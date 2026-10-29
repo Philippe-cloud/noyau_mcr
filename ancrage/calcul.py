@@ -56,7 +56,7 @@ def _concordance(g, eid, cache):
         pas = {p for p, c in g.d["mentions"] if c == eid}
         n = sum(1 for p in pas if g.appui_atteste(p)) if pas else 0
         return (1 - 0.5 ** n) if n else 0.3, f"{n} élément(s) du socle attesté(s) le mentionnent"
-    if t in ("definition", "question", "relation", "description"):
+    if t in ("definition", "question", "relation", "description", "retour", "proposition"):
         par = [p for p in e["prov"]["derive_de"] if p in g.E]
         if not par:
             return 0.3, "aucun appui"
@@ -123,9 +123,20 @@ def chrf(a, b, n=3):
     return 0.0 if p + r == 0 else 2 * p * r / (p + r)
 
 
+def _retours(g):
+    rets = g.par_type("retour"); props = g.par_type("proposition")
+    verd = {}
+    for r in rets:
+        v = g.E[r]["contenu"]["controle"].get("verdict") or "non contrôlé"
+        verd[v] = verd.get(v, 0) + 1
+    return {"retours": len(rets), "verdicts_du_controle": verd, "propositions": len(props),
+            "propositions_examinees": sum(1 for p in props if g.statut(p) != "propose"),
+            "propositions_validees": sum(1 for p in props if g.statut(p) in ("valide", "variable"))}
+
+
 def moniteur(g):
     """Indicateurs globaux de la boucle et alertes."""
-    validables = [k for k, e in g.E.items() if e["type"] in ("concept", "definition", "relation", "question", "traduction")]
+    validables = [k for k, e in g.E.items() if e["type"] in ("concept", "definition", "relation", "question", "traduction", "proposition")]
     valides = [k for k in validables if g.statut(k) in ("valide", "variable")]
     ia_valides = [k for k in valides if g.agent_de(k).get("type") == "ia"]
     valideurs = {v["agent"] for v in g.d["validations"] if g.d["agents"].get(v["agent"], {}).get("type") == "humain"}
@@ -144,6 +155,7 @@ def moniteur(g):
            "ecart_ia_reference": round(1 - sum(ecarts) / len(ecarts), 3) if ecarts else None,
            "score_temoin": round(sum(scores_t) / len(scores_t), 3) if scores_t else None,
            "taux_rejet": round(rejets / max(1, len(g.d["validations"])), 3),
+           "retours_ia": _retours(g),
            "ancrage_moyen": round(sum(e["ancrage"]["indice"] for e in g.E.values() if "ancrage" in e) / max(1, len(g.E)), 3)}
     al = []
     S = SEUILS

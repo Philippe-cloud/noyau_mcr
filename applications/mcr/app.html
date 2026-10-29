@@ -103,7 +103,7 @@ body.helpon [data-help]{outline:1px dashed transparent}body.helpon [data-help]:h
   <div id="tl" data-help="timeline"></div>
   <h3>Graphe de la trajectoire</h3><div id="tg" data-help="trajGraph"></div>
  </section>
- <section class="panel" style="max-height:none"><div id="trajSide"></div></section>
+ <section class="panel" style="max-height:none"><div id="iaBox" data-help="iaBox"></div><div id="trajSide"></div></section>
 </div>
 
 <div id="view-corpus" class="hidden">
@@ -145,6 +145,7 @@ const vs=it=>it&&it.statut&&it.statut!=='propose'?it.statut:'propose';
 function applyVal(){DATA.docs.forEach(d=>{const it=VAL.items['doc:'+d.id];d.fr=it?.fr??ORIG.d[d.id].fr;d.en=it?.en??ORIG.d[d.id].en;d.statut=vs(it);d.vinfo=it});
  DATA.concepts.forEach(c=>{const it=VAL.items['concept:'+c.id];c.def=it?.def??ORIG.c[c.id].def;c.statut=vs(it);c.vinfo=it});
  DATA.relations.forEach(r=>{const k=r.a+'|'+r.b,it=VAL.items['rel:'+k];r.lab=it?.lab??ORIG.r[k].lab;r.statut=vs(it);r.vinfo=it});
+ (DATA.propositionsIA||[]).forEach(x=>{const it=VAL.items['pia:'+x.id];x.texte=it?.texte??x.texte_propose??x.texte;x.statut=vs(it);x.vinfo=it});
  DATA.questions.forEach(q=>{const it=VAL.items['q:'+q.id];q.q=it?.q??ORIG.q[q.id].q;q.statut=vs(it);q.vinfo=it});
  DATA.typesRelation=VAL.types&&VAL.types.length?[...VAL.types]:[...ORIG.types]}
 const RELS=()=>DATA.relations.filter(r=>r.statut!=='rejete');
@@ -157,7 +158,7 @@ const SRC={TI:'texte intégral consulté',RE:'résumé auteur/éditeur consulté
 const ACC={texte:'Texte intégral (copie reçue, diffusion à autoriser)',libre:'Texte en libre accès',lien:'Lien éditeur / catalogue',reference:'Référence seule'};
 // ---------- état ----------
 const KEY='mcr-trajectoire-v2';
-function newTraj(){return{format:'trajectoire-mcr-v2',apprenant:'',creeLe:nowISO(),plantes:[],active:null,traces:[],eps:0.15}}
+function newTraj(){return{format:'trajectoire-mcr-v2',apprenant:'',creeLe:nowISO(),plantes:[],active:null,traces:[],retours_ia:[],eps:0.15}}
 let T;try{T=JSON.parse(localStorage.getItem(KEY))}catch(e){}if(!T||T.format!=='trajectoire-mcr-v2')T=newTraj();
 let PREF={aide:true,vu:false};try{Object.assign(PREF,JSON.parse(localStorage.getItem(KEY+'-pref'))||{})}catch(e){}
 function persist(){try{localStorage.setItem(KEY,JSON.stringify(T));localStorage.setItem(KEY+'-pref',JSON.stringify(PREF))}catch(e){}}
@@ -301,6 +302,7 @@ const HELP={tabs:['Les trois vues','Ma plante : une question et sa description. 
  descBox:['Ma description','Ce que vous avez retenu et relié. Enregistrer crée une description datée Dn.',5],
  btDesc:['Enregistrer la description','Fige l’état actuel de la plante, avec la date et l’heure. À partir de deux descriptions, W mesure la stabilité.',5],
  W:['Fonctionnelle d’opacité W','D’après D11 (ch. 7) : W compare la dernière description à celles qui la précèdent. W sous ε plusieurs fois de suite : la description se stabilise (« fruit mûr »). Transposition proposée par le projet.',6],
+ iaBox:['Retour de l’IA','Claude commente votre dernière description en citant ses appuis dans la base. Un contrôle vérifie que chaque phrase est sourcée et respecte les statuts. Ses propositions éventuelles vont à Mioara, jamais directement dans la base.'],
  timeline:['Frise','Une ligne par plante, un point par description, dans l’ordre du temps.'],trajGraph:['Graphe de la trajectoire','Les plantes (violet) et les éléments qu’elles partagent : ce sont les nœuds de votre trajectoire.'],
  corpusFilters:['Filtres','Recherchez par mot, par ensemble ou par fiabilité du résumé.']};
 const bub=$('#bubble');let bubT=null;
@@ -343,7 +345,7 @@ let confirmReset=false;
 // ---------- trajectoire ----------
 const PC=['#7c3aed','#db2777','#0891b2','#ca8a04','#16a34a','#ea580c','#4f46e5','#0d9488'];
 function renderTraj(){const all=[];T.plantes.forEach((p,pi)=>p.descriptions.forEach(d=>all.push({p,pi,d})));all.sort((a,b)=>a.d.date.localeCompare(b.d.date));
- if(!all.length){$('#tl').innerHTML='<p class="muted">Aucune description enregistrée pour l’instant. Enregistrez une description dans « Ma plante ».</p>';$('#tg').innerHTML='';$('#trajSide').innerHTML=trajSide([]);return}
+ if(!all.length){renderIA();$('#tl').innerHTML='<p class="muted">Aucune description enregistrée pour l’instant. Enregistrez une description dans « Ma plante ».</p>';$('#tg').innerHTML='';$('#trajSide').innerHTML=trajSide([]);return}
  const W=Math.max(520,$('#tl').clientWidth||700),rowH=34,H=T.plantes.length*rowH+40,x=i=>110+i*(W-140)/Math.max(1,all.length-1);
  let s=`<svg width="100%" viewBox="0 0 ${W} ${H}" style="max-width:100%">`;T.plantes.forEach((p,i)=>{s+=`<text x="4" y="${24+i*rowH}" font-size="12" fill="${PC[i%8]}">${p.id} ${esc(p.question.slice(0,14))}…</text><line x1="105" y1="${20+i*rowH}" x2="${W-20}" y2="${20+i*rowH}" stroke="#eef2f7"/>`});
  s+=`<polyline fill="none" stroke="#94a3b8" stroke-width="1.5" points="${all.map((a,i)=>x(i)+','+(20+a.pi*rowH)).join(' ')}"/>`;
@@ -358,7 +360,7 @@ function renderTraj(){const all=[];T.plantes.forEach((p,pi)=>p.descriptions.forE
  last.forEach(({p},i)=>{const a=pp[p.id];g+=`<g style="cursor:pointer" data-open="${p.id}"><circle cx="${a.x}" cy="${a.y}" r="15" fill="${PC[T.plantes.indexOf(p)%8]}"/><text x="${a.x}" y="${a.y+4}" font-size="11" fill="#fff" text-anchor="middle">${p.id}</text>${wrap(p.question,30).map((l,k)=>`<text x="${a.x}" y="${a.y+30+k*12}" font-size="10.5" text-anchor="middle" fill="#374151">${esc(l)}</text>`).join('')}</g>`});
  g+='</svg>'+(shared.length?'':'<p class="muted">Aucun élément n’est encore partagé entre deux plantes : posez une autre question qui croise la première.</p>');$('#tg').innerHTML=g;
  $('#tg').querySelectorAll('[data-open]').forEach(n=>n.onclick=()=>{T.active=n.dataset.open;persist();showView('plante')});
- $('#trajSide').innerHTML=trajSide(shared);bindCmp()}
+ $('#trajSide').innerHTML=trajSide(shared);bindCmp();renderIA()}
 function trajSide(shared){let h=`<h2>Synthèse</h2><div class="muted">${T.plantes.length} plante(s) · ${T.plantes.reduce((a,p)=>a+p.descriptions.length,0)} description(s) · ${T.traces.length} trace(s)</div>
  <div class="row"><label class="muted">Seuil ε <input type="number" id="epsIn" step="0.05" min="0" max="5" value="${T.eps}" style="width:70px"></label></div>`;
  if(shared.length)h+=`<h3>Nœuds de la trajectoire</h3>`+shared.map(([e,s])=>`<div class="muted">${esc(C[e]?C[e].lab:e+' · '+DOC[e].titre.slice(0,40))} — ${[...s].join(', ')}</div>`).join('');
@@ -373,6 +375,74 @@ function bindCmp(){if($('#epsIn'))$('#epsIn').onchange=e=>{T.eps=+e.target.value
  const cmp=()=>{const p=T.plantes.find(x=>x.id===$('#cmpP').value);const A=setOf(p.descriptions[$('#cmpA').value]),B=setOf(p.descriptions[$('#cmpB').value]);const nm=x=>{const [t,v]=[x.slice(0,1),x.slice(2)];if(t==='c')return C[v].lab;if(t==='d')return v;const [a,ty,b]=v.split('|');return (C[a]?.lab||a)+' '+ty+' '+(C[b]?.lab||b)};
   const ap=[...B].filter(x=>!A.has(x)),di=[...A].filter(x=>!B.has(x));$('#cmpOut').innerHTML=`<div class="muted"><b style="color:#15803d">Apparus</b> : ${ap.map(nm).map(esc).join(' ; ')||'—'}<br><b style="color:#b91c1c">Disparus</b> : ${di.map(nm).map(esc).join(' ; ')||'—'}</div>`};
  $('#cmpP').onchange=fill;$('#cmpA').onchange=cmp;$('#cmpB').onchange=cmp;fill()}
+// ---------- retour de l'IA ----------
+let SAMPLE=null,iaBusy=false,iaPlant=null;(async()=>{try{if(window.claude&&window.claude.use)SAMPLE=await window.claude.use('sample')}catch(e){}if(view==='traj')renderTraj()})();
+if(!T.retours_ia)T.retours_ia=[];
+const HEDGE=/propos|non valid|hypoth|\bia\b|à confirmer|lecture propre|votre lecture/i,HORS=/hors corpus|ne couvre pas|sort du corpus|pas dans la base/i,ABST=/je ne peux|pas (de )?répon|ne permet pas|faute de source/i;
+const stNoyau=s=>({valide:'validé',corriger:'à corriger',rejete:'rejeté'}[s]||'proposé, non validé');
+function iaPacket(p){const D=p.descriptions[p.descriptions.length-1],q=p.qid?Q[p.qid]:null,pr=proposals(p),E=[];
+ const add=(o)=>{if(!E.some(x=>x.id===o.id))E.push(o)};
+ if(q)add({id:'Q:'+q.id,type:'question',texte:q.q,statut:stNoyau(q.statut)});
+ const cset=new Set([...D.c,...pr.concepts]),dset=new Set([...D.d,...pr.docs]);
+ cset.forEach(c=>{if(!C[c])return;const x=C[c];add({id:'C:'+c,type:'concept',libelle:x.lab,definition:x.def,statut:stNoyau(x.statut),retenu:D.c.includes(c),...(x.noyau?{ancrage:x.noyau.indice}:{})})});
+ dset.forEach(d=>{if(!DOC[d])return;const x=DOC[d];add({id:'S:'+d,type:'document',titre:x.titre,auteurs:x.auteurs.join(', '),resume:(x.fr||'').slice(0,500),statut_resume:stNoyau(x.statut),retenu:D.d.includes(d)})});
+ RELS().filter(r=>cset.has(r.a)&&cset.has(r.b)).forEach(r=>add({id:'R:'+r.a+'|'+r.b,type:'relation',de:'C:'+r.a,vers:'C:'+r.b,libelle:r.lab,statut:stNoyau(r.statut)}));
+ const liens=D.r.map(s=>{const [a,t,b]=s.split('|');return{de:(C[a]?'C:':'S:')+a,type:t,vers:(C[b]?'C:':'S:')+b,origine:'lecture de l’apprenant'}});
+ const hist=p.descriptions.map(d=>({n:'D'+d.n,date:d.date.slice(0,10),elements:[...d.c.map(x=>'C:'+x),...d.d.map(x=>'S:'+x)],W:d.W!=null?+d.W.toFixed(2):null}));
+ const valideurs=Object.values(VAL.items).some(it=>it.statut&&it.statut!=='propose')?[VAL.valideur||'Mioara Mugur-Schächter']:[];
+ return{question:p.question,qid:p.qid,plante:p.id,autorite:'Mioara Mugur-Schächter',valideurs,elements:E,liens_de_l_apprenant:liens,pourquoi:D.pourquoi||'',historique:hist}}
+function iaPrompt(k){return `Tu fais un retour à un apprenant qui explore la Méthode de Conceptualisation Relativisée (MCR) de Mioara Mugur-Schächter. Il a posé une question, retenu des notions et des documents, tracé des liens, et enregistré des descriptions datées. Tu disposes UNIQUEMENT du paquet ci-dessous, extrait de la base du projet.
+
+Règles impératives :
+1. Chaque phrase qui affirme quelque chose sur la MCR cite entre crochets les identifiants du paquet qui l'appuient, par ex. [C:n07, S:D11]. N'utilise aucun identifiant absent du paquet.
+2. Un élément au statut « proposé, non validé » doit être présenté comme tel dans la phrase (« proposé », « non validé »). Seuls les éléments « validé » peuvent être présentés comme établis par Mioara.
+3. Un lien de l'apprenant absent de la base est « sa lecture propre » : dis-le sans le juger faux.
+4. N'ajoute aucune connaissance extérieure au paquet. Si le paquet ne permet pas de répondre, dis-le.
+5. ${k.valideurs.length?'Une seule autorité a validé : présente les contenus validés comme « selon Mioara ».':'Rien n\'est encore validé : tout le contenu de la base est une proposition.'}
+6. Ton retour aide l'apprenant à comprendre son propre chemin : ce qu'il a bien relié, ce qu'il n'a pas mobilisé parmi les éléments proposés, ce qui a changé entre ses descriptions. Pas de note, pas de jugement de valeur. 3 à 6 phrases, en français, en le vouvoyant.
+7. Tu peux faire 0 à 3 propositions à l'autorité (définition à préciser, relation manquante, nouvelle question), chacune avec au moins un appui du paquet. Elles resteront « proposées » jusqu'à ce que Mioara les examine.
+
+Réponds en JSON strict, sans texte autour :
+{"retour":[{"phrase":"…","citations":["C:…"]}],"prochaine_question":"…","propositions":[{"nature":"definition|relation|question","cible":"C:… (definition)","de":"C:… (relation)","vers":"C:… (relation)","concepts":["C:…"],"texte":"…","appuis":["S:…"],"justification":"…"}]}
+
+Paquet :
+${JSON.stringify(k)}`}
+function iaControl(k,r){const ids=new Map(k.elements.map(e=>[e.id,e]));const det=[],glob=[];let ok=0;
+ const ph=Array.isArray(r.retour)?r.retour:[];if(!ph.length)glob.push('retour vide ou mal formé');
+ ph.forEach(o=>{const t=String(o.phrase||''),cit=(o.citations||[]).map(String),pb=[];
+  if(t.length>40&&!cit.length&&!HORS.test(t)&&!ABST.test(t))pb.push('affirmation non sourcée');
+  cit.forEach(c=>{const e=ids.get(c);if(!e)pb.push('identifiant hors paquet : '+c);else if(/non validé/.test(e.statut||e.statut_resume||'')&&e.type!=='document'&&!HEDGE.test(t))pb.push(c+' est « proposé » mais présenté comme établi')});
+  det.push({phrase:t,citations:cit,problemes:pb});if(!pb.length)ok++});
+ (r.propositions||[]).forEach((p,i)=>{const n='proposition '+(i+1)+' : ';const ap=(p.appuis||[]);
+  if(!String(p.texte||'').trim())glob.push(n+'texte vide');
+  if(!ap.length)glob.push(n+'sans appui');ap.filter(a=>!ids.has(a)).forEach(a=>glob.push(n+'appui hors paquet '+a));
+  [p.cible,p.de,p.vers,...(p.concepts||[])].filter(Boolean).filter(a=>!ids.has(a)).forEach(a=>glob.push(n+'élément hors paquet '+a))});
+ const taux=ph.length?ok/ph.length:0;const verdict=taux===1&&!glob.length?'conforme':taux>=0.6?'à reprendre':'refusée';
+ return{verdict,phrases_conformes:ok+'/'+ph.length,problemes:[...glob,...det.flatMap((d,i)=>d.problemes.map(x=>'phrase '+(i+1)+' : '+x))],detail:det}}
+async function askIA(){const p=T.plantes.find(x=>x.id===iaPlant);if(!p||!p.descriptions.length||iaBusy||!SAMPLE)return;iaBusy=true;renderIA();
+ const k=iaPacket(p);let r=null,err='';
+ try{r=await SAMPLE.json(iaPrompt(k),{modelTier:'default'});if(typeof r==='string')r=JSON.parse(r)}catch(e){err=e&&e.code==='rate_limited'?'Trop de demandes : réessayez dans un moment.':e&&e.code==='not_granted'?'L’accès à Claude n’a pas été autorisé.':'Le retour n’a pas pu être obtenu.'}
+ iaBusy=false;if(!r){banner(err);renderIA();return}
+ const c=iaControl(k,r),d=nowISO();T.retours_ia=T.retours_ia||[];
+ T.retours_ia.push({id:'RIA-'+d.slice(0,16).replace(/[-:T]/g,'')+'-'+p.id,date:d,plante:p.id,qid:p.qid,question:p.question,description:'D'+p.descriptions.length,modele:'Claude (via l’application)',
+  retour:(r.retour||[]).map(o=>({phrase:String(o.phrase||''),citations:(o.citations||[]).map(String)})),prochaine_question:String(r.prochaine_question||''),propositions:Array.isArray(r.propositions)?r.propositions.slice(0,3):[],controle:{verdict:c.verdict,phrases_conformes:c.phrases_conformes,problemes:c.problemes}});
+ trace('retour_ia',{plante:p.id,verdict:c.verdict});persist();renderIA();banner('Retour reçu · contrôle : '+c.verdict)}
+const VCOL={conforme:'b-ok','à reprendre':'b-warn','refusée':'b-rej'};
+const idLab=id=>{const [t,v]=[id.split(':')[0],id.slice(id.indexOf(':')+1)];if(t==='C'&&C[v])return C[v].lab;if(t==='S'&&DOC[v])return v;if(t==='Q'&&Q[v])return 'question '+v;if(t==='R'){const [a,b]=v.split('|');return (C[a]?.lab||a)+' → '+(C[b]?.lab||b)}return id};
+function renderIA(){const box=$('#iaBox');if(!box)return;T.retours_ia=T.retours_ia||[];const ps=T.plantes.filter(p=>p.descriptions.length);
+ if(!iaPlant||!ps.some(p=>p.id===iaPlant))iaPlant=(P()&&P().descriptions.length?P().id:ps[0]?.id)||null;
+ let h=`<h2>Retour de l’IA</h2><div class="muted">Claude lit votre dernière description avec les éléments de la base (et leurs statuts) et vous fait un retour sur votre chemin. Chaque phrase cite ses appuis ; un contrôle vérifie le retour avant affichage. Le retour est enregistré dans votre trajectoire et remonte au projet avec elle.</div>`;
+ if(!ps.length)h+=`<p class="muted">Enregistrez d’abord une description dans « Ma plante ».</p>`;
+ else if(!SAMPLE)h+=`<p class="muted">Ce service est disponible dans l’application publiée sur Claude, pas dans un fichier ouvert hors ligne.</p>`;
+ else h+=`<div class="row"><select id="iaP" style="width:auto;max-width:100%">${ps.map(p=>`<option value="${p.id}" ${p.id===iaPlant?'selected':''}>${p.id} – ${esc(p.question.slice(0,50))} (D${p.descriptions.length})</option>`).join('')}</select><button class="pri" id="iaGo" ${iaBusy?'disabled':''}>${iaBusy?'Retour en cours…':'Demander un retour'}</button></div>`;
+ const L=T.retours_ia.filter(r=>r.plante===iaPlant).slice().reverse();
+ h+=L.map(r=>`<div class="vcard" style="margin-top:8px"><div class="muted">${fmt(r.date)} · sur ${esc(r.description||'')} · <span class="badge ${VCOL[r.controle.verdict]||'b-n'}">contrôle : ${esc(r.controle.verdict)}</span> ${esc(r.controle.phrases_conformes||'')}</div>
+  ${(x=>r.controle.verdict==='refusée'?`<details><summary class="lk">Retour refusé par le contrôle : l’afficher quand même</summary>${x}</details>`:x)(r.retour.map(o=>`<p style="margin:6px 0">${esc(o.phrase.replace(/\s*\[[^\]]*\]/g,''))} ${o.citations.map(c=>`<span class="badge b-n" title="${esc(c)}">${esc(idLab(c))}</span>`).join('')}</p>`).join(''))}
+  ${r.controle.problemes.length?`<details><summary class="lk">Points relevés par le contrôle (${r.controle.problemes.length})</summary><ul class="muted">${r.controle.problemes.map(x=>`<li>${esc(x)}</li>`).join('')}</ul></details>`:''}
+  ${r.prochaine_question?`<div class="row"><span class="muted">Question suggérée : <b>${esc(r.prochaine_question)}</b></span><button class="sm" data-plq="${esc(r.prochaine_question)}">Planter cette question</button></div>`:''}
+  ${r.propositions.length?`<details><summary class="lk">Propositions ${r.controle.verdict==='refusée'?'non transmises (retour refusé)':'transmises à Mioara'} (${r.propositions.length})</summary><ul class="muted">${r.propositions.map(p=>`<li><span class="badge b-prop">proposé par l’IA</span>${esc(p.nature||'')} · ${esc([p.cible,p.de,p.vers].filter(Boolean).map(idLab).join(' → '))} : ${esc(p.texte||'')}</li>`).join('')}</ul></details>`:''}</div>`).join('');
+ box.innerHTML=h;if($('#iaP'))$('#iaP').onchange=e=>{iaPlant=e.target.value;renderIA()};if($('#iaGo'))$('#iaGo').onclick=askIA;
+ box.querySelectorAll('[data-plq]').forEach(b=>b.onclick=()=>plant(null,b.dataset.plq,null))}
 // ---------- corpus ----------
 function renderCorpus(){const q=$('#cq').value.toLowerCase().trim(),f=$('#cfam').value,s=$('#csrc').value;
  const L=DATA.docs.filter(d=>(!f||d.fam===f)&&(!s||d.src===s)&&(!q||(d.id+' '+d.titre+' '+d.auteurs.join(' ')+' '+d.fr+' '+d.en).toLowerCase().includes(q)));$('#ccount').textContent=L.length+' document(s)';
@@ -383,13 +453,14 @@ function renderCorpus(){const q=$('#cq').value.toLowerCase().trim(),f=$('#cfam')
 // ---------- vues, utilitaires ----------
 // ---------- interface de validation ----------
 let vtab='doc',vUnlocked=false;try{vUnlocked=sessionStorage.getItem('mcr-val-ok')==='1'}catch(e){}
-const VT={doc:['Résumés',()=>DATA.docs,d=>'doc:'+d.id],concept:['Définitions',()=>DATA.concepts,c=>'concept:'+c.id],rel:['Relations',()=>DATA.relations,r=>'rel:'+r.a+'|'+r.b],q:['Questions',()=>DATA.questions,q=>'q:'+q.id]};
+const VT={doc:['Résumés',()=>DATA.docs,d=>'doc:'+d.id],concept:['Définitions',()=>DATA.concepts,c=>'concept:'+c.id],rel:['Relations',()=>DATA.relations,r=>'rel:'+r.a+'|'+r.b],q:['Questions',()=>DATA.questions,q=>'q:'+q.id],pia:['Propositions IA',()=>DATA.propositionsIA||[],x=>'pia:'+x.id]};
+const VTK=()=>Object.keys(VT).filter(t=>t!=='pia'||(DATA.propositionsIA||[]).length);
 function vcount(t){const L=VT[t][1](),f=VT[t][2];return [L.filter(x=>vs(VAL.items[f(x)])!=='propose').length,L.length]}
 function vbar(){const b=$('#vbar');if(view!=='valid'){b.classList.add('hidden');return}b.classList.remove('hidden');
- b.innerHTML=`<b>Mode validation</b><span>${Object.keys(VT).map(t=>{const [a,n]=vcount(t);return VT[t][0]+' '+a+'/'+n}).join(' · ')}</span><span class="sp"></span><button id="vExp">Exporter la validation</button><label style="cursor:pointer;border:1px solid #fff;border-radius:6px;padding:2px 8px;font-size:12px">Importer<input type="file" id="vImp" accept=".json" class="hidden"></label><button id="vQuit">Quitter</button>`;
+ b.innerHTML=`<b>Mode validation</b><span>${VTK().map(t=>{const [a,n]=vcount(t);return VT[t][0]+' '+a+'/'+n}).join(' · ')}</span><span class="sp"></span><button id="vExp">Exporter la validation</button><label style="cursor:pointer;border:1px solid #fff;border-radius:6px;padding:2px 8px;font-size:12px">Importer<input type="file" id="vImp" accept=".json" class="hidden"></label><button id="vQuit">Quitter</button>`;
  $('#vQuit').onclick=()=>showView('plante');$('#vExp').onclick=exportVal;$('#vImp').onchange=importVal}
 function renderValid(){vbar();$('#vName').value=VAL.valideur||'';$('#vName').onchange=e=>{VAL.valideur=e.target.value.trim();persistVal()};
- $('#vTabs').innerHTML=Object.keys(VT).map(t=>{const [a,n]=vcount(t);return `<span class="chip ${vtab===t?'on':''}" data-vt="${t}">${VT[t][0]} (${a}/${n})</span>`}).join('');
+ $('#vTabs').innerHTML=VTK().map(t=>{const [a,n]=vcount(t);return `<span class="chip ${vtab===t?'on':''}" data-vt="${t}">${VT[t][0]} (${a}/${n})</span>`}).join('');
  document.querySelectorAll('[data-vt]').forEach(c=>c.onclick=()=>{vtab=c.dataset.vt;renderValid()});
  $('#vq').oninput=renderVList;$('#vf').onchange=renderVList;
  $('#vTypes').innerHTML=vtab==='rel'?`<div class="vcard"><b>Types de relation proposés aux utilisateurs</b><div class="muted">Un type par ligne. Cette liste remplace la liste provisoire.</div><textarea id="vTy" rows="5">${esc(DATA.typesRelation.join('\n'))}</textarea><div class="row"><button class="sm" id="vTyOk">Enregistrer la liste</button><button class="sm" id="vTyRe">Revenir à la liste proposée</button></div></div>`:'';
@@ -403,6 +474,7 @@ function renderVList(){const t=vtab,q=$('#vq').value.toLowerCase().trim(),f=$('#
    fields=`<div class="vgrid"><label class="muted">Résumé français<textarea data-f="fr" rows="7">${esc(x.fr)}</textarea></label><label class="muted">Résumé anglais<textarea data-f="en" rows="7">${esc(x.en)}</textarea></label></div>`}
   if(t==='concept'){head=`<b>${esc(x.lab)}</b> <span class="muted">· ${esc(x.type)} · repères : ${x.refs.map(esc).join(' ; ')}</span>`;fields=`<label class="muted">Définition<textarea data-f="def" rows="3">${esc(x.def)}</textarea></label>`}
   if(t==='rel'){head=`<b>${esc(C[x.a].lab)}</b> → <b>${esc(C[x.b].lab)}</b>`;fields=`<label class="muted">Libellé de la relation<input type="text" data-f="lab" value="${esc(x.lab)}"></label>`}
+  if(t==='pia'){head=`<span class="badge b-prop">IA · ${esc(x.nature)}</span> <b>${esc(x.porte_sur||'')}</b><div class="muted">appuis : ${(x.appuis||[]).map(esc).join(', ')||'—'} · contrôle du retour : ${esc(x.controle||'—')} · issu d’une question d’apprenant : « ${esc(x.retour||'')} »${x.justification?' · justification : '+esc(x.justification):''}</div>`;fields=`<label class="muted">Proposition<textarea data-f="texte" rows="2">${esc(x.texte)}</textarea></label>`}
   if(t==='q'){head=`<span class="lvl">${LV[x.niveau]}</span> <span class="muted">concepts : ${x.concepts.map(c=>esc(C[c].lab)).join(', ')}</span>`;fields=`<label class="muted">Question<textarea data-f="q" rows="2">${esc(x.q)}</textarea></label>`}
   return `<div class="vcard st-${vs(it)}" data-k="${esc(k)}">${head}<div style="margin-top:6px">${fields}</div>
   <div class="row"><label class="muted">Statut <select data-f="statut" style="width:auto">${SOPT(it)}</select></label><label class="muted" style="flex:1;min-width:200px">Commentaire<input type="text" data-f="commentaire" value="${esc(it.commentaire||'')}"></label><button class="sm" data-reset="${esc(k)}">Revenir à la proposition</button></div>

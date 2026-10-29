@@ -53,13 +53,23 @@ python -m ancrage comparer corpus/mcr
 python exemples/test_garde_fou.py
 ```
 
+## Retours de l'IA
+
+Dans l'application, l'onglet *Ma trajectoire* propose « Demander un retour » : Claude lit la dernière description d'une plante avec les éléments de la base (et leurs statuts) et commente le chemin de l'apprenant. Chaque phrase cite ses appuis ; un contrôle intégré vérifie le retour (identifiants du paquet seulement, éléments « proposés » présentés comme tels) avant de l'afficher.
+
+Le retour est enregistré dans la trajectoire (`retours_ia`) et remonte au noyau avec elle. Le noyau en fait :
+- une entité `RET:` (le retour, dérivé des descriptions de l'apprenant et des éléments cités) ;
+- une entité `PIA:` par proposition à l'autorité (définition, relation, question), au statut « proposé », plafonnée tant que Mioara ne l'a pas examinée — sauf si le contrôle a refusé le retour.
+
+Les propositions apparaissent dans la fiche de l'autorité et dans l'onglet « Propositions IA » du mode Validation. La vue IA indique en retour comment ses réponses ont passé le contrôle. Un retour produit hors de l'application peut être déposé dans `corpus/mcr/entrees/propositions_ia/` au format `propositions-ia-mcr-v1` (exemple fictif dans `exemples/donnees_simulees/`).
+
 ## Organisation
 
 ```
 ancrage/            noyau : graphe, adaptateurs, calcul, RDF/SHACL, interrogation, vues, régénération
   regles/           formes.ttl (garde-fous SHACL), seuils.json (seuils de gouvernance)
 applications/mcr/   interface de l'application « Explorer la MCR » (les données y sont injectées)
-corpus/mcr/entrees/ corpus_mcr.json, validations/, trajectoires/
+corpus/mcr/entrees/ corpus_mcr.json, validations/, trajectoires/, propositions_ia/
 interface/          interface de l'application de bureau
 noyau_app.py        application de bureau (serveur local + navigateur)
 exemples/           réponses d'IA de test, test des garde-fous, données simulées
@@ -68,7 +78,7 @@ exemples/           réponses d'IA de test, test des garde-fous, données simul�
 
 ## Données simulées
 
-`exemples/donnees_simulees/` contient une validation et une trajectoire **fictives**, pour les tests uniquement. Ce ne sont pas des validations de Mioara Mugur-Schächter. Pour les essayer, les copier temporairement dans `corpus/mcr/entrees/validations/` et `trajectoires/`, lancer la boucle, puis les retirer.
+`exemples/donnees_simulees/` contient une validation, une trajectoire et des propositions IA **fictives**, pour les tests uniquement. Ce ne sont pas des validations de Mioara Mugur-Schächter. Pour les essayer, les copier temporairement dans `corpus/mcr/entrees/validations/` et `trajectoires/`, lancer la boucle, puis les retirer.
 
 ## Limites
 

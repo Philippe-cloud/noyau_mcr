@@ -25,14 +25,14 @@ def validations_consolidees(g, nom):
         if v["role"] not in ROLES_FICHIER:
             continue
         eid = v["entite"]; e = g.E[eid]; pre, ref = eid.split(":", 1)
-        cle = {"DEF": "concept", "R": "rel", "Q": "q", "RES": "doc"}.get(pre)
+        cle = {"DEF": "concept", "R": "rel", "Q": "q", "RES": "doc", "PIA": "pia"}.get(pre)
         if not cle:
             continue
         valideur = g.d["agents"][v["agent"]]["nom"]
         it = {"statut": v["statut"], "commentaire": v["commentaire"], "date": v["date"]}
         if e.get("original"):
             for k in e["original"]:
-                champ = {("DEF", "texte"): "def", ("Q", "texte"): "q", ("R", "libelle"): "lab", ("RES", "texte"): "fr", ("RES", "texte_en"): "en"}.get((pre, k))
+                champ = {("DEF", "texte"): "def", ("Q", "texte"): "q", ("R", "libelle"): "lab", ("RES", "texte"): "fr", ("RES", "texte_en"): "en", ("PIA", "texte"): "texte"}.get((pre, k))
                 if champ: it[champ] = e["contenu"][k]
         if pre == "DEF" and g.E["C:" + ref].get("original", {}).get("libelle"):
             it["lab"] = g.E["C:" + ref]["contenu"]["libelle"]
@@ -56,6 +56,13 @@ def regenerer(g, dossier):
         r["noyau"] = _an(g, f"R:{r['a']}|{r['b']}")
     for q in data["questions"]:
         q["noyau"] = _an(g, "Q:" + q["id"])
+    from .vues import _prop
+    data["propositionsIA"] = []
+    for p in g.par_type("proposition"):
+        x = _prop(g, p); c = g.E[p]["contenu"]
+        x.update(id=p.split(":", 1)[1], texte_propose=g.E[p].get("original", {}).get("texte", x["texte"]), date=g.E[p]["prov"]["date"], destinataire_anonyme=True,
+                 retour=g.E[c["issue_du_retour"]]["contenu"]["question"] if c["issue_du_retour"] in g.E else "")
+        data["propositionsIA"].append(x)
     m = g.d.get("moniteur", {})
     data["noyau"] = {"version": g.d.get("version"), "alertes": m.get("alertes", []), "ancrage_moyen": m.get("ancrage_moyen"),
                      "part_validee": m.get("part_validee")}

@@ -120,7 +120,9 @@ def vue_autorite(g):
         for x in g.E[d]["contenu"]["elements"]:
             if x in g.E and g.E[x].get("ancrage", {}).get("niveau") == "faible":
                 faibles[x] += 1
+    props = [_prop(g, p) for p in g.par_type("proposition")]
     return {"vue": "autorite", "corpus": g.d["nom"], "version": g.d.get("version"), "autorite": g.config.get("autorite"),
+            "propositions_ia": props,
             "socle": {"nombre": len(socle), "elements": socle},
             "a_traiter": {"par_type": dict(a_traiter), "identifiants": attente},
             "regles_proposees": {"terminologie": regles_terminologiques(g), "relations_a_qualifier": relations_suggerees(g),
@@ -172,6 +174,24 @@ def ecart_avec_apprenants(g):
     return out
 
 
+def _prop(g, p):
+    c = g.E[p]["contenu"]
+    sur = [x for x in (c.get("de"), c.get("vers")) if x in g.E] or [x for x in [c.get("cible")] + c.get("concepts", []) if x in g.E]
+    return {"id": p, "nature": c["nature"], "texte": c["texte"], "porte_sur": " → ".join(_lib(g, x) for x in sur),
+            "appuis": c["appuis"], "justification": c.get("justification", ""), "controle": c.get("verdict_controle"),
+            "statut": g.statut(p), "indice": g.E[p]["ancrage"]["indice"]}
+
+
+def _controle_retours(g):
+    pb = Counter()
+    for r in g.par_type("retour"):
+        for x in g.E[r]["contenu"]["controle"].get("problemes", []):
+            pb[re.sub(r"[A-Z]+:[^\s,»]+", "<id>", x)] += 1
+    m = g.d.get("moniteur", {}).get("retours_ia", {})
+    return {**m, "problemes_frequents": [{"probleme": k, "nb": n} for k, n in pb.most_common(8)],
+            "consigne": "Cite chaque élément entre crochets, présente tout élément « proposé » comme non validé, et ne propose rien sans appui dans le paquet."}
+
+
 def vue_ia(g):
     temoin = set(g.d.get("temoin", []))
     ecarts = []
@@ -197,6 +217,7 @@ def vue_ia(g):
             "mes_tendances": tendances_terminologiques(g),
             "ecart_avec_les_apprenants": ecart_avec_apprenants(g),
             "retours_des_validateurs": retours,
+            "controle_de_mes_retours_aux_apprenants": _controle_retours(g),
             "alertes": m.get("alertes", []),
             "consigne": "Signale dans tes réponses les termes où tu t'écartes habituellement de la référence ; tes productions restent des propositions tant qu'un humain ne les a pas validées. Le rappel indique la part de ce que les apprenants ont retenu qui figurait dans ta sélection ; les éléments « retenus mais non fournis » sont ceux que tu omets."}
 
@@ -292,7 +313,7 @@ def fiche_autorite_html(g, v):
     m = g.d.get("moniteur", {})
     R = v["regles_proposees"]
     noms = {"resume": "résumés", "definition": "définitions", "concept": "concepts", "relation": "relations",
-            "question": "questions", "traduction": "traductions"}
+            "question": "questions", "traduction": "traductions", "proposition": "propositions issues des retours de l'IA aux apprenants"}
     at = ", ".join(f"{n} {noms.get(k, k)}" for k, n in v["a_traiter"]["par_type"].items()) or "rien"
     def table(entetes, lignes):
         if not lignes:
@@ -308,6 +329,9 @@ def fiche_autorite_html(g, v):
     div = v["divergences"]["ia_vs_reference_les_plus_fortes"]
     lignes_div = [[e(d["passage"]), str(d["similarite"])] for d in div]
     faibles = [[e(x["id"] + " · " + _lib(g, x["id"]) if x["id"] in g.E else x["id"]), str(x["descriptions"])] for x in v["divergences"]["elements_faiblement_ancres_retenus_par_les_apprenants"]]
+    NAT = {"definition": "définition", "relation": "relation", "question": "question", "resume": "résumé"}
+    lignes_pia = [[e(NAT.get(p["nature"], p["nature"])), e(p["porte_sur"]), e(p["texte"]) + (f"<br><span class='aide'>{e(p['justification'])}</span>" if p["justification"] else ""),
+                   e(", ".join(p["appuis"])), e(p["controle"] or "—"), e(p["statut"])] for p in v.get("propositions_ia", [])]
     alertes = "".join(f"<li>{e(a)}</li>" for a in m.get("alertes", [])) or "<li>Aucune.</li>"
     return f"""<!DOCTYPE html><html lang="fr"><head><meta charset="utf-8"><title>Fiche pour {e(aut)} – {e(v['corpus'])}</title>
 <style>body{{font:15px/1.55 Georgia,'Times New Roman',serif;color:#1f2328;max-width:900px;margin:30px auto;padding:0 20px}}
@@ -338,6 +362,9 @@ table{{border-collapse:collapse;width:100%;font-size:14px;margin:8px 0}}th,td{{b
 <h2>{'4' if lignes_term else '3'}. Corrections déjà faites</h2>
 {table(['Élément', 'Statut', 'Version proposée', 'Version corrigée'], lignes_cor)}
 {"<h2>Écarts les plus forts entre traduction IA et votre traduction</h2>" + table(['Passage', 'Similarité (0 à 1)'], lignes_div) if lignes_div else ""}
+<h2>Propositions de l'IA issues de ses retours aux apprenants</h2>
+<p class="aide">Quand un apprenant demande un retour dans l'application, l'IA peut proposer une définition, une relation ou une question. Ces propositions restent « proposées » tant que vous ne les avez pas examinées (onglet « Propositions IA » du mode Validation). La colonne « Contrôle » indique si le retour a passé le contrôleur du noyau.</p>
+{table(['Nature', 'Porte sur', 'Proposition', 'Appuis', 'Contrôle', 'Statut'], lignes_pia)}
 <h2>Éléments faiblement fondés retenus par les apprenants</h2>
 <p class="aide">Éléments encore non validés que les apprenants utilisent : les valider ou les corriger en priorité aurait le plus d'effet.</p>
 {table(['Élément', 'Nombre de descriptions'], faibles)}

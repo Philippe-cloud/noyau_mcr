@@ -1,0 +1,57 @@
+{
+ "format": "propositions-ia-mcr-v1",
+ "_note": "DONNÉES SIMULÉES pour test : ne pas déposer dans corpus/mcr/entrees.",
+ "apprenant": "",
+ "retours": [
+  {
+   "id": "RIA-20261029-1500-P1",
+   "date": "2026-10-29T14:00:00Z",
+   "plante": "P1",
+   "qid": "Q2",
+   "question": "Que veut dire « décrire » quelque chose selon la MCR ?",
+   "modele": "Claude (simulation)",
+   "retour": [
+    {
+     "phrase": "Vous avez relié la génération d'un objet-d'étude à sa qualification [C:n07, C:n08], ce qui suit la chaîne posée par la base (proposé, non validé).",
+     "citations": [
+      "C:n07",
+      "C:n08"
+     ]
+    },
+    {
+     "phrase": "Le lien de D61 à l'entité-objet est votre lecture propre ; la base ne l'indexe pas encore [S:D61].",
+     "citations": [
+      "S:D61"
+     ]
+    }
+   ],
+   "prochaine_question": "Quel rôle joue la vue V dans la qualification ?",
+   "propositions": [
+    {
+     "nature": "relation",
+     "de": "C:n02",
+     "vers": "C:n07",
+     "texte": "précède",
+     "appuis": [
+      "S:D11"
+     ],
+     "justification": "ordre des opérations dans D11"
+    },
+    {
+     "nature": "question",
+     "texte": "Pourquoi une description est-elle toujours relative à une vue ?",
+     "concepts": [
+      "C:n08"
+     ],
+     "appuis": [
+      "S:D11"
+     ]
+    }
+   ],
+   "controle": {
+    "verdict": "conforme",
+    "problemes": []
+   }
+  }
+ ]
+}

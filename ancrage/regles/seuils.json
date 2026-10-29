@@ -1,6 +1,6 @@
 {
  "_note": "Seuils de gouvernance : à fixer avec les validateurs (le lama, Mioara). Valeurs provisoires du prototype.",
- "poids_operations": {"creation": 1.0, "transcription": 1.0, "copie": 1.0, "traduction": 0.9, "extraction": 0.9, "resume": 0.8, "resume_notice": 0.6, "redaction": 0.75, "inference": 0.7, "selection": 1.0},
+ "poids_operations": {"creation": 1.0, "transcription": 1.0, "copie": 1.0, "traduction": 0.9, "extraction": 0.9, "resume": 0.8, "resume_notice": 0.6, "redaction": 0.75, "inference": 0.7, "selection": 1.0, "retour_ia": 0.6, "proposition_ia": 0.6},
  "niveau_fort": 0.75,
  "niveau_moyen": 0.55,
  "plafond_ia_non_validee": 0.5,
