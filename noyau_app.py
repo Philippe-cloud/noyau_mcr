@@ -205,6 +205,11 @@ def port_libre(depart=8765):
 
 
 def main():
+    for flux in (sys.stdout, sys.stderr):            # console Windows : éviter les erreurs d'encodage (é, →…)
+        try:
+            flux.reconfigure(encoding="utf-8", errors="replace")
+        except Exception:
+            pass
     preparer_donnees()
     if "--test" in sys.argv:
         for c in CORPUS:
