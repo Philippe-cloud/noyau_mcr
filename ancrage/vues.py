@@ -80,21 +80,18 @@ def relations_suggerees(g, seuil=3):
 
 
 def relations_apprenants(g):
-    """Relations créées par les apprenants, absentes de la base (agrégées, sans noms)."""
+    """Relations créées par les apprenants (agrégées, sans noms), comparées à la base."""
     cnt, qui = Counter(), defaultdict(set)
     for d in g.par_type("description"):
         e = g.E[d]
         for r in e["contenu"]["relations"]:
-            a, t, b = r.split("|")
-            cnt[(a, t, b)] += 1
-            qui[(a, t, b)].add(e["prov"]["operateur"])
+            cnt[r] += 1
+            qui[r].add(e["prov"]["operateur"])
     out = []
-    for (a, t, b), n in cnt.most_common():
-        ra, rb = f"R:{a}|{b}", f"R:{b}|{a}"
-        base = ra if ra in g.E else rb if rb in g.E else None
-        out.append({"de": "C:" + a, "type": t, "vers": "C:" + b, "descriptions": n, "apprenants": len(qui[(a, t, b)]),
-                    "dans_la_base": base, "libelle_base": g.E[base]["contenu"]["libelle"] if base else None,
-                    "statut_base": g.statut(base) if base else None})
+    for r, n in cnt.most_common():
+        cmp = _comparer_relation(g, r)
+        out.append({"relation": cmp["vous"], "descriptions": n, "apprenants": len(qui[r]),
+                    "autorite": cmp.get("autorite"), "ia": cmp.get("ia"), "accord": cmp.get("accord")})
     return out
 
 
@@ -183,20 +180,49 @@ def vue_ia(g):
 
 
 # ---------------------------------------------------------------- apprenants
+def _resoudre(g, x):
+    """Identifiant d'application → entité du graphe (concept ou document du socle)."""
+    for pre in ("C:", g.config.get("prefixe_doc", "S:"), "S:", "P:"):
+        if pre + x in g.E:
+            return pre + x
+    return None
+
+
+def _lib(g, eid):
+    c = g.E[eid]["contenu"]
+    return c.get("libelle") or (eid.split(":", 1)[1] + " · " + c.get("titre", "")[:60] if c.get("titre") else eid)
+
+
 def _comparer_relation(g, r):
     a, t, b = r.split("|")
-    ca, cb = "C:" + a, "C:" + b
-    base = next((x for x in (f"R:{a}|{b}", f"R:{b}|{a}") if x in g.E), None)
-    out = {"relation": r, "vous": f"{g.E[ca]['contenu']['libelle']} — {t} → {g.E[cb]['contenu']['libelle']}" if ca in g.E and cb in g.E else r}
-    socle = [p for p in {p for p, c in g.d["mentions"] if c == ca} & {p for p, c in g.d["mentions"] if c == cb} if g.appui_atteste(p)]
-    out["autorite"] = (f"{g.config.get('autorite')} réunit ces deux notions dans {len(socle)} élément(s) du socle : " + ", ".join(sorted(socle)[:5])) if socle else "aucun élément du socle ne réunit ces deux notions"
-    if base:
-        st = g.statut(base); lab = g.E[base]["contenu"]["libelle"]
-        out["base"] = {"id": base, "libelle": lab, "statut": st}
-        out["ia"] = f"l'IA proposait « {lab} »" + (" (validé)" if st == "valide" else " (non validé)" if st == "propose" else f" ({st})")
-        out["accord"] = (_norm(lab) == _norm(t))
+    ea, eb = _resoudre(g, a), _resoudre(g, b)
+    out = {"relation": r, "vous": f"{_lib(g, ea) if ea else a} — {t} → {_lib(g, eb) if eb else b}"}
+    aut = g.config.get("autorite")
+    if not ea or not eb:
+        out["autorite"] = "élément inconnu de la base"; out["ia"] = "—"; return out
+    concepts = [x for x in (ea, eb) if g.E[x]["type"] == "concept"]
+    autres = [x for x in (ea, eb) if g.E[x]["type"] != "concept"]
+    if len(concepts) == 2:
+        socle = [p for p in {p for p, c in g.d["mentions"] if c == ea} & {p for p, c in g.d["mentions"] if c == eb} if g.appui_atteste(p)]
+        out["autorite"] = (f"{aut} réunit ces deux notions dans {len(socle)} élément(s) du socle : " + ", ".join(sorted(socle)[:5])) if socle else "aucun élément du socle ne réunit ces deux notions"
+        base = next((x for x in (f"R:{a}|{b}", f"R:{b}|{a}") if x in g.E), None)
+        if base:
+            st = g.statut(base); lab = g.E[base]["contenu"]["libelle"]
+            out["base"] = {"id": base, "libelle": lab, "statut": st}
+            out["ia"] = f"l'IA proposait « {lab} »" + (" (validé)" if st == "valide" else " (non validé)" if st == "propose" else f" ({st})")
+            out["accord"] = _norm(lab) == _norm(t)
+        else:
+            out["ia"] = "l'IA ne proposait pas de relation entre ces notions"
+    elif len(concepts) == 1 and autres:
+        doc, c = autres[0], concepts[0]
+        mention = [doc, c] in g.d["mentions"] or (doc, c) in [tuple(m) for m in g.d["mentions"]]
+        out["autorite"] = (f"la base indexe {doc} sur cette notion (indexation du projet, pas encore validée par {aut})" if mention
+                           else f"la base n'indexe pas {doc} sur cette notion : c'est votre lecture propre")
+        out["ia"] = "l'indexation proposée rejoint votre lien" if mention else "aucune indexation proposée ne fait ce lien"
+        out["accord"] = mention
     else:
-        out["ia"] = "l'IA ne proposait pas de relation entre ces notions"
+        out["autorite"] = "relation entre deux documents : le socle ne les relie pas directement"
+        out["ia"] = "—"
     return out
 
 
