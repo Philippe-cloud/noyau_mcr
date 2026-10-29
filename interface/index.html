@@ -98,10 +98,11 @@ function moniteur(e){const m=e.moniteur;if(!m){$('#etat').innerHTML='<div class=
  <table>${Object.entries(L).map(([k,l])=>`<tr><td>${l}</td><td><b>${m[k]===null?'—':m[k]}</b></td></tr>`).join('')}<tr><td>Validateurs humains</td><td><b>${esc(m.validateurs_humains.join(', ')||'aucun')}</b></td></tr></table>${m.alertes.map(a=>`<div class="al">⚠ ${esc(a)}</div>`).join('')}`}
 function sortiesUI(s){if(!s){$('#sorties').innerHTML='<span class="muted">Aucune sortie : lancez la boucle.</span>';$('#vues').innerHTML='';$('#sv').textContent='';return}
  $('#sv').textContent='· version '+s.version;
- const app=s.fichiers.find(f=>f.endsWith('.html'));
- $('#sorties').innerHTML=`<div class="row">${app?`<button class="pri" id="openApp">Ouvrir l'application régénérée</button><a href="/fichier?corpus=${CORPUS}&nom=${encodeURIComponent(app)}"><button>Télécharger l'application</button></a>`:''}<button id="openDir">Ouvrir le dossier des sorties</button></div>
+ const app=s.fichiers.find(f=>f.startsWith('explorer')),fiche=s.fichiers.find(f=>f.startsWith('fiche_autorite'));
+ $('#sorties').innerHTML=`<div class="row">${app?`<button class="pri" id="openApp">Ouvrir l'application régénérée</button><a href="/fichier?corpus=${CORPUS}&nom=${encodeURIComponent(app)}"><button>Télécharger l'application</button></a>`:''}${fiche?`<button id="openFiche">Ouvrir la fiche pour l'autorité</button>`:''}<button id="openDir">Ouvrir le dossier des sorties</button></div>
  <h3>Fichiers</h3>${s.fichiers.map(f=>`<div class="f"><span>${esc(f)}</span><a class="lk" href="/fichier?corpus=${CORPUS}&nom=${encodeURIComponent(f)}">télécharger</a></div>`).join('')}`;
  if(app)$('#openApp').onclick=()=>window.open(`/fichier?corpus=${CORPUS}&nom=${encodeURIComponent(app)}&voir=1`,'_blank');
+ if(fiche)$('#openFiche').onclick=()=>window.open(`/fichier?corpus=${CORPUS}&nom=${encodeURIComponent(fiche)}&voir=1`,'_blank');
  $('#openDir').onclick=async()=>{const r=await api('/api/ouvrir-dossier',{});toast('Dossier : '+r.dossier)};
  vuesUI(s)}
 async function vuesUI(s){let h='';

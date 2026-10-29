@@ -149,8 +149,10 @@ def moniteur(g):
     S = SEUILS
     if ind["part_origine_ia_dans_valide"] > S["alerte_part_ia"]:
         al.append(f"circularité : {ind['part_origine_ia_dans_valide']:.0%} du validé est d'origine IA (seuil {S['alerte_part_ia']:.0%})")
-    if len(valideurs) < S["validateurs_min"]:
-        al.append(f"validateur unique ({', '.join(valideurs) or 'aucun'}) : les réponses sont une vue, pas un consensus")
+    if not valideurs:
+        al.append("aucune validation humaine pour l'instant : tout ce que propose l'IA reste à valider")
+    elif len(valideurs) < S["validateurs_min"]:
+        al.append(f"validateur unique ({', '.join(valideurs)}) : les réponses sont une vue, pas un consensus")
     if ind["score_temoin"] is not None and ind["score_temoin"] < S["temoin_min"]:
         al.append(f"jeu témoin : similarité IA/référence {ind['score_temoin']:.2f} sous le seuil {S['temoin_min']}")
     ind["alertes"] = al

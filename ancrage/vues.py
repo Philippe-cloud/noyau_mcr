@@ -257,4 +257,73 @@ def exporter(g, dossier):
         fichiers[n] = t
     for n, o in fichiers.items():
         json.dump(o, open(os.path.join(out, n), "w", encoding="utf-8"), ensure_ascii=False, indent=1)
-    return out, list(fichiers)
+    fiche = f"fiche_autorite_{nom}.html"
+    open(os.path.join(out, fiche), "w", encoding="utf-8").write(fiche_autorite_html(g, fichiers[f"vue_autorite_{nom}.json"]))
+    return out, list(fichiers) + [fiche]
+
+
+# ---------------------------------------------------------------- fiche lisible pour l'autorité
+def fiche_autorite_html(g, v):
+    import html as H
+    e = lambda s: H.escape(str(s if s is not None else ""))
+    aut = v.get("autorite") or "l'autorité"
+    m = g.d.get("moniteur", {})
+    R = v["regles_proposees"]
+    noms = {"resume": "résumés", "definition": "définitions", "concept": "concepts", "relation": "relations",
+            "question": "questions", "traduction": "traductions"}
+    at = ", ".join(f"{n} {noms.get(k, k)}" for k, n in v["a_traiter"]["par_type"].items()) or "rien"
+    def table(entetes, lignes):
+        if not lignes:
+            return "<p class='vide'>Rien pour l'instant.</p>"
+        return ("<table><tr>" + "".join(f"<th>{e(h)}</th>" for h in entetes) + "</tr>" +
+                "".join("<tr>" + "".join(f"<td>{c}</td>" for c in l) + "</tr>" for l in lignes) + "</table>")
+    app = R["relations_des_apprenants"]
+    lignes_app = [[e(r["relation"]), f"{r['apprenants']} apprenant(s), {r['descriptions']} description(s)", e(r["autorite"])] for r in app]
+    lignes_rel = [[e(" / ".join(r["libelles"])), f"{r['co_mentions']} document(s)"] for r in R["relations_a_qualifier"]]
+    lignes_term = [[e(r["proposition"]), str(r["nb"]), e(r["statut_actuel"])] for r in R.get("terminologie", [])[:20]]
+    lignes_cor = [[e(c["id"]), e(c["statut"]), e(" ; ".join(f"{k} : « {str(x)[:120]} »" for k, x in c["original"].items())),
+                   e(" ; ".join(f"« {str(x)[:120]} »" for x in c["corrige"].values()))] for c in v["corrections_faites"]]
+    div = v["divergences"]["ia_vs_reference_les_plus_fortes"]
+    lignes_div = [[e(d["passage"]), str(d["similarite"])] for d in div]
+    faibles = [[e(x["id"] + " · " + _lib(g, x["id"]) if x["id"] in g.E else x["id"]), str(x["descriptions"])] for x in v["divergences"]["elements_faiblement_ancres_retenus_par_les_apprenants"]]
+    alertes = "".join(f"<li>{e(a)}</li>" for a in m.get("alertes", [])) or "<li>Aucune.</li>"
+    return f"""<!DOCTYPE html><html lang="fr"><head><meta charset="utf-8"><title>Fiche pour {e(aut)} – {e(v['corpus'])}</title>
+<style>body{{font:15px/1.55 Georgia,'Times New Roman',serif;color:#1f2328;max-width:900px;margin:30px auto;padding:0 20px}}
+h1{{font-size:24px;margin:0}}h2{{font-size:18px;margin:28px 0 6px;color:#1f3864;border-bottom:1px solid #dce3ee;padding-bottom:4px}}
+.sous{{color:#6b7280;font-style:italic;margin:4px 0 18px}}.intro{{background:#f3f6fb;border-left:4px solid #2e5597;padding:10px 14px}}
+table{{border-collapse:collapse;width:100%;font-size:14px;margin:8px 0}}th,td{{border-bottom:1px solid #e5e7eb;padding:6px;text-align:left;vertical-align:top}}th{{background:#f3f6fb}}
+.vide{{color:#6b7280;font-style:italic}}.aide{{color:#4b5563;font-size:14px}}ol li,ul li{{margin:3px 0}}
+@media print{{body{{margin:0}}h2{{page-break-after:avoid}}tr{{page-break-inside:avoid}}}}</style></head><body>
+<h1>Fiche pour {e(aut)}</h1>
+<p class="sous">{e(v['corpus'])} · version du modèle {e(v['version'])} · document produit automatiquement par le noyau</p>
+<p class="intro">Cette fiche rassemble ce que l'usage du dispositif fait remonter et qui appelle votre regard : les liens que les apprenants construisent, les notions que vos textes réunissent sans relation explicite dans la base, et ce qui reste à valider. Rien n'y est tranché : chaque point est une proposition que vous pouvez confirmer, corriger ou écarter.</p>
+
+<h2>En bref</h2>
+<ul><li>Socle : <b>{v['socle']['nombre']}</b> textes ou passages de référence.</li>
+<li>Propositions de l'IA encore à valider : <b>{e(at)}</b>.</li>
+<li>Validations enregistrées à ce jour : <b>{m.get('validations', 0)}</b> ; corrections : <b>{len(v['corrections_faites'])}</b>.</li>
+<li>Apprenants dont les trajectoires sont prises en compte : <b>{v['divergences']['nombre_apprenants']}</b> (données anonymisées).</li></ul>
+<p class="aide">Points de vigilance du dispositif :</p><ul class="aide">{alertes}</ul>
+
+<h2>1. Les liens construits par les apprenants</h2>
+<p class="aide">Ce que les apprenants ont relié en répondant aux questions, et la situation de ce lien dans la base. Un lien repris dans plusieurs descriptions est une lecture stable ; un lien absent de la base est une lecture personnelle qui mérite votre avis.</p>
+{table(['Lien', 'Fréquence', 'Situation dans la base'], lignes_app)}
+
+<h2>2. Notions que vos textes réunissent souvent, sans relation dans la base</h2>
+<p class="aide">Paires de notions présentes ensemble dans plusieurs documents du socle. Faut-il qualifier leur relation, et comment ?</p>
+{table(['Notions', 'Réunies dans'], lignes_rel)}
+{"<h2>3. Correspondances de traduction attestées dans vos traductions</h2><p class='aide'>Traductions que vous employez de façon répétée et qui pourraient devenir des règles.</p>" + table(['Proposition', 'Attestations', 'Statut actuel du glossaire'], lignes_term) if lignes_term else ""}
+<h2>{'4' if lignes_term else '3'}. Corrections déjà faites</h2>
+{table(['Élément', 'Statut', 'Version proposée', 'Version corrigée'], lignes_cor)}
+{"<h2>Écarts les plus forts entre traduction IA et votre traduction</h2>" + table(['Passage', 'Similarité (0 à 1)'], lignes_div) if lignes_div else ""}
+<h2>Éléments faiblement fondés retenus par les apprenants</h2>
+<p class="aide">Éléments encore non validés que les apprenants utilisent : les valider ou les corriger en priorité aurait le plus d'effet.</p>
+{table(['Élément', 'Nombre de descriptions'], faibles)}
+
+<h2>Comment répondre</h2>
+<ol><li>Ouvrez l'application « {'Explorer la MCR' if 'MCR' in v['corpus'] else 'Explorer les textes tibétains'} » fournie avec cette fiche.</li>
+<li>Cliquez <b>Validation</b> et entrez le code transmis par le projet.</li>
+<li>Corrigez ou validez les éléments concernés, en ajoutant un commentaire si besoin.</li>
+<li>Cliquez <b>Exporter la validation</b> et renvoyez le fichier au projet. Il sera intégré au prochain tour de boucle.</li></ol>
+<p class="aide">Pour les liens des apprenants (§1) et les notions à relier (§2), un simple courriel ou une annotation sur cette fiche imprimée suffit pour l'instant.</p>
+</body></html>"""
