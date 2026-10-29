@@ -1,0 +1,531 @@
+{
+  "format": "trajectoire-mcr-v2",
+  "apprenant": "",
+  "creeLe": "2026-10-28T13:35:25.135Z",
+  "plantes": [
+    {
+      "id": "P1",
+      "qid": "Q2",
+      "question": "Que veut dire « décrire » quelque chose selon la MCR ?",
+      "niveau": 1,
+      "creeLe": "2026-10-28T13:36:10.889Z",
+      "concepts": [
+        "n08",
+        "g4",
+        "n07",
+        "n02",
+        "n04"
+      ],
+      "docs": [
+        "D61"
+      ],
+      "ecartes": [
+        "D44"
+      ],
+      "relations": [
+        {
+          "id": "r1793279658294",
+          "a": "n02",
+          "b": "n04",
+          "type": "fonde",
+          "date": "2026-10-29T13:14:18.294Z",
+          "origine": "utilisateur"
+        }
+      ],
+      "descriptions": [
+        {
+          "n": 1,
+          "date": "2026-10-28T13:40:41.612Z",
+          "c": [
+            "n08"
+          ],
+          "d": [
+            "D44"
+          ],
+          "r": [
+            "D44|illustre|n08"
+          ]
+        },
+        {
+          "n": 2,
+          "date": "2026-10-28T13:41:05.045Z",
+          "c": [
+            "n08",
+            "g4"
+          ],
+          "d": [
+            "D44"
+          ],
+          "r": [
+            "D44|illustre|n08",
+            "D44|qualifie|g4"
+          ],
+          "W": 0.18652602331724139
+        },
+        {
+          "n": 3,
+          "date": "2026-10-29T13:13:26.275Z",
+          "c": [
+            "n08",
+            "g4"
+          ],
+          "d": [],
+          "r": [],
+          "W": 1.4388721249745011
+        },
+        {
+          "n": 4,
+          "date": "2026-10-29T13:13:41.207Z",
+          "c": [
+            "n08",
+            "g4"
+          ],
+          "d": [
+            "D61"
+          ],
+          "r": [],
+          "W": 1.4057162117716135
+        },
+        {
+          "n": 5,
+          "date": "2026-10-29T13:14:02.999Z",
+          "c": [
+            "n08",
+            "g4",
+            "n07",
+            "n02"
+          ],
+          "d": [
+            "D61"
+          ],
+          "r": [],
+          "W": 1.2530862615187628
+        }
+      ]
+    },
+    {
+      "id": "P2",
+      "qid": "Q9",
+      "question": "Que fait l’algorithme A[D0] ?",
+      "niveau": 2,
+      "creeLe": "2026-10-28T13:41:35.330Z",
+      "concepts": [],
+      "docs": [],
+      "ecartes": [],
+      "relations": [],
+      "descriptions": []
+    },
+    {
+      "id": "P3",
+      "qid": "Q1",
+      "question": "Pourquoi Mioara Mugur-Schächter part-elle de la mécanique quantique ?",
+      "niveau": 1,
+      "creeLe": "2026-10-28T13:43:32.707Z",
+      "concepts": [],
+      "docs": [],
+      "ecartes": [],
+      "relations": [],
+      "descriptions": []
+    },
+    {
+      "id": "P4",
+      "qid": "Q10",
+      "question": "Qu’est-ce qu’une probabilité « factuelle » ?",
+      "niveau": 2,
+      "creeLe": "2026-10-28T13:49:34.616Z",
+      "concepts": [],
+      "docs": [],
+      "ecartes": [],
+      "relations": [],
+      "descriptions": []
+    },
+    {
+      "id": "P5",
+      "qid": "Q5",
+      "question": "Qu’est-ce que le réalisme naïf, et pourquoi la MCR le critique-t-elle ?",
+      "niveau": 1,
+      "creeLe": "2026-10-28T14:37:50.893Z",
+      "concepts": [],
+      "docs": [],
+      "ecartes": [],
+      "relations": [],
+      "descriptions": []
+    },
+    {
+      "id": "P6",
+      "qid": "Q3",
+      "question": "Qu’est-ce qu’une opération de génération ?",
+      "niveau": 1,
+      "creeLe": "2026-10-29T13:14:29.239Z",
+      "concepts": [
+        "n02",
+        "n01"
+      ],
+      "docs": [
+        "D61",
+        "D15"
+      ],
+      "ecartes": [],
+      "relations": [
+        {
+          "id": "r1793279686647",
+          "a": "D61",
+          "b": "n02",
+          "type": "qualifie",
+          "date": "2026-10-29T13:14:46.647Z",
+          "origine": "utilisateur"
+        }
+      ],
+      "descriptions": [
+        {
+          "n": 1,
+          "date": "2026-10-29T13:14:58.464Z",
+          "c": [
+            "n02"
+          ],
+          "d": [
+            "D61",
+            "D15"
+          ],
+          "r": [
+            "D61|qualifie|n02"
+          ]
+        },
+        {
+          "n": 2,
+          "date": "2026-10-29T13:15:00.125Z",
+          "c": [
+            "n02"
+          ],
+          "d": [
+            "D61",
+            "D15"
+          ],
+          "r": [
+            "D61|qualifie|n02"
+          ],
+          "W": 0
+        },
+        {
+          "n": 3,
+          "date": "2026-10-29T13:15:07.406Z",
+          "c": [
+            "n02",
+            "n01"
+          ],
+          "d": [
+            "D61",
+            "D15"
+          ],
+          "r": [
+            "D61|qualifie|n02"
+          ],
+          "W": 0.2128468519815082
+        }
+      ]
+    }
+  ],
+  "active": "P6",
+  "traces": [
+    {
+      "date": "2026-10-28T13:36:10.890Z",
+      "type": "question",
+      "plante": "P1",
+      "question": "Que veut dire « décrire » quelque chose selon la MCR ?",
+      "qid": "Q2"
+    },
+    {
+      "date": "2026-10-28T13:39:28.065Z",
+      "type": "consulter",
+      "plante": "P1",
+      "el": "D44"
+    },
+    {
+      "date": "2026-10-28T13:39:45.056Z",
+      "type": "retenir",
+      "plante": "P1",
+      "el": "D44"
+    },
+    {
+      "date": "2026-10-28T13:40:07.494Z",
+      "type": "consulter",
+      "plante": "P1",
+      "el": "n08"
+    },
+    {
+      "date": "2026-10-28T13:40:08.293Z",
+      "type": "consulter",
+      "plante": "P1",
+      "el": "n07"
+    },
+    {
+      "date": "2026-10-28T13:40:14.877Z",
+      "type": "consulter",
+      "plante": "P1",
+      "el": "n08"
+    },
+    {
+      "date": "2026-10-28T13:40:18.992Z",
+      "type": "consulter",
+      "plante": "P1",
+      "el": "D44"
+    },
+    {
+      "date": "2026-10-28T13:40:31.755Z",
+      "type": "illustre",
+      "plante": "P1",
+      "a": "D44",
+      "b": "n08"
+    },
+    {
+      "date": "2026-10-28T13:40:41.612Z",
+      "type": "description",
+      "plante": "P1",
+      "n": 1
+    },
+    {
+      "date": "2026-10-28T13:40:50.346Z",
+      "type": "consulter",
+      "plante": "P1",
+      "el": "g4"
+    },
+    {
+      "date": "2026-10-28T13:40:53.182Z",
+      "type": "consulter",
+      "plante": "P1",
+      "el": "D44"
+    },
+    {
+      "date": "2026-10-28T13:41:03.059Z",
+      "type": "qualifie",
+      "plante": "P1",
+      "a": "D44",
+      "b": "g4"
+    },
+    {
+      "date": "2026-10-28T13:41:05.046Z",
+      "type": "description",
+      "plante": "P1",
+      "n": 2,
+      "W": 0.18652602331724139
+    },
+    {
+      "date": "2026-10-28T13:41:35.330Z",
+      "type": "question",
+      "plante": "P2",
+      "question": "Que fait l’algorithme A[D0] ?",
+      "qid": "Q9"
+    },
+    {
+      "date": "2026-10-28T13:41:44.586Z",
+      "type": "consulter",
+      "plante": "P2",
+      "el": "n06"
+    },
+    {
+      "date": "2026-10-28T13:43:16.466Z",
+      "type": "consulter",
+      "plante": "P1",
+      "el": "D44"
+    },
+    {
+      "date": "2026-10-28T13:43:22.080Z",
+      "type": "ecarter",
+      "plante": "P1",
+      "el": "D44"
+    },
+    {
+      "date": "2026-10-28T13:43:30.692Z",
+      "type": "consulter",
+      "plante": "P1",
+      "el": "D61"
+    },
+    {
+      "date": "2026-10-28T13:43:32.707Z",
+      "type": "question",
+      "plante": "P3",
+      "question": "Pourquoi Mioara Mugur-Schächter part-elle de la mécanique quantique ?",
+      "qid": "Q1"
+    },
+    {
+      "date": "2026-10-28T13:49:34.616Z",
+      "type": "question",
+      "plante": "P4",
+      "question": "Qu’est-ce qu’une probabilité « factuelle » ?",
+      "qid": "Q10"
+    },
+    {
+      "date": "2026-10-28T13:49:45.435Z",
+      "type": "consulter",
+      "plante": "P4",
+      "el": "n18"
+    },
+    {
+      "date": "2026-10-28T13:49:53.602Z",
+      "type": "consulter",
+      "plante": "P4",
+      "el": "n15"
+    },
+    {
+      "date": "2026-10-28T14:37:50.893Z",
+      "type": "question",
+      "plante": "P5",
+      "question": "Qu’est-ce que le réalisme naïf, et pourquoi la MCR le critique-t-elle ?",
+      "qid": "Q5"
+    },
+    {
+      "date": "2026-10-28T14:37:57.002Z",
+      "type": "consulter",
+      "plante": "P5",
+      "el": "D48"
+    },
+    {
+      "date": "2026-10-28T14:38:11.417Z",
+      "type": "consulter",
+      "plante": "P5",
+      "el": "D11"
+    },
+    {
+      "date": "2026-10-28T14:38:18.543Z",
+      "type": "consulter",
+      "plante": "P5",
+      "el": "D27"
+    },
+    {
+      "date": "2026-10-29T13:13:16.679Z",
+      "type": "consulter",
+      "plante": "P1",
+      "el": "D61"
+    },
+    {
+      "date": "2026-10-29T13:13:26.275Z",
+      "type": "description",
+      "plante": "P1",
+      "n": 3,
+      "W": 1.4388721249745011
+    },
+    {
+      "date": "2026-10-29T13:13:35.799Z",
+      "type": "retenir",
+      "plante": "P1",
+      "el": "D61"
+    },
+    {
+      "date": "2026-10-29T13:13:41.207Z",
+      "type": "description",
+      "plante": "P1",
+      "n": 4,
+      "W": 1.4057162117716135
+    },
+    {
+      "date": "2026-10-29T13:13:42.487Z",
+      "type": "consulter",
+      "plante": "P1",
+      "el": "n07"
+    },
+    {
+      "date": "2026-10-29T13:13:54.098Z",
+      "type": "retenir",
+      "plante": "P1",
+      "el": "n07"
+    },
+    {
+      "date": "2026-10-29T13:13:56.260Z",
+      "type": "consulter",
+      "plante": "P1",
+      "el": "n02"
+    },
+    {
+      "date": "2026-10-29T13:13:59.308Z",
+      "type": "retenir",
+      "plante": "P1",
+      "el": "n02"
+    },
+    {
+      "date": "2026-10-29T13:14:03.000Z",
+      "type": "description",
+      "plante": "P1",
+      "n": 5,
+      "W": 1.2530862615187628
+    },
+    {
+      "date": "2026-10-29T13:14:18.294Z",
+      "type": "fonde",
+      "plante": "P1",
+      "a": "n02",
+      "b": "n04"
+    },
+    {
+      "date": "2026-10-29T13:14:29.239Z",
+      "type": "question",
+      "plante": "P6",
+      "question": "Qu’est-ce qu’une opération de génération ?",
+      "qid": "Q3"
+    },
+    {
+      "date": "2026-10-29T13:14:33.481Z",
+      "type": "consulter",
+      "plante": "P6",
+      "el": "D61"
+    },
+    {
+      "date": "2026-10-29T13:14:37.547Z",
+      "type": "retenir",
+      "plante": "P6",
+      "el": "D61"
+    },
+    {
+      "date": "2026-10-29T13:14:46.647Z",
+      "type": "qualifie",
+      "plante": "P6",
+      "a": "D61",
+      "b": "n02"
+    },
+    {
+      "date": "2026-10-29T13:14:47.949Z",
+      "type": "consulter",
+      "plante": "P6",
+      "el": "n01"
+    },
+    {
+      "date": "2026-10-29T13:14:57.523Z",
+      "type": "retenir",
+      "plante": "P6",
+      "el": "D15"
+    },
+    {
+      "date": "2026-10-29T13:14:58.464Z",
+      "type": "description",
+      "plante": "P6",
+      "n": 1
+    },
+    {
+      "date": "2026-10-29T13:15:00.125Z",
+      "type": "description",
+      "plante": "P6",
+      "n": 2,
+      "W": 0
+    },
+    {
+      "date": "2026-10-29T13:15:01.936Z",
+      "type": "consulter",
+      "plante": "P6",
+      "el": "n01"
+    },
+    {
+      "date": "2026-10-29T13:15:05.923Z",
+      "type": "retenir",
+      "plante": "P6",
+      "el": "n01"
+    },
+    {
+      "date": "2026-10-29T13:15:07.406Z",
+      "type": "description",
+      "plante": "P6",
+      "n": 3,
+      "W": 0.2128468519815082
+    }
+  ],
+  "eps": 0.15,
+  "enregistreLe": "2026-10-29T13:15:12.387Z"
+}
