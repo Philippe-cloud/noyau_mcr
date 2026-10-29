@@ -1,0 +1,61 @@
+@prefix sh:      <http://www.w3.org/ns/shacl#> .
+@prefix prov:    <http://www.w3.org/ns/prov#> .
+@prefix skos:    <http://www.w3.org/2004/02/skos/core#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix rdfs:    <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix ex:      <https://noyau-ancrage.org/voc#> .
+
+# Règle 1 : toute entité a une provenance (activité de génération et agent responsable).
+ex:FormeEntite a sh:NodeShape ;
+  sh:targetClass prov:Entity ;
+  sh:property [ sh:path prov:wasGeneratedBy ; sh:minCount 1 ;
+                sh:message "Entité sans activité de génération (provenance manquante)." ] ;
+  sh:property [ sh:path prov:wasAttributedTo ; sh:minCount 1 ;
+                sh:message "Entité sans agent responsable." ] ;
+  sh:property [ sh:path ex:statut ; sh:minCount 1 ; sh:maxCount 1 ;
+                sh:in ( "propose" "valide" "variable" "corriger" "rejete" "source" ) ;
+                sh:message "Statut absent ou inconnu." ] .
+
+# Règle 2 : un concept a un libellé français.
+ex:FormeConcept a sh:NodeShape ;
+  sh:targetClass skos:Concept ;
+  sh:property [ sh:path skos:prefLabel ; sh:minCount 1 ; sh:languageIn ( "fr" ) ;
+                sh:message "Concept sans libellé français." ] .
+
+# Règle 3 : un passage ou une traduction porte un texte.
+ex:FormeTexte a sh:NodeShape ;
+  sh:targetClass ex:Passage , ex:Traduction , ex:Resume ;
+  sh:property [ sh:path ex:texte ; sh:minCount 1 ; sh:message "Passage ou traduction sans texte." ] ;
+  sh:property [ sh:path prov:wasDerivedFrom ; sh:minCount 1 ; sh:message "Texte qui ne dérive d'aucune source." ] .
+
+# Règle 4 : une validation a exactement un agent et un statut.
+ex:FormeValidation a sh:NodeShape ;
+  sh:targetClass ex:Validation ;
+  sh:property [ sh:path prov:wasAssociatedWith ; sh:minCount 1 ; sh:maxCount 1 ; sh:message "Validation sans agent unique." ] ;
+  sh:property [ sh:path prov:used ; sh:minCount 1 ; sh:message "Validation sans objet." ] .
+
+# Règle 5 (garde-fou de la boucle) : un contenu produit par une IA ne peut être
+# « validé » que par un agent humain distinct.
+ex:FormeIAValidee a sh:NodeShape ;
+  sh:targetClass prov:Entity ;
+  sh:sparql [
+    sh:message "Contenu d'origine IA marqué validé sans validation humaine." ;
+    sh:prefixes [ sh:declare [ sh:prefix "prov" ; sh:namespace "http://www.w3.org/ns/prov#"^^<http://www.w3.org/2001/XMLSchema#anyURI> ] ,
+                             [ sh:prefix "ex" ; sh:namespace "https://noyau-ancrage.org/voc#"^^<http://www.w3.org/2001/XMLSchema#anyURI> ] ] ;
+    sh:select """
+      SELECT $this WHERE {
+        $this prov:wasAttributedTo ?ag ; ex:statut ?s .
+        ?ag a prov:SoftwareAgent .
+        FILTER (?s IN ("valide","variable"))
+        FILTER NOT EXISTS {
+          ?v a ex:Validation ; prov:used $this ; prov:wasAssociatedWith ?h ; ex:statut ?vs .
+          ?h a prov:Person .
+          FILTER (?vs IN ("valide","variable"))
+        }
+      }""" ] .
+
+# Règle 6 (avertissement) : une relation rejetée ne doit plus relier ses concepts dans SKOS.
+ex:FormeRelation a sh:NodeShape ;
+  sh:targetClass ex:Relation ;
+  sh:property [ sh:path ex:de ; sh:minCount 1 ] ;
+  sh:property [ sh:path ex:vers ; sh:minCount 1 ] .

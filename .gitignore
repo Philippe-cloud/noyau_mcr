@@ -1,0 +1,8 @@
+__pycache__/
+*.pyc
+build/
+dist/
+*.spec
+corpus/*/versions/*.json
+corpus/*/versions/*.jsonld
+corpus/*/sorties/

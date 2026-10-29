@@ -1,0 +1,44 @@
+{
+ "format": "trajectoire-mcr-v2",
+ "apprenant": "Apprenant test",
+ "plantes": [
+  {
+   "id": "P1",
+   "question": "Qu’est-ce qu’une opération de génération ?",
+   "descriptions": [
+    {
+     "n": 1,
+     "date": "2026-10-29T09:10:00",
+     "c": [
+      "n01",
+      "n02"
+     ],
+     "d": [
+      "D11",
+      "D26"
+     ],
+     "r": [
+      "n01|génère|n02"
+     ]
+    },
+    {
+     "n": 2,
+     "date": "2026-10-29T09:20:00",
+     "c": [
+      "n01",
+      "n02",
+      "n04"
+     ],
+     "d": [
+      "D11",
+      "D26"
+     ],
+     "r": [
+      "n01|génère|n02",
+      "n02|entre dans|n04"
+     ]
+    }
+   ]
+  }
+ ]
+}

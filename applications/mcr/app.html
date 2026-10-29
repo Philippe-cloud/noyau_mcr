@@ -1,0 +1,439 @@
+<!DOCTYPE html>
+<html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Explorer la MCR</title>
+<style>
+:root{--ink:#1f2328;--mut:#6b7280;--line:#e5e7eb;--bg:#f8fafc;--acc:#2e5597;--ok:#15803d;--prop:#b26b00;--usr:#2563eb;--seed:#7c3aed}
+*{box-sizing:border-box}body{margin:0;font:14px/1.45 system-ui,-apple-system,Segoe UI,Roboto,sans-serif;color:var(--ink);background:var(--bg)}
+header{display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding:8px 12px;background:#fff;border-bottom:1px solid var(--line);position:sticky;top:0;z-index:20}
+header h1{font-size:17px;margin:0 10px 0 0}
+.tabs{display:flex;gap:4px}.tabs button{border:1px solid var(--line);background:#fff;border-radius:16px;padding:5px 12px;cursor:pointer}
+.tabs button.on{background:var(--acc);color:#fff;border-color:var(--acc)}
+.sp{flex:1}button{font:inherit;cursor:pointer;border:1px solid #cbd5e1;background:#fff;border-radius:6px;padding:4px 10px}
+button.pri{background:var(--acc);color:#fff;border-color:var(--acc)}button.ok{background:var(--ok);color:#fff;border-color:var(--ok)}
+button:disabled{opacity:.45;cursor:default}button.sm{font-size:12px;padding:2px 8px}
+.tog{display:flex;align-items:center;gap:6px;font-size:13px;border:1px solid var(--line);border-radius:16px;padding:3px 10px;background:#fff;cursor:pointer;user-select:none}
+.tog .dot{width:28px;height:16px;border-radius:8px;background:#cbd5e1;position:relative}.tog .dot:after{content:"";position:absolute;top:2px;left:2px;width:12px;height:12px;border-radius:50%;background:#fff;transition:.15s}
+.tog.on .dot{background:var(--ok)}.tog.on .dot:after{left:14px}
+main{display:grid;grid-template-columns:270px 1fr 330px;gap:10px;padding:10px;min-height:calc(100vh - 54px)}
+.panel{background:#fff;border:1px solid var(--line);border-radius:10px;padding:10px;overflow:auto;max-height:calc(100vh - 74px)}
+h2{font-size:15px;margin:2px 0 8px}h3{font-size:13px;margin:12px 0 6px;color:var(--mut);text-transform:uppercase;letter-spacing:.03em}
+.muted{color:var(--mut);font-size:12.5px}.chips{display:flex;gap:4px;flex-wrap:wrap;margin-bottom:6px}
+.chip{border:1px solid var(--line);border-radius:12px;padding:2px 9px;font-size:12px;cursor:pointer;background:#fff}.chip.on{background:#eef2ff;border-color:var(--acc);color:var(--acc)}
+.q{border:1px solid var(--line);border-radius:8px;padding:6px 8px;margin-bottom:5px;cursor:pointer;font-size:13px}.q:hover{border-color:var(--acc)}.q.on{background:#f5f3ff;border-color:var(--seed)}
+.lvl{display:inline-block;font-size:11px;border-radius:8px;padding:0 6px;margin-right:4px;background:#f1f5f9;color:#475569}
+textarea,input[type=text],select{font:inherit;width:100%;border:1px solid #cbd5e1;border-radius:6px;padding:5px}
+.center{display:flex;flex-direction:column;gap:8px;min-width:0}
+#guide{background:#fff;border:1px solid var(--line);border-radius:10px;padding:8px 10px;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+#guide .steps{display:flex;gap:4px;flex-wrap:wrap}#guide .st{font-size:12px;border-radius:12px;padding:2px 8px;background:#f1f5f9;color:#64748b}
+#guide .st.done{background:#dcfce7;color:#166534}#guide .st.cur{background:var(--acc);color:#fff}
+#guide .msg{flex:1;min-width:200px;font-size:13px}
+#stage{background:#fff;border:1px solid var(--line);border-radius:10px;position:relative;flex:1;min-height:460px}
+#svg{width:100%;height:100%;display:block;min-height:460px}
+.node{cursor:pointer}.node text{font-size:11.5px;pointer-events:none}
+.legend{display:flex;gap:12px;flex-wrap:wrap;font-size:12px;color:var(--mut);padding:4px 2px}
+.legend i{display:inline-block;width:18px;height:0;border-top:2px solid;vertical-align:middle;margin-right:4px}
+.card{border:1px solid var(--line);border-radius:8px;padding:8px;margin-bottom:8px}
+.badge{display:inline-block;font-size:11px;border-radius:8px;padding:1px 7px;margin:0 3px 3px 0;border:1px solid}
+.b-prop{color:var(--prop);border-color:#f3d19e;background:#fff8eb}.b-ok{color:var(--ok);border-color:#a7e3b9;background:#f0fdf4}.b-usr{color:var(--usr);border-color:#bfdbfe;background:#eff6ff}.b-n{color:#475569;border-color:#e2e8f0;background:#f8fafc}
+.row{display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin-top:6px}
+a{color:var(--acc)}.lk{cursor:pointer;color:var(--acc);text-decoration:underline}
+.desc{border-left:3px solid var(--seed);padding:4px 8px;margin-bottom:6px;background:#faf5ff;border-radius:0 6px 6px 0;font-size:13px}
+.hidden{display:none!important}
+#view-traj,#view-corpus{padding:10px;display:grid;gap:10px}
+#view-traj{grid-template-columns:1fr 360px}#view-corpus{grid-template-columns:1fr}
+.grid-docs{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:8px}
+.lang{display:flex;gap:4px;margin:4px 0}.b-warn{color:#b45309;border-color:#fcd34d;background:#fffbeb}.b-rej{color:#991b1b;border-color:#fecaca;background:#fef2f2}#vbar{background:#14532d;color:#fff;padding:6px 12px;display:flex;gap:10px;align-items:center;flex-wrap:wrap;font-size:13px}#vbar button{font-size:12px}.vcard{border:1px solid var(--line);border-radius:8px;padding:10px;margin-bottom:10px;background:#fff}.vcard.st-valide{border-left:4px solid #15803d}.vcard.st-corriger{border-left:4px solid #f59e0b}.vcard.st-rejete{border-left:4px solid #b91c1c}.vcard textarea{font-size:13px}.vgrid{display:grid;grid-template-columns:1fr 1fr;gap:8px}@media(max-width:900px){.vgrid{grid-template-columns:1fr}}
+/* aide */
+#bubble{position:fixed;z-index:60;max-width:300px;background:#111827;color:#f9fafb;border-radius:8px;padding:8px 10px;font-size:12.5px;line-height:1.4;pointer-events:none;box-shadow:0 6px 20px rgba(0,0,0,.25);opacity:0;transition:opacity .12s}
+#bubble b{display:block;color:#fde68a;margin-bottom:2px}#bubble .stp{font-size:11px;color:#93c5fd;margin-top:4px}
+#bubble.show{opacity:1}
+body.helpon [data-help]{outline:1px dashed transparent}body.helpon [data-help]:hover{outline-color:#f59e0b;outline-offset:2px}
+.pulse{animation:pulse 1.6s ease-in-out infinite;border-radius:8px}
+@keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(245,158,11,.0)}50%{box-shadow:0 0 0 5px rgba(245,158,11,.55)}}
+#tour{position:fixed;z-index:70;max-width:330px;background:#fff;border:2px solid #f59e0b;border-radius:10px;padding:10px 12px;box-shadow:0 10px 30px rgba(0,0,0,.25)}
+#tour h4{margin:0 0 4px;font-size:14px}#tour .row{justify-content:space-between}
+.tourhl{position:relative;z-index:65;box-shadow:0 0 0 4px #f59e0b,0 0 0 9999px rgba(15,23,42,.35)!important;border-radius:8px}
+#modal{position:fixed;inset:0;background:rgba(15,23,42,.45);z-index:80;display:flex;align-items:center;justify-content:center;padding:12px}
+#modal .box{background:#fff;border-radius:12px;max-width:640px;width:100%;max-height:88vh;overflow:auto;padding:16px}
+#banner{position:fixed;bottom:14px;left:50%;transform:translateX(-50%);background:#111827;color:#fff;border-radius:8px;padding:8px 14px;z-index:90;font-size:13px;opacity:0;transition:.2s;pointer-events:none}#banner.show{opacity:1}
+@media (max-width:1000px){main,#view-traj{grid-template-columns:1fr}.panel{max-height:none}#stage,#svg{min-height:420px}}
+</style></head><body>
+<div id="vbar" class="hidden"></div>
+<header>
+ <h1>Explorer la MCR</h1>
+ <div class="tabs" data-help="tabs"><button id="tb-plante" class="on">Ma plante</button><button id="tb-traj">Ma trajectoire</button><button id="tb-corpus">Corpus</button></div>
+ <div class="sp"></div>
+ <div id="helpTog" class="tog on" data-help="helpTog" title="Activer / arrêter l'aide"><span class="dot"></span><span id="helpLab">Aide active</span></div>
+ <button id="btTour" data-help="btTour">Visite guidée</button>
+ <button id="btAide" data-help="btAide">? Aide</button>
+ <button id="btVal" data-help="btVal">Validation</button>
+ <button id="btSave" data-help="btSave">Enregistrer</button>
+ <label class="tog" data-help="btLoad" style="cursor:pointer">Reprendre<input id="fileIn" type="file" accept=".json" class="hidden"></label>
+</header>
+
+<main id="view-plante">
+ <section class="panel" id="pLeft">
+  <h2>1. Choisir une question</h2>
+  <div class="chips" id="lvls" data-help="lvls"></div>
+  <div id="qList" data-help="qList"></div>
+  <div class="row"><button class="sm" id="btOwnQ" data-help="btOwnQ">+ Poser ma propre question</button></div>
+  <h3>Mon jardin</h3>
+  <div id="garden" data-help="garden"></div>
+ </section>
+ <section class="center">
+  <div id="guide" data-help="guide"><div class="steps" id="gSteps"></div><div class="msg" id="gMsg"></div><button class="sm" id="gStop">Arrêter l'aide</button></div>
+  <div id="stage" data-help="stage"><svg id="svg"></svg></div>
+  <div class="legend" data-help="legend">
+   <span><i style="border-color:var(--seed)"></i>graine = la question</span>
+   <span>▲ branches = documents</span><span>▼ racines = concepts</span>
+   <span><i style="border-color:var(--ok)"></i>validé Mioara</span><span><i style="border-color:var(--prop);border-top-style:dashed"></i>proposé</span><span><i style="border-color:var(--usr)"></i>créé par moi</span>
+   <span>contour pointillé = proposition non encore retenue</span>
+  </div>
+ </section>
+ <section class="panel" id="pRight">
+  <div id="detail" data-help="detail"></div>
+  <h3>Ma description</h3>
+  <div id="descBox" data-help="descBox"></div>
+ </section>
+</main>
+
+<div id="view-traj" class="hidden">
+ <section class="panel" style="max-height:none"><h2>Ma trajectoire</h2>
+  <div class="muted">Chaque point est une description enregistrée, dans l'ordre du temps. Une ligne par question (plante). Les éléments communs à plusieurs plantes forment les nœuds de la trajectoire.</div>
+  <div id="tl" data-help="timeline"></div>
+  <h3>Graphe de la trajectoire</h3><div id="tg" data-help="trajGraph"></div>
+ </section>
+ <section class="panel" style="max-height:none"><div id="trajSide"></div></section>
+</div>
+
+<div id="view-corpus" class="hidden">
+ <section class="panel" style="max-height:none"><h2>Corpus (carte secondaire)</h2>
+  <div class="muted">Les 51 documents de la bibliographie, avec leur résumé FR/EN. Vous pouvez en ajouter un à la plante active.</div>
+  <div class="row" data-help="corpusFilters"><input type="text" id="cq" placeholder="Rechercher un titre, un auteur, un mot du résumé…" style="flex:1;min-width:200px">
+   <select id="cfam" style="width:auto"><option value="">Tous les ensembles</option><option value="oeuvre">Œuvre de M. Mugur-Schächter</option><option value="associe">Corpus associé</option><option value="cindyniques">Cindyniques</option></select>
+   <select id="csrc" style="width:auto"><option value="">Toutes sources de résumé</option><option value="TI">Texte intégral consulté</option><option value="RE">Résumé auteur/éditeur</option><option value="NO">Notice – à vérifier</option></select></div>
+  <div class="muted" id="ccount" style="margin:6px 0"></div>
+  <div class="grid-docs" id="cgrid"></div>
+ </section>
+</div>
+
+<div id="view-valid" class="hidden" style="padding:10px">
+ <section class="panel" style="max-height:none">
+  <h2>Mode validation</h2>
+  <div class="muted">Corrigez les textes proposés et donnez un statut à chaque élément. Tout est enregistré automatiquement dans ce navigateur. « Exporter la validation » produit un fichier à renvoyer au projet ; une fois réintégré, ce qui est validé apparaît en vert pour tous.</div>
+  <div class="row"><label class="muted">Validé par <input type="text" id="vName" style="width:240px"></label></div>
+  <div class="chips" id="vTabs" data-help="vTabs" style="margin-top:10px"></div>
+  <div class="row" data-help="vFilters"><input type="text" id="vq" placeholder="Rechercher…" style="flex:1;min-width:180px"><select id="vf" style="width:auto"><option value="">Tous les statuts</option><option value="propose">À traiter (proposé)</option><option value="valide">Validé</option><option value="corriger">À corriger</option><option value="rejete">Rejeté</option></select></div>
+  <div id="vTypes"></div>
+  <div id="vList" style="margin-top:10px"></div>
+ </section>
+</div>
+<div id="bubble"></div><div id="banner"></div>
+<script>
+const DATA=__DATA__;
+const VALEMB=__VAL__;
+const $=s=>document.querySelector(s),esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const C=Object.fromEntries(DATA.concepts.map(c=>[c.id,c])),DOC=Object.fromEntries(DATA.docs.map(d=>[d.id,d])),Q=Object.fromEntries(DATA.questions.map(q=>[q.id,q]));
+// ---------- validation (overlay) ----------
+const ORIG={d:Object.fromEntries(DATA.docs.map(d=>[d.id,{fr:d.fr,en:d.en}])),c:Object.fromEntries(DATA.concepts.map(c=>[c.id,{def:c.def}])),r:Object.fromEntries(DATA.relations.map(r=>[r.a+'|'+r.b,{lab:r.lab}])),q:Object.fromEntries(DATA.questions.map(q=>[q.id,{q:q.q}])),types:[...DATA.typesRelation]};
+const VKEY='mcr-validation-v1',VCODE='MMS';
+function newVal(){return{format:'validation-mcr-v1',valideur:'Mioara Mugur-Schächter',creeLe:new Date().toISOString(),items:{},types:null}}
+let VAL;try{VAL=JSON.parse(localStorage.getItem(VKEY))}catch(e){}if(!VAL||VAL.format!=='validation-mcr-v1')VAL=newVal();
+if(typeof VALEMB!=='undefined'&&VALEMB&&VALEMB.items){for(const k in VALEMB.items)if(!VAL.items[k])VAL.items[k]=VALEMB.items[k];if(VALEMB.types&&!VAL.types)VAL.types=VALEMB.types}
+function persistVal(){try{localStorage.setItem(VKEY,JSON.stringify(VAL))}catch(e){}}
+const vs=it=>it&&it.statut&&it.statut!=='propose'?it.statut:'propose';
+function applyVal(){DATA.docs.forEach(d=>{const it=VAL.items['doc:'+d.id];d.fr=it?.fr??ORIG.d[d.id].fr;d.en=it?.en??ORIG.d[d.id].en;d.statut=vs(it);d.vinfo=it});
+ DATA.concepts.forEach(c=>{const it=VAL.items['concept:'+c.id];c.def=it?.def??ORIG.c[c.id].def;c.statut=vs(it);c.vinfo=it});
+ DATA.relations.forEach(r=>{const k=r.a+'|'+r.b,it=VAL.items['rel:'+k];r.lab=it?.lab??ORIG.r[k].lab;r.statut=vs(it);r.vinfo=it});
+ DATA.questions.forEach(q=>{const it=VAL.items['q:'+q.id];q.q=it?.q??ORIG.q[q.id].q;q.statut=vs(it);q.vinfo=it});
+ DATA.typesRelation=VAL.types&&VAL.types.length?[...VAL.types]:[...ORIG.types]}
+const RELS=()=>DATA.relations.filter(r=>r.statut!=='rejete');
+function vnote(o){const it=o.vinfo;if(!it||!it.statut||it.statut==='propose')return 'proposé, à valider par Mioara';const L={valide:'validé',corriger:'à corriger',rejete:'rejeté'}[it.statut];return L+' par '+esc(VAL.valideur||'Mioara')+(it.date?' le '+new Date(it.date).toLocaleDateString('fr-FR'):'')+(it.commentaire?' – « '+esc(it.commentaire)+' »':'')}
+applyVal();
+const LV={1:'Découverte',2:'Intermédiaire',3:'Avancé'};
+const nowISO=()=>new Date().toISOString(),fmt=s=>{const d=new Date(s);return d.toLocaleDateString('fr-FR')+' '+d.toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'})};
+const STAT={valide:['Validé Mioara','b-ok'],propose:['Proposé','b-prop'],corriger:['À corriger','b-warn'],rejete:['Rejeté','b-rej'],utilisateur:['Créé par moi','b-usr']};
+const SRC={TI:'texte intégral consulté',RE:'résumé auteur/éditeur consulté',NO:'notice + contexte – à vérifier'};
+const ACC={texte:'Texte intégral (copie reçue, diffusion à autoriser)',libre:'Texte en libre accès',lien:'Lien éditeur / catalogue',reference:'Référence seule'};
+// ---------- état ----------
+const KEY='mcr-trajectoire-v2';
+function newTraj(){return{format:'trajectoire-mcr-v2',apprenant:'',creeLe:nowISO(),plantes:[],active:null,traces:[],eps:0.15}}
+let T;try{T=JSON.parse(localStorage.getItem(KEY))}catch(e){}if(!T||T.format!=='trajectoire-mcr-v2')T=newTraj();
+let PREF={aide:true,vu:false};try{Object.assign(PREF,JSON.parse(localStorage.getItem(KEY+'-pref'))||{})}catch(e){}
+function persist(){try{localStorage.setItem(KEY,JSON.stringify(T));localStorage.setItem(KEY+'-pref',JSON.stringify(PREF))}catch(e){}}
+const P=()=>T.plantes.find(p=>p.id===T.active)||null;
+function trace(type,o={}){T.traces.push({date:nowISO(),type,plante:T.active,...o})}
+let sel=null,linkFrom=null,lvl=0,lang='fr';
+// ---------- propositions ----------
+function proposals(p){if(!p)return{concepts:[],docs:[]};const q=p.qid?Q[p.qid]:null;let cs=q?[...q.concepts]:[];
+ const nb=new Set();RELS().forEach(r=>{if(cs.includes(r.a))nb.add(r.b);if(cs.includes(r.b))nb.add(r.a)});
+ cs=[...cs,...[...nb].filter(x=>!cs.includes(x)).slice(0,5)];
+ let ds=q?q.docs.filter(x=>DOC[x].statut!=='rejete'):['D11'];
+ if(!q){const sc={};DATA.docs.forEach(d=>{const o=d.concepts.filter(x=>p.concepts.includes(x)).length;if(o&&d.id!=='D11')sc[d.id]=o});ds=['D11',...Object.keys(sc).sort((a,b)=>sc[b]-sc[a]).slice(0,5)]}
+ cs=[...new Set([...cs,...p.concepts])].filter(x=>!p.ecartes.includes(x));ds=[...new Set([...ds,...p.docs])].filter(x=>!p.ecartes.includes(x));return{concepts:cs,docs:ds}}
+// ---------- plantes ----------
+function newPlantId(){let i=1;while(T.plantes.some(p=>p.id==='P'+i))i++;return 'P'+i}
+function plant(qid,text,niveau){const id=newPlantId();const p={id,qid:qid||null,question:text,niveau:niveau||null,creeLe:nowISO(),concepts:[],docs:[],ecartes:[],relations:[],descriptions:[]};
+ T.plantes.push(p);T.active=id;sel=null;linkFrom=null;trace('question',{question:text,qid});persist();renderAll();if(innerWidth<1000)$('#stage').scrollIntoView({behavior:'smooth'});banner('Nouvelle plante : « '+text.slice(0,60)+' »')}
+function toggleKeep(id){const p=P();if(!p)return;const isC=!!C[id],arr=isC?p.concepts:p.docs;const i=arr.indexOf(id);
+ if(i>=0){arr.splice(i,1);p.relations=p.relations.filter(r=>r.a!==id&&r.b!==id);trace('lacher',{el:id})}else{arr.push(id);p.ecartes=p.ecartes.filter(x=>x!==id);trace('retenir',{el:id})}persist();renderAll()}
+function discard(id){const p=P();if(!p)return;p.ecartes.push(id);p.concepts=p.concepts.filter(x=>x!==id);p.docs=p.docs.filter(x=>x!==id);p.relations=p.relations.filter(r=>r.a!==id&&r.b!==id);if(sel===id)sel=null;trace('ecarter',{el:id});persist();renderAll()}
+function addRel(a,b,type,origine){const p=P();if(!p||a===b)return;[a,b].forEach(x=>{const arr=C[x]?p.concepts:p.docs;if(!arr.includes(x))arr.push(x)});
+ if(p.relations.some(r=>r.a===a&&r.b===b&&r.type===type))return banner('Cette relation existe déjà.');
+ p.relations.push({id:'r'+Date.now(),a,b,type,date:nowISO(),origine:origine||'utilisateur'});trace('relier',{a,b,type});persist();renderAll()}
+function elems(p){return{c:[...p.concepts],d:[...p.docs],r:p.relations.map(r=>r.a+'|'+r.type+'|'+r.b)}}
+function setOf(D){return new Set([...D.c.map(x=>'c:'+x),...D.d.map(x=>'d:'+x),...D.r.map(x=>'r:'+x)])}
+function Wopac(DS,k){const A=0.5;const cur=setOf(DS[k]);if(!cur.size)return 0;const cnt={};let tot=0;for(let i=0;i<k;i++)setOf(DS[i]).forEach(x=>{cnt[x]=(cnt[x]||0)+1;tot++});
+ const U=new Set([...Object.keys(cnt),...cur]);const f=1/cur.size;let W=0;cur.forEach(x=>{const p=((cnt[x]||0)+A)/(tot+A*U.size);W+=f*Math.log2(f/p)});return Math.max(0,W)}
+function saveDesc(){const p=P();if(!p)return;const e=elems(p);if(e.c.length+e.d.length<1)return banner('Retenez au moins un élément avant d’enregistrer.');
+ const D={n:p.descriptions.length+1,date:nowISO(),...e};p.descriptions.push(D);if(p.descriptions.length>1)D.W=Wopac(p.descriptions,p.descriptions.length-1);
+ trace('description',{n:D.n,W:D.W});persist();renderAll();banner('Description D'+D.n+' enregistrée'+(D.W!=null?' · W = '+D.W.toFixed(2)+' bit':''))}
+// ---------- rendu gauche ----------
+function renderLeft(){$('#lvls').innerHTML=[0,1,2,3].map(l=>`<span class="chip ${lvl===l?'on':''}" data-l="${l}">${l?LV[l]:'Tous niveaux'}</span>`).join('');
+ document.querySelectorAll('#lvls .chip').forEach(c=>c.onclick=()=>{lvl=+c.dataset.l;renderLeft()});
+ const p=P();$('#qList').innerHTML=DATA.questions.filter(q=>q.statut!=='rejete'&&(!lvl||q.niveau===lvl)).map(q=>{const has=T.plantes.find(x=>x.qid===q.id);return `<div class="q ${p&&p.qid===q.id?'on':''}" data-q="${q.id}"><span class="lvl">${LV[q.niveau]}</span>${esc(q.q)}${has?' <span class="muted">· déjà plantée</span>':''}</div>`}).join('');
+ document.querySelectorAll('#qList .q').forEach(e=>e.onclick=()=>{const q=Q[e.dataset.q];const ex=T.plantes.find(x=>x.qid===q.id);if(ex){T.active=ex.id;sel=null;persist();renderAll();banner('Plante existante rouverte.')}else plant(q.id,q.q,q.niveau)});
+ $('#garden').innerHTML=T.plantes.length?T.plantes.map(x=>`<div class="q ${x.id===T.active?'on':''}" data-p="${x.id}"><b>${x.id}</b> ${esc(x.question.slice(0,70))}<div class="muted">${x.concepts.length+x.docs.length} élément(s) retenu(s) · ${x.relations.length} relation(s) · ${x.descriptions.length} description(s)</div>
+  <div class="row"><button class="sm" data-ed="${x.id}">Modifier</button><button class="sm" data-del="${x.id}" style="color:#b91c1c">Supprimer</button></div></div>`).join(''):'<div class="muted">Aucune plante. Choisissez une question ci-dessus.</div>';
+ document.querySelectorAll('#garden .q').forEach(e=>e.onclick=ev=>{if(ev.target.tagName==='BUTTON')return;T.active=e.dataset.p;sel=null;persist();renderAll()});
+ document.querySelectorAll('[data-del]').forEach(b=>b.onclick=()=>{const x=T.plantes.find(y=>y.id===b.dataset.del);modal(`<h2>Supprimer cette plante ?</h2><p>« ${esc(x.question)} »</p><p class="muted">Ses ${x.descriptions.length} description(s) disparaîtront de la trajectoire.</p><div class="row"><button class="pri" id="mOk" style="background:#b91c1c;border-color:#b91c1c">Supprimer</button><button id="mNo">Annuler</button></div>`);
+  $('#mNo').onclick=closeModal;$('#mOk').onclick=()=>{T.plantes=T.plantes.filter(y=>y.id!==x.id);if(T.active===x.id)T.active=T.plantes[0]?.id||null;trace('supprimer',{plante:x.id});closeModal();persist();renderAll()}});
+ document.querySelectorAll('[data-ed]').forEach(b=>b.onclick=()=>{const x=T.plantes.find(y=>y.id===b.dataset.ed);modal(`<h2>Modifier la question</h2><textarea id="mQ" rows="3">${esc(x.question)}</textarea><div class="row"><button class="ok" id="mOk">Enregistrer</button><button id="mNo">Annuler</button></div>`);
+  $('#mNo').onclick=closeModal;$('#mOk').onclick=()=>{const v=$('#mQ').value.trim();if(v){x.question=v;trace('modifierQuestion',{plante:x.id,question:v})}closeModal();persist();renderAll()}})}
+$('#btOwnQ').onclick=()=>{modal(`<h2>Poser ma propre question</h2><p class="muted">Écrivez votre question, puis choisissez un ou plusieurs concepts de départ. Les documents seront proposés à partir de ces concepts.</p>
+ <textarea id="mQ" rows="2" placeholder="Ma question…"></textarea><h3>Concepts de départ</h3><div class="chips" id="mC">${DATA.concepts.map(c=>`<span class="chip" data-c="${c.id}">${esc(c.lab)}</span>`).join('')}</div>
+ <div class="row"><button class="ok" id="mOk">Planter</button><button id="mNo">Annuler</button></div>`);
+ document.querySelectorAll('#mC .chip').forEach(c=>c.onclick=()=>c.classList.toggle('on'));$('#mNo').onclick=closeModal;
+ $('#mOk').onclick=()=>{const v=$('#mQ').value.trim();const cs=[...document.querySelectorAll('#mC .chip.on')].map(c=>c.dataset.c);if(!v)return banner('Écrivez d’abord votre question.');closeModal();plant(null,v,null);const p=P();p.concepts=cs;persist();renderAll()}};
+// ---------- graphe plante ----------
+function wrap(s,n){const w=s.split(' ');const L=[];let cur='';w.forEach(x=>{if((cur+' '+x).trim().length>n){if(cur)L.push(cur);cur=x}else cur=(cur+' '+x).trim()});if(cur)L.push(cur);return L.slice(0,3)}
+let POS={};
+function renderPlant(){const svg=$('#svg'),st=$('#stage');const W=st.clientWidth||800,H=Math.max(st.clientHeight,460);svg.setAttribute('viewBox',`0 0 ${W} ${H}`);
+ const p=P();if(!p){svg.innerHTML=`<text x="${W/2}" y="${H/2-10}" text-anchor="middle" font-size="16" fill="#6b7280">Choisissez une question à gauche :</text><text x="${W/2}" y="${H/2+14}" text-anchor="middle" font-size="14" fill="#6b7280">elle devient la graine de votre plante.</text>`;return}
+ const pr=proposals(p),gy=H*0.52,cx=W/2;POS={};
+ const arc=(ids,up)=>{const n=ids.length;ids.forEach((id,i)=>{const t=n===1?0.5:i/(n-1);const ang=Math.PI*(0.08+0.84*t);const k=(n>4&&i%2)?0.6:1;const rx=(W/2-95)*k,ry=(up?gy-40:H-gy-34)*k;let y=up?gy-Math.max(48,Math.sin(ang)*ry):gy+Math.max(58,Math.sin(ang)*ry);POS[id]={x:cx-Math.cos(ang)*rx,y}})};
+ arc(pr.docs,true);arc(pr.concepts,false);POS.__seed={x:cx,y:gy};
+ const kept=new Set([...p.concepts,...p.docs]);let s=`<defs><marker id="ar" viewBox="0 0 10 10" refX="10" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0L10,5L0,10z" fill="#2563eb"/></marker></defs>`;
+ s+=`<line x1="20" y1="${gy}" x2="${W-20}" y2="${gy}" stroke="#d6c7a1" stroke-width="2"/><text x="24" y="${gy-6}" font-size="11" fill="#a08a5b">branches · documents</text><text x="24" y="${gy+16}" font-size="11" fill="#a08a5b">racines · concepts</text>`;
+ [...pr.docs,...pr.concepts].forEach(id=>{if(!kept.has(id))return;const a=POS[id];s+=`<path d="M${cx},${gy} Q${(cx+a.x)/2},${(gy+a.y)/2+(C[id]?-20:20)} ${a.x},${a.y}" fill="none" stroke="${C[id]?'#a3b18a':'#86b07a'}" stroke-width="2"/>`});
+ const shown=new Set([...pr.concepts]);RELS().forEach(r=>{if(shown.has(r.a)&&shown.has(r.b)){const a=POS[r.a],b=POS[r.b];const col=r.statut==='valide'?'#15803d':'#b26b00';s+=`<path d="M${a.x},${a.y} Q${(a.x+b.x)/2},${Math.max(a.y,b.y)+40} ${b.x},${b.y}" fill="none" stroke="${col}" stroke-width="1.3" stroke-dasharray="${r.statut==='valide'?'':'5 4'}" opacity=".75"><title>${esc(C[r.a].lab)} — ${esc(r.lab)} → ${esc(C[r.b].lab)} (${r.statut==='valide'?'validé Mioara':'proposé'})</title></path>`}});
+ p.relations.forEach(r=>{const a=POS[r.a],b=POS[r.b];if(!a||!b)return;const mx=(a.x+b.x)/2,my=(a.y+b.y)/2-(Math.abs(a.y-b.y)<60?40:0);s+=`<path d="M${a.x},${a.y} Q${mx},${my} ${b.x},${b.y}" fill="none" stroke="#2563eb" stroke-width="2.2" marker-end="url(#ar)"><title>${esc(r.type)}</title></path><text x="${mx}" y="${my-3}" font-size="11" fill="#2563eb" text-anchor="middle" style="paint-order:stroke;stroke:#fff;stroke-width:3">${esc(r.type)}</text>`});
+ s+=`<g class="node" data-id="__seed" data-help="seed"><ellipse cx="${cx}" cy="${gy}" rx="16" ry="11" fill="#7c3aed"/>${wrap('« '+p.question+' »',46).map((l,i)=>`<text x="${cx}" y="${gy+28+i*13}" text-anchor="middle" font-size="12" font-weight="600" fill="#5b21b6" style="paint-order:stroke;stroke:#fff;stroke-width:4">${esc(l)}</text>`).join('')}</g>`;
+ const node=(id)=>{const a=POS[id],isC=!!C[id],k=kept.has(id),lab=isC?C[id].lab:id+' · '+DOC[id].titre;let L=wrap(lab,isC?20:24).slice(0,isC?3:2);if(!isC&&wrap(lab,24).length>2)L[1]=L[1].replace(/.{0,2}$/,'…');const fill=isC?(k?'#ecfccb':'#fff'):(k?'#dbeafe':'#fff'),stroke=isC?'#65a30d':'#3b82f6';
+  const w=Math.max(...L.map(l=>l.length))*6.2+16,h=L.length*13+10;const isSel=sel===id,isFrom=linkFrom===id;
+  return `<g class="node" data-id="${id}" data-help="${isC?'nodeC':'nodeD'}"><rect x="${a.x-w/2}" y="${a.y-h/2}" width="${w}" height="${h}" rx="${isC?12:4}" fill="${fill}" stroke="${isFrom?'#f59e0b':isSel?'#111827':stroke}" stroke-width="${isSel||isFrom?2.5:1.3}" stroke-dasharray="${k?'':'4 3'}"/>${L.map((l,i)=>`<text x="${a.x}" y="${a.y-h/2+16+i*13}" text-anchor="middle" fill="${k?'#111827':'#4b5563'}">${esc(l)}</text>`).join('')}</g>`};
+ s+=[...pr.docs,...pr.concepts].map(node).join('');svg.innerHTML=s;
+ svg.querySelectorAll('.node').forEach(g=>g.onclick=e=>{e.stopPropagation();const id=g.dataset.id;if(id==='__seed'){sel='__seed';renderAll();return}
+  if(linkFrom&&linkFrom!==id){askType(linkFrom,id);return}sel=id;trace('consulter',{el:id});persist();renderAll();$('#pRight').scrollTop=0});
+ svg.onclick=()=>{if(linkFrom){linkFrom=null;banner('Création de relation annulée.')}sel=null;renderAll()}}
+function askType(a,b){const la=C[a]?C[a].lab:a,lb=C[b]?C[b].lab:b;modal(`<h2>Nouvelle relation</h2><p><b>${esc(la)}</b> → <b>${esc(lb)}</b></p><p class="muted">Choisissez le type de relation. La liste est provisoire : elle sera fixée avec Mioara.</p>
+ <div class="chips" id="mT">${DATA.typesRelation.map(t=>`<span class="chip" data-t="${esc(t)}">${esc(t)}</span>`).join('')}</div><input type="text" id="mTx" placeholder="ou un autre type…"><div class="row"><button class="ok" id="mOk">Créer</button><button id="mNo">Annuler</button></div>`);
+ let t=C[a]&&C[b]?'précise':'traite de';document.querySelectorAll('#mT .chip').forEach(c=>{if(c.dataset.t===t)c.classList.add('on');c.onclick=()=>{document.querySelectorAll('#mT .chip').forEach(x=>x.classList.remove('on'));c.classList.add('on');t=c.dataset.t}});
+ $('#mNo').onclick=()=>{closeModal();linkFrom=null;renderAll()};$('#mOk').onclick=()=>{const v=$('#mTx').value.trim()||t;closeModal();linkFrom=null;addRel(a,b,v);sel=b;renderAll();banner('Relation créée : '+v)}}
+// ---------- détail ----------
+function badge(s){const x=STAT[s]||[s,'b-n'];return `<span class="badge ${x[1]}">${x[0]}</span>`}
+function renderDetail(){const p=P(),el=$('#detail');if(!p){el.innerHTML='<h2>Détail</h2><div class="muted">Le détail d’un concept ou d’un document s’affiche ici quand vous cliquez dessus dans la plante.</div>';return}
+ if(!sel||sel==='__seed'){const q=p.qid?Q[p.qid]:null;el.innerHTML=`<h2>La graine</h2><div class="card"><b>« ${esc(p.question)} »</b><div class="muted">${q?LV[q.niveau]+' · question de base '+badge(q.statut):'Ma propre question '+badge('utilisateur')}</div>${q?`<div class="muted" style="margin-top:4px">Dans D11 : ${q.sections.map(s=>esc(DATA.sections[s]||s)).join(' ; ')}</div>`:''}</div><div class="muted">Cliquez sur un concept (en bas) ou un document (en haut) pour le découvrir, puis retenez-le.</div>`;return}
+ const k=p.concepts.includes(sel)||p.docs.includes(sel);let h='';
+ if(C[sel]){const c=C[sel];const rs=RELS().filter(r=>r.a===sel||r.b===sel);const ds=DATA.docs.filter(d=>d.concepts.includes(sel)&&d.id!=='D11').slice(0,8);
+  h=`<h2>${esc(c.lab)}</h2><div>${badge(c.statut)}<span class="badge b-n">${esc(c.type)}</span></div><div class="card">${esc(c.def)}<div class="muted" style="margin-top:4px">Définition – statut : ${vnote(c)}. Repères dans D11 : ${c.refs.map(esc).join(' ; ')||'—'}</div></div>
+  ${rs.length?`<h3>Relations proposées</h3>${rs.map(r=>{const o=r.a===sel?r.b:r.a;return `<div class="muted" style="margin-bottom:3px">${esc(C[r.a].lab)} <b>${esc(r.lab)}</b> ${esc(C[r.b].lab)} ${badge(r.statut)} <span class="lk" data-take="${r.a}|${r.b}|${esc(r.lab)}">reprendre</span></div>`}).join('')}`:''}
+  ${ds.length?`<h3>Documents liés</h3>${ds.map(d=>`<div class="muted"><span class="lk" data-go="${d.id}">${d.id}</span> ${esc(d.titre.slice(0,70))}</div>`).join('')}`:''}`}
+ else if(DOC[sel]){const d=DOC[sel];h=`<h2>${d.id} · ${esc(d.titre)}</h2><div class="muted">${esc((d.auteurs||[]).join(', ')||'—')} · ${esc(d.date||'s.d.')} · ${esc(d.type||'')}</div>
+  <div style="margin-top:4px">${badge(d.statut)}<span class="badge b-n">${ACC[d.acces]}</span></div>
+  <div class="lang" data-help="lang"><span class="chip ${lang==='fr'?'on':''}" data-lang="fr">FR</span><span class="chip ${lang==='en'?'on':''}" data-lang="en">EN</span></div>
+  <div class="card">${esc(lang==='fr'?d.fr:d.en)}<div class="muted" style="margin-top:4px">Résumé : ${SRC[d.src]} · statut : ${vnote(d)}.</div></div>
+  ${d.lien?`<div><a href="${esc(d.lien)}" target="_blank" rel="noopener" data-help="docLink">Ouvrir le document ↗</a></div>`:`<div class="muted">Pas de lien en ligne. ${esc(d.loc)}</div>`}
+  <div class="muted" style="margin-top:4px">Autorisation : ${esc(d.autorisation)} · Validation auteure : ${esc(d.validation)}</div>`}
+ h+=`<div class="row" data-help="actions"><button class="${k?'':'ok'}" id="dKeep">${k?'Ne plus retenir':'Retenir'}</button><button id="dLink" ${k?'':'disabled'} title="${k?'':'Retenez d’abord cet élément'}">${linkFrom===sel?'Cliquez la cible…':'Relier à…'}</button><button id="dDrop">Écarter</button></div>`;
+ el.innerHTML=h;$('#dKeep').onclick=()=>toggleKeep(sel);$('#dDrop').onclick=()=>discard(sel);
+ $('#dLink').onclick=()=>{linkFrom=sel;renderAll();banner('Cliquez maintenant l’élément à relier dans la plante.')};
+ el.querySelectorAll('[data-lang]').forEach(c=>c.onclick=()=>{lang=c.dataset.lang;renderDetail()});
+ el.querySelectorAll('[data-take]').forEach(a=>a.onclick=()=>{const [x,y,l]=a.dataset.take.split('|');addRel(x,y,l,'propose');banner('Relation reprise dans votre plante.')});
+ el.querySelectorAll('[data-go]').forEach(a=>a.onclick=()=>{const p=P();if(!p.docs.includes(a.dataset.go)&&!proposals(p).docs.includes(a.dataset.go)){p.docs.push(a.dataset.go)}sel=a.dataset.go;persist();renderAll()})}
+function renderDesc(){const p=P(),el=$('#descBox');if(!p){el.innerHTML='<div class="muted">—</div>';return}
+ const n=p.concepts.length+p.docs.length;const DS=p.descriptions;
+ let h=`<div class="muted">${p.concepts.length} concept(s) · ${p.docs.length} document(s) · ${p.relations.length} relation(s) retenus.</div>
+ <div class="row"><button class="pri" id="btDesc" ${n?'':'disabled'} data-help="btDesc">Enregistrer la description D${DS.length+1}</button></div>`;
+ if(p.relations.length)h+=`<h3>Mes relations</h3>`+p.relations.map(r=>`<div class="muted">${esc(C[r.a]?.lab||r.a)} <b style="color:#2563eb">${esc(r.type)}</b> ${esc(C[r.b]?.lab||r.b)} <span class="lk" data-rdel="${r.id}">retirer</span></div>`).join('');
+ if(DS.length){h+=`<h3>Journal de cette plante</h3>`+DS.slice().reverse().map(d=>`<div class="desc"><b>D${d.n}</b> · ${fmt(d.date)}<div class="muted">${d.c.length} concept(s) · ${d.d.length} doc(s) · ${d.r.length} relation(s)${d.W!=null?' · W = '+d.W.toFixed(2)+' bit':''}</div></div>`).join('');
+  h+=stability(p)}
+ el.innerHTML=h;if($('#btDesc'))$('#btDesc').onclick=saveDesc;el.querySelectorAll('[data-rdel]').forEach(a=>a.onclick=()=>{p.relations=p.relations.filter(r=>r.id!==a.dataset.rdel);persist();renderAll()})}
+function stability(p){const DS=p.descriptions;if(DS.length<2)return `<div class="muted">Il faut au moins deux descriptions pour mesurer la stabilité (W).</div>`;let st=0;for(let i=DS.length-1;i>0&&DS[i].W<T.eps;i--)st++;
+ return `<div class="card" data-help="W"><b>Stabilité</b> : ${st>=2?'<span style="color:#15803d">le fruit est mûr</span> – W reste sous ε depuis '+st+' descriptions.':st===1?'W vient de passer sous ε ; une description de plus pour confirmer.':'la plante bouge encore (W au-dessus de ε = '+T.eps+').'}</div>`}
+// ---------- guide (étapes) ----------
+const STEPS=[['Question','Choisissez une question à gauche, selon votre niveau. Elle devient la graine de votre plante.','#qList'],
+ ['Explorer','Cliquez sur un concept (racines, en bas) ou un document (branches, en haut) : son détail s’affiche à droite.','#stage'],
+ ['Retenir','Retenez au moins deux éléments avec le bouton « Retenir » du panneau de droite. Le contour pointillé devient plein.','#detail'],
+ ['Relier','Créez au moins une relation : « Relier à… », puis cliquez l’élément cible et choisissez le type.','#detail'],
+ ['Décrire','Enregistrez votre description : elle est horodatée et rejoint votre trajectoire.','#descBox'],
+ ['Continuer','Reprenez la même plante pour une nouvelle description (mesure de stabilité W), posez une autre question, ou regardez « Ma trajectoire ».','#garden']];
+let seen=new Set();
+function curStep(){const p=P();if(!p)return 0;const n=p.concepts.length+p.docs.length;if(!T.traces.some(t=>t.type==='consulter'&&t.plante===p.id)&&!n)return 1;if(n<2)return 2;if(!p.relations.length)return 3;if(!p.descriptions.length)return 4;return 5}
+function renderGuide(){const c=curStep();$('#gSteps').innerHTML=STEPS.map((s,i)=>`<span class="st ${i<c?'done':i===c?'cur':''}">${i+1}. ${s[0]}</span>`).join('');
+ $('#gMsg').innerHTML=PREF.aide?`<b>Étape ${c+1}</b> – ${STEPS[c][1]}`:'<span class="muted">Aide arrêtée. Réactivez-la avec le bouton « Aide » en haut.</span>';
+ $('#gStop').textContent=PREF.aide?'Arrêter l’aide':'Réactiver l’aide';document.querySelectorAll('.pulse').forEach(e=>e.classList.remove('pulse'));
+ if(PREF.aide&&!tourOn){const t=$(STEPS[c][2]);if(t)t.classList.add('pulse')}}
+$('#gStop').onclick=()=>setHelp(!PREF.aide);
+// ---------- aide au survol ----------
+const HELP={tabs:['Les trois vues','Ma plante : une question et sa description. Ma trajectoire : toutes vos descriptions dans le temps. Corpus : la bibliographie complète.'],
+ helpTog:['Aide au survol','Allume ou éteint ces bulles et la mise en évidence de l’étape en cours. Votre choix est mémorisé.'],
+ btTour:['Visite guidée','Une présentation pas à pas de l’écran. Vous pouvez l’arrêter à tout moment.'],
+ btAide:['Aide complète','Mode d’emploi, lexique (plante, description, trajectoire, W) et statuts.'],
+ btSave:['Enregistrer','Télécharge votre trajectoire (fichier .json) pour la garder ou la reprendre ailleurs. Elle est aussi conservée dans ce navigateur.'],
+ btLoad:['Reprendre','Recharge une trajectoire enregistrée (.json).'],
+ btVal:['Validation','Réservé à Mioara (code demandé) : corriger les résumés, définitions, relations et questions, et leur donner un statut.'],
+ vTabs:['Catégories','Résumés, définitions, relations, questions : le compteur indique combien sont déjà traités.'],
+ vFilters:['Filtrer','Retrouvez un élément par mot, ou n’affichez que ceux qui restent à traiter.'],
+ lvls:['Niveau',' Filtre les questions de base : découverte, intermédiaire, avancé.',1],
+ qList:['Questions de base','Proposées par le projet, à valider par Mioara. Cliquez-en une : elle devient la graine d’une nouvelle plante.',1],
+ btOwnQ:['Ma propre question','Vous écrivez la question et choisissez les concepts de départ ; les documents sont proposés à partir d’eux.',1],
+ garden:['Mon jardin','Toutes vos plantes (une par question). Cliquez pour rouvrir, modifiez ou supprimez une question.',6],
+ guide:['Où en suis-je ?','Les étapes du parcours. L’étape en cours est en bleu et la zone concernée clignote en orange.'],
+ stage:['La plante','Graine au centre (votre question), documents en haut (branches), concepts en bas (racines). Pointillé : proposé, pas encore retenu.',2],
+ seed:['La graine','Votre question : c’est elle qui sélectionne les concepts et documents proposés.',2],
+ nodeC:['Concept','Cliquez pour lire sa définition et ses relations. Contour pointillé : proposé ; plein : retenu par vous.',2],
+ nodeD:['Document','Cliquez pour lire son résumé FR/EN et ouvrir le lien. Contour pointillé : proposé ; plein : retenu.',2],
+ legend:['Légende','Vert : validé par Mioara · orange pointillé : proposé par le projet · bleu : créé par vous.'],
+ detail:['Détail','Lisez, puis retenez, écartez ou reliez l’élément sélectionné.',3],
+ actions:['Actions','Retenir l’ajoute à votre description. Relier à… : cliquez ensuite l’élément cible. Écarter le retire des propositions.',3],
+ lang:['Langue du résumé','Basculez entre le résumé français et le résumé anglais.',2],docLink:['Lien','Ouvre le document original dans un nouvel onglet.',2],
+ descBox:['Ma description','Ce que vous avez retenu et relié. Enregistrer crée une description datée Dn.',5],
+ btDesc:['Enregistrer la description','Fige l’état actuel de la plante, avec la date et l’heure. À partir de deux descriptions, W mesure la stabilité.',5],
+ W:['Fonctionnelle d’opacité W','D’après D11 (ch. 7) : W compare la dernière description à celles qui la précèdent. W sous ε plusieurs fois de suite : la description se stabilise (« fruit mûr »). Transposition proposée par le projet.',6],
+ timeline:['Frise','Une ligne par plante, un point par description, dans l’ordre du temps.'],trajGraph:['Graphe de la trajectoire','Les plantes (violet) et les éléments qu’elles partagent : ce sont les nœuds de votre trajectoire.'],
+ corpusFilters:['Filtres','Recherchez par mot, par ensemble ou par fiabilité du résumé.']};
+const bub=$('#bubble');let bubT=null;
+function showBubble(el,x,y){const k=el.dataset.help,h=HELP[k];if(!h)return;bub.innerHTML=`<b>${esc(h[0])}</b>${esc(h[1])}${h[2]?`<div class="stp">Étape ${h[2]} du parcours</div>`:''}`;bub.classList.add('show');
+ const bw=310;let L=x+14,Tp=y+14;if(L+bw>innerWidth)L=x-bw-10;if(Tp+120>innerHeight)Tp=y-110;bub.style.left=Math.max(6,L)+'px';bub.style.top=Math.max(6,Tp)+'px'}
+document.addEventListener('mousemove',e=>{if(!PREF.aide||tourOn){bub.classList.remove('show');return}const el=e.target.closest&&e.target.closest('[data-help]');if(el)showBubble(el,e.clientX,e.clientY);else bub.classList.remove('show')});
+document.addEventListener('pointerdown',e=>{if(e.pointerType!=='touch'||!PREF.aide||tourOn)return;const el=e.target.closest&&e.target.closest('[data-help]');if(!el)return;showBubble(el,e.clientX,e.clientY);clearTimeout(bubT);bubT=setTimeout(()=>bub.classList.remove('show'),3500)});
+function setHelp(on){PREF.aide=on;persist();document.body.classList.toggle('helpon',on);$('#helpTog').classList.toggle('on',on);$('#helpLab').textContent=on?'Aide active':'Aide arrêtée';if(!on)bub.classList.remove('show');renderGuide();banner(on?'Aide réactivée.':'Aide arrêtée. Vous pouvez la réactiver en haut à droite.')}
+$('#helpTog').onclick=()=>setHelp(!PREF.aide);
+// ---------- visite guidée ----------
+const TOUR=[['#tb-plante','Bienvenue','Cette application part d’une question. Vous construisez une « plante » : la description que cette question produit avec des concepts et des documents.'],
+ ['#qList','1. Choisir une question','Les questions de base sont rangées par niveau. Cliquez-en une, ou posez la vôtre.'],
+ ['#stage','2. La plante','Au centre la graine (votre question), en haut les documents, en bas les concepts. Les éléments en pointillé sont des propositions.'],
+ ['#detail','3. Lire et retenir','Cliquez un élément : sa définition ou son résumé FR/EN s’affiche ici. Retenez ce qui répond à votre question.'],
+ ['#detail','4. Relier','Avec « Relier à… », vous créez vos propres relations (en bleu). Les relations proposées (orange) peuvent être reprises.'],
+ ['#descBox','5. Enregistrer une description','Chaque enregistrement est daté. Plusieurs descriptions d’une même question permettent de mesurer la stabilité W.'],
+ ['#tb-traj','6. La trajectoire','Toutes vos descriptions, sur toutes vos questions, forment votre trajectoire horodatée.'],
+ ['#helpTog','Aide au survol','Les bulles d’aide suivent votre souris. Vous pouvez les arrêter ici à tout moment.']];
+let tourOn=false,tourI=0;
+function tour(i){endTourHL();if(i<0||i>=TOUR.length)return endTour();tourOn=true;tourI=i;showView('plante');const [s,t,x]=TOUR[i];const el=$(s);if(!el)return tour(i+1);el.classList.add('tourhl');el.scrollIntoView({block:'nearest'});
+ let box=$('#tour');if(!box){box=document.createElement('div');box.id='tour';document.body.appendChild(box)}
+ box.innerHTML=`<h4>${esc(t)}</h4><div>${esc(x)}</div><div class="row"><span class="muted">${i+1} / ${TOUR.length}</span><span><button class="sm" id="tPrev" ${i?'':'disabled'}>Précédent</button> <button class="sm pri" id="tNext">${i===TOUR.length-1?'Terminer':'Suivant'}</button> <button class="sm" id="tStop">Arrêter la visite</button></span></div>`;
+ const r=el.getBoundingClientRect();let top=r.bottom+10,left=Math.min(Math.max(8,r.left),innerWidth-345);if(top+170>innerHeight)top=Math.max(8,r.top-180);box.style.top=top+'px';box.style.left=left+'px';
+ $('#tPrev').onclick=()=>tour(i-1);$('#tNext').onclick=()=>tour(i+1);$('#tStop').onclick=endTour;renderGuide()}
+function endTourHL(){document.querySelectorAll('.tourhl').forEach(e=>e.classList.remove('tourhl'))}
+function endTour(){endTourHL();tourOn=false;$('#tour')?.remove();PREF.vu=true;persist();renderGuide()}
+$('#btTour').onclick=()=>tour(0);document.addEventListener('keydown',e=>{if(e.key==='Escape'){if(tourOn)endTour();else closeModal()}});
+// ---------- aide complète ----------
+$('#btAide').onclick=()=>{modal(`<h2>Aide – Explorer la MCR</h2>
+<h3>Le principe</h3><p>On part d’une <b>question</b>. Elle fait pousser une <b>plante</b> : des concepts (racines) et des documents (branches) vous sont proposés. Vous retenez, vous reliez, puis vous <b>enregistrez une description</b> datée. Chaque question donne une plante ; toutes vos descriptions, dans le temps, forment votre <b>trajectoire</b>.</p>
+<h3>Le parcours en 6 étapes</h3><ol>${STEPS.map(s=>`<li><b>${s[0]}</b> – ${esc(s[1])}</li>`).join('')}</ol>
+<h3>Lexique</h3><ul><li><b>Graine</b> : la question ; elle sélectionne ce qui est proposé.</li><li><b>Description</b> : l’état figé et daté de votre plante (Dn).</li><li><b>Trajectoire</b> : la suite datée de toutes vos descriptions ; les éléments partagés entre plantes en sont les nœuds.</li><li><b>W (fonctionnelle d’opacité)</b> : compare une description aux précédentes de la même plante ; sous le seuil ε plusieurs fois de suite, la description est stable (« fruit mûr »).</li></ul>
+<h3>Les statuts</h3><p>${badge('valide')} fixé par Mioara · ${badge('propose')} proposé par le projet, en attente de validation · ${badge('utilisateur')} votre interprétation.</p><p class="muted">Définitions, relations, questions et résumés sont « proposés » tant que Mioara ne les a pas traités. Elle le fait avec le bouton « Validation » (code transmis par le projet) : elle peut corriger chaque texte et lui donner le statut validé, à corriger ou rejeté. Les éléments rejetés ne sont plus proposés.</p>
+<h3>Correspondance avec la MCR (transposition à soumettre)</h3><p class="muted">Question ≈ vue V · plante ≈ description D/G, œG, V/ · descriptions successives ≈ répétitions · W &lt; ε ≈ stabilisation.</p>
+<h3>Vos données</h3><p class="muted">Votre trajectoire est gardée dans ce navigateur. « Enregistrer » la télécharge en fichier .json ; « Reprendre » la recharge. « Recommencer » efface tout.</p>
+<div class="row"><button class="pri" id="mTour">Lancer la visite guidée</button><button id="mHelp">${PREF.aide?'Arrêter':'Activer'} l’aide au survol</button><button id="mReset" style="color:#b91c1c">Recommencer</button><button id="mNo">Fermer</button></div>`);
+ $('#mNo').onclick=closeModal;$('#mTour').onclick=()=>{closeModal();tour(0)};$('#mHelp').onclick=()=>{closeModal();setHelp(!PREF.aide)};
+ $('#mReset').onclick=()=>{if(confirmReset){T=newTraj();sel=null;persist();closeModal();renderAll();banner('Trajectoire effacée.')}else{confirmReset=true;$('#mReset').textContent='Confirmer : tout effacer'}}};
+let confirmReset=false;
+// ---------- trajectoire ----------
+const PC=['#7c3aed','#db2777','#0891b2','#ca8a04','#16a34a','#ea580c','#4f46e5','#0d9488'];
+function renderTraj(){const all=[];T.plantes.forEach((p,pi)=>p.descriptions.forEach(d=>all.push({p,pi,d})));all.sort((a,b)=>a.d.date.localeCompare(b.d.date));
+ if(!all.length){$('#tl').innerHTML='<p class="muted">Aucune description enregistrée pour l’instant. Enregistrez une description dans « Ma plante ».</p>';$('#tg').innerHTML='';$('#trajSide').innerHTML=trajSide([]);return}
+ const W=Math.max(520,$('#tl').clientWidth||700),rowH=34,H=T.plantes.length*rowH+40,x=i=>110+i*(W-140)/Math.max(1,all.length-1);
+ let s=`<svg width="100%" viewBox="0 0 ${W} ${H}" style="max-width:100%">`;T.plantes.forEach((p,i)=>{s+=`<text x="4" y="${24+i*rowH}" font-size="12" fill="${PC[i%8]}">${p.id} ${esc(p.question.slice(0,14))}…</text><line x1="105" y1="${20+i*rowH}" x2="${W-20}" y2="${20+i*rowH}" stroke="#eef2f7"/>`});
+ s+=`<polyline fill="none" stroke="#94a3b8" stroke-width="1.5" points="${all.map((a,i)=>x(i)+','+(20+a.pi*rowH)).join(' ')}"/>`;
+ all.forEach((a,i)=>{s+=`<circle cx="${x(i)}" cy="${20+a.pi*rowH}" r="7" fill="${PC[a.pi%8]}"><title>${a.p.id} · D${a.d.n} · ${fmt(a.d.date)}${a.d.W!=null?' · W = '+a.d.W.toFixed(2):''}</title></circle><text x="${x(i)}" y="${H-6}" font-size="10" text-anchor="middle" fill="#6b7280">${a.p.id}·D${a.d.n}</text>`});
+ $('#tl').innerHTML=s+'</svg>';
+ // graphe : plantes + éléments partagés (dans la dernière description de chaque plante)
+ const last=T.plantes.filter(p=>p.descriptions.length).map(p=>({p,D:p.descriptions[p.descriptions.length-1]}));const cnt={};last.forEach(({p,D})=>[...D.c,...D.d].forEach(e=>{(cnt[e]=cnt[e]||new Set()).add(p.id)}));
+ const shared=Object.entries(cnt).filter(([e,s])=>s.size>1);const GW=Math.max(520,$('#tg').clientWidth||700),GH=380,cx=GW/2,cy=GH/2,R=Math.min(GW,GH)/2-50;const pp={};
+ last.forEach(({p},i)=>{const a=2*Math.PI*i/last.length-Math.PI/2;pp[p.id]={x:cx+R*Math.cos(a),y:cy+R*Math.sin(a)}});
+ let g=`<svg width="100%" viewBox="0 0 ${GW} ${GH}">`;const ep={};shared.forEach(([e,set],i)=>{const ids=[...set];let X=0,Y=0;ids.forEach(id=>{X+=pp[id].x;Y+=pp[id].y});X/=ids.length;Y/=ids.length;const j=(i%5-2)*16;ep[e]={x:(X+cx)/2+j,y:(Y+cy)/2+j};ids.forEach(id=>g+=`<line x1="${pp[id].x}" y1="${pp[id].y}" x2="${ep[e].x}" y2="${ep[e].y}" stroke="#cbd5e1"/>`)});
+ shared.forEach(([e])=>{const lab=C[e]?C[e].lab:e;g+=`<g><circle cx="${ep[e].x}" cy="${ep[e].y}" r="6" fill="${C[e]?'#65a30d':'#3b82f6'}"/><text x="${ep[e].x+8}" y="${ep[e].y+4}" font-size="11">${esc(lab.slice(0,28))}</text></g>`});
+ last.forEach(({p},i)=>{const a=pp[p.id];g+=`<g style="cursor:pointer" data-open="${p.id}"><circle cx="${a.x}" cy="${a.y}" r="15" fill="${PC[T.plantes.indexOf(p)%8]}"/><text x="${a.x}" y="${a.y+4}" font-size="11" fill="#fff" text-anchor="middle">${p.id}</text>${wrap(p.question,30).map((l,k)=>`<text x="${a.x}" y="${a.y+30+k*12}" font-size="10.5" text-anchor="middle" fill="#374151">${esc(l)}</text>`).join('')}</g>`});
+ g+='</svg>'+(shared.length?'':'<p class="muted">Aucun élément n’est encore partagé entre deux plantes : posez une autre question qui croise la première.</p>');$('#tg').innerHTML=g;
+ $('#tg').querySelectorAll('[data-open]').forEach(n=>n.onclick=()=>{T.active=n.dataset.open;persist();showView('plante')});
+ $('#trajSide').innerHTML=trajSide(shared);bindCmp()}
+function trajSide(shared){let h=`<h2>Synthèse</h2><div class="muted">${T.plantes.length} plante(s) · ${T.plantes.reduce((a,p)=>a+p.descriptions.length,0)} description(s) · ${T.traces.length} trace(s)</div>
+ <div class="row"><label class="muted">Seuil ε <input type="number" id="epsIn" step="0.05" min="0" max="5" value="${T.eps}" style="width:70px"></label></div>`;
+ if(shared.length)h+=`<h3>Nœuds de la trajectoire</h3>`+shared.map(([e,s])=>`<div class="muted">${esc(C[e]?C[e].lab:e+' · '+DOC[e].titre.slice(0,40))} — ${[...s].join(', ')}</div>`).join('');
+ T.plantes.filter(p=>p.descriptions.length>1).forEach(p=>{h+=`<h3>${p.id} · W</h3>`+wChart(p)+stability(p)});
+ const ps=T.plantes.filter(p=>p.descriptions.length>1);if(ps.length)h+=`<h3>Comparer deux descriptions</h3><select id="cmpP">${ps.map(p=>`<option value="${p.id}">${p.id} – ${esc(p.question.slice(0,40))}</option>`).join('')}</select><div class="row"><select id="cmpA" style="width:auto"></select>→<select id="cmpB" style="width:auto"></select></div><div id="cmpOut"></div>`;
+ return h}
+function wChart(p){const Ws=p.descriptions.slice(1).map(d=>d.W||0),w=320,h=110,pl=28,pb=18,eps=T.eps;const mx=Math.max(eps*1.6,...Ws,0.1);const X=i=>pl+(Ws.length<2?(w-pl-10)/2:i*(w-pl-10)/(Ws.length-1)),Y=v=>6+(1-v/mx)*(h-6-pb);
+ return `<svg width="${w}" height="${h}"><line x1="${pl}" y1="${Y(0)}" x2="${w-5}" y2="${Y(0)}" stroke="#d1d5db"/><line x1="${pl}" y1="${Y(eps)}" x2="${w-5}" y2="${Y(eps)}" stroke="#15803d" stroke-dasharray="5 4"/><text x="${w-8}" y="${Y(eps)-3}" font-size="10" text-anchor="end" fill="#15803d">ε</text><text x="2" y="${Y(mx)+8}" font-size="10" fill="#6b7280">${mx.toFixed(1)}</text>
+ <polyline fill="none" stroke="#111827" stroke-width="2" points="${Ws.map((v,i)=>X(i)+','+Y(v)).join(' ')}"/>${Ws.map((v,i)=>`<circle cx="${X(i)}" cy="${Y(v)}" r="3.5"><title>D${i+1}→D${i+2} : ${v.toFixed(2)} bit</title></circle><text x="${X(i)}" y="${h-4}" font-size="9.5" text-anchor="middle" fill="#6b7280">D${i+2}</text>`).join('')}</svg>`}
+function bindCmp(){if($('#epsIn'))$('#epsIn').onchange=e=>{T.eps=+e.target.value||0.15;persist();renderTraj()};if(!$('#cmpP'))return;
+ const fill=()=>{const p=T.plantes.find(x=>x.id===$('#cmpP').value);const o=p.descriptions.map((d,i)=>`<option value="${i}">D${d.n}</option>`).join('');$('#cmpA').innerHTML=o;$('#cmpB').innerHTML=o;$('#cmpA').value=p.descriptions.length-2;$('#cmpB').value=p.descriptions.length-1;cmp()};
+ const cmp=()=>{const p=T.plantes.find(x=>x.id===$('#cmpP').value);const A=setOf(p.descriptions[$('#cmpA').value]),B=setOf(p.descriptions[$('#cmpB').value]);const nm=x=>{const [t,v]=[x.slice(0,1),x.slice(2)];if(t==='c')return C[v].lab;if(t==='d')return v;const [a,ty,b]=v.split('|');return (C[a]?.lab||a)+' '+ty+' '+(C[b]?.lab||b)};
+  const ap=[...B].filter(x=>!A.has(x)),di=[...A].filter(x=>!B.has(x));$('#cmpOut').innerHTML=`<div class="muted"><b style="color:#15803d">Apparus</b> : ${ap.map(nm).map(esc).join(' ; ')||'—'}<br><b style="color:#b91c1c">Disparus</b> : ${di.map(nm).map(esc).join(' ; ')||'—'}</div>`};
+ $('#cmpP').onchange=fill;$('#cmpA').onchange=cmp;$('#cmpB').onchange=cmp;fill()}
+// ---------- corpus ----------
+function renderCorpus(){const q=$('#cq').value.toLowerCase().trim(),f=$('#cfam').value,s=$('#csrc').value;
+ const L=DATA.docs.filter(d=>(!f||d.fam===f)&&(!s||d.src===s)&&(!q||(d.id+' '+d.titre+' '+d.auteurs.join(' ')+' '+d.fr+' '+d.en).toLowerCase().includes(q)));$('#ccount').textContent=L.length+' document(s)';
+ $('#cgrid').innerHTML=L.map(d=>`<div class="card"><b>${d.id}</b> · ${esc(d.titre)}<div class="muted">${esc(d.auteurs.join(', ')||'—')} · ${esc(d.date||'s.d.')}</div><div style="margin:4px 0">${badge(d.statut)}<span class="badge b-n">${SRC[d.src]}</span></div>
+ <details><summary class="lk">Résumé FR / EN</summary><p>${esc(d.fr)}</p><p class="muted"><i>${esc(d.en)}</i></p></details><div class="row">${d.lien?`<a href="${esc(d.lien)}" target="_blank" rel="noopener">Ouvrir ↗</a>`:''}<button class="sm" data-add="${d.id}" ${P()?'':'disabled'}>Ajouter à ma plante</button></div></div>`).join('');
+ document.querySelectorAll('[data-add]').forEach(b=>b.onclick=()=>{const p=P();if(!p.docs.includes(b.dataset.add)){p.docs.push(b.dataset.add);trace('retenir',{el:b.dataset.add,depuis:'corpus'})}sel=b.dataset.add;persist();banner(b.dataset.add+' ajouté à '+p.id);showView('plante')})}
+['#cq','#cfam','#csrc'].forEach(s=>$(s).oninput=renderCorpus);
+// ---------- vues, utilitaires ----------
+// ---------- interface de validation ----------
+let vtab='doc',vUnlocked=false;try{vUnlocked=sessionStorage.getItem('mcr-val-ok')==='1'}catch(e){}
+const VT={doc:['Résumés',()=>DATA.docs,d=>'doc:'+d.id],concept:['Définitions',()=>DATA.concepts,c=>'concept:'+c.id],rel:['Relations',()=>DATA.relations,r=>'rel:'+r.a+'|'+r.b],q:['Questions',()=>DATA.questions,q=>'q:'+q.id]};
+function vcount(t){const L=VT[t][1](),f=VT[t][2];return [L.filter(x=>vs(VAL.items[f(x)])!=='propose').length,L.length]}
+function vbar(){const b=$('#vbar');if(view!=='valid'){b.classList.add('hidden');return}b.classList.remove('hidden');
+ b.innerHTML=`<b>Mode validation</b><span>${Object.keys(VT).map(t=>{const [a,n]=vcount(t);return VT[t][0]+' '+a+'/'+n}).join(' · ')}</span><span class="sp"></span><button id="vExp">Exporter la validation</button><label style="cursor:pointer;border:1px solid #fff;border-radius:6px;padding:2px 8px;font-size:12px">Importer<input type="file" id="vImp" accept=".json" class="hidden"></label><button id="vQuit">Quitter</button>`;
+ $('#vQuit').onclick=()=>showView('plante');$('#vExp').onclick=exportVal;$('#vImp').onchange=importVal}
+function renderValid(){vbar();$('#vName').value=VAL.valideur||'';$('#vName').onchange=e=>{VAL.valideur=e.target.value.trim();persistVal()};
+ $('#vTabs').innerHTML=Object.keys(VT).map(t=>{const [a,n]=vcount(t);return `<span class="chip ${vtab===t?'on':''}" data-vt="${t}">${VT[t][0]} (${a}/${n})</span>`}).join('');
+ document.querySelectorAll('[data-vt]').forEach(c=>c.onclick=()=>{vtab=c.dataset.vt;renderValid()});
+ $('#vq').oninput=renderVList;$('#vf').onchange=renderVList;
+ $('#vTypes').innerHTML=vtab==='rel'?`<div class="vcard"><b>Types de relation proposés aux utilisateurs</b><div class="muted">Un type par ligne. Cette liste remplace la liste provisoire.</div><textarea id="vTy" rows="5">${esc(DATA.typesRelation.join('\n'))}</textarea><div class="row"><button class="sm" id="vTyOk">Enregistrer la liste</button><button class="sm" id="vTyRe">Revenir à la liste proposée</button></div></div>`:'';
+ if(vtab==='rel'){$('#vTyOk').onclick=()=>{VAL.types=$('#vTy').value.split('\n').map(x=>x.trim()).filter(Boolean);persistVal();applyVal();banner('Liste des types enregistrée.')};$('#vTyRe').onclick=()=>{VAL.types=null;persistVal();applyVal();renderValid()}}
+ renderVList()}
+const SOPT=it=>['propose','valide','corriger','rejete'].map(x=>`<option value="${x}" ${vs(it)===x?'selected':''}>${STAT[x][0]}</option>`).join('');
+function renderVList(){const t=vtab,q=$('#vq').value.toLowerCase().trim(),f=$('#vf').value,key=VT[t][2];
+ let L=VT[t][1]().filter(x=>(!f||vs(VAL.items[key(x)])===f)&&(!q||JSON.stringify(x).toLowerCase().includes(q)));
+ $('#vList').innerHTML=L.map(x=>{const k=key(x),it=VAL.items[k]||{};let head='',fields='';
+  if(t==='doc'){head=`<b>${x.id}</b> · ${esc(x.titre)}<div class="muted">${esc(x.auteurs.join(', ')||'—')} · ${esc(x.date||'s.d.')} · source du résumé : ${SRC[x.src]} ${x.lien?`· <a href="${esc(x.lien)}" target="_blank" rel="noopener">ouvrir ↗</a>`:''}</div>`;
+   fields=`<div class="vgrid"><label class="muted">Résumé français<textarea data-f="fr" rows="7">${esc(x.fr)}</textarea></label><label class="muted">Résumé anglais<textarea data-f="en" rows="7">${esc(x.en)}</textarea></label></div>`}
+  if(t==='concept'){head=`<b>${esc(x.lab)}</b> <span class="muted">· ${esc(x.type)} · repères : ${x.refs.map(esc).join(' ; ')}</span>`;fields=`<label class="muted">Définition<textarea data-f="def" rows="3">${esc(x.def)}</textarea></label>`}
+  if(t==='rel'){head=`<b>${esc(C[x.a].lab)}</b> → <b>${esc(C[x.b].lab)}</b>`;fields=`<label class="muted">Libellé de la relation<input type="text" data-f="lab" value="${esc(x.lab)}"></label>`}
+  if(t==='q'){head=`<span class="lvl">${LV[x.niveau]}</span> <span class="muted">concepts : ${x.concepts.map(c=>esc(C[c].lab)).join(', ')}</span>`;fields=`<label class="muted">Question<textarea data-f="q" rows="2">${esc(x.q)}</textarea></label>`}
+  return `<div class="vcard st-${vs(it)}" data-k="${esc(k)}">${head}<div style="margin-top:6px">${fields}</div>
+  <div class="row"><label class="muted">Statut <select data-f="statut" style="width:auto">${SOPT(it)}</select></label><label class="muted" style="flex:1;min-width:200px">Commentaire<input type="text" data-f="commentaire" value="${esc(it.commentaire||'')}"></label><button class="sm" data-reset="${esc(k)}">Revenir à la proposition</button></div>
+  <div class="muted vst">${it.date?'Modifié le '+fmt(it.date):'Non traité'}</div></div>`}).join('')||'<p class="muted">Aucun élément.</p>';
+ document.querySelectorAll('.vcard[data-k]').forEach(card=>{const k=card.dataset.k;card.querySelectorAll('[data-f]').forEach(inp=>inp.onchange=()=>{const it=VAL.items[k]||(VAL.items[k]={});it[inp.dataset.f]=inp.value;
+  if(inp.dataset.f!=='statut'&&inp.dataset.f!=='commentaire'&&(!it.statut||it.statut==='propose')){it.statut='corriger';card.querySelector('[data-f=statut]').value='corriger'}
+  it.date=nowISO();persistVal();applyVal();card.className='vcard st-'+vs(it);card.querySelector('.vst').textContent='Modifié le '+fmt(it.date);vbar();
+  document.querySelectorAll('[data-vt]').forEach(c=>{const [a,n]=vcount(c.dataset.vt);c.textContent=VT[c.dataset.vt][0]+' ('+a+'/'+n+')'})})});
+ document.querySelectorAll('[data-reset]').forEach(b=>b.onclick=()=>{delete VAL.items[b.dataset.reset];persistVal();applyVal();renderValid();banner('Élément remis à la proposition.')})}
+async function exportVal(){VAL.exporteLe=nowISO();VAL.valideur=$('#vName').value.trim()||VAL.valideur;persistVal();const txt=JSON.stringify(VAL,null,2),name='validation_MCR_'+VAL.exporteLe.slice(0,16).replace(/[:T]/g,'-')+'.json';
+ if(DL){try{await DL.save({filename:name,data:txt});banner('Validation exportée : '+name);return}catch(e){}}
+ try{const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([txt],{type:'application/json'}));a.download=name;document.body.appendChild(a);a.click();a.remove()}catch(e){}
+ modal(`<h2>Validation exportée</h2><p class="muted">Le fichier <b>${esc(name)}</b> a été proposé au téléchargement. S’il n’apparaît pas, copiez le texte ci-dessous dans un fichier .json et envoyez-le au projet.</p><textarea id="cpT" rows="8" style="font-family:monospace;font-size:11px">${esc(txt)}</textarea><div class="row"><button class="pri" id="cpB">Copier</button><button id="mNo">Fermer</button></div>`);
+ $('#mNo').onclick=closeModal;$('#cpB').onclick=async()=>{try{await navigator.clipboard.writeText(txt)}catch(e){$('#cpT').select();document.execCommand('copy')}$('#cpB').textContent='Copié'}}
+async function importVal(e){const f=e.target.files[0];if(!f)return;try{const o=JSON.parse(await f.text());if(o.format!=='validation-mcr-v1')throw 0;VAL=o;persistVal();applyVal();renderValid();banner('Validation importée : '+Object.keys(o.items).length+' élément(s).')}catch(err){banner('Ce fichier n’est pas une validation de cette application.')}e.target.value=''}
+$('#btVal').onclick=()=>{if(vUnlocked)return showView('valid');modal(`<h2>Mode validation</h2><p class="muted">Ce mode est réservé à Mioara Mugur-Schächter, pour corriger et valider les contenus proposés. Entrez le code transmis par le projet.</p><input type="text" id="vCode" placeholder="Code"><div class="row"><button class="pri" id="vOk">Entrer</button><button id="mNo">Annuler</button></div>`);
+ $('#mNo').onclick=closeModal;const go=()=>{if($('#vCode').value.trim().toUpperCase()===VCODE){vUnlocked=true;try{sessionStorage.setItem('mcr-val-ok','1')}catch(e){}closeModal();showView('valid')}else banner('Code incorrect.')};$('#vOk').onclick=go;$('#vCode').onkeydown=e=>{if(e.key==='Enter')go()};$('#vCode').focus()};
+let view='plante';function showView(v){view=v;['plante','traj','corpus','valid'].forEach(x=>{$('#view-'+x).classList.toggle('hidden',x!==v);$('#tb-'+x)?.classList.toggle('on',x===v)});renderAll()}
+$('#tb-plante').onclick=()=>showView('plante');$('#tb-traj').onclick=()=>showView('traj');$('#tb-corpus').onclick=()=>showView('corpus');
+function renderAll(){vbar();if(view==='plante'){renderLeft();renderPlant();renderDetail();renderDesc();renderGuide()}else if(view==='traj')renderTraj();else if(view==='valid')renderValid();else renderCorpus()}
+function modal(h){closeModal();const m=document.createElement('div');m.id='modal';m.innerHTML=`<div class="box">${h}</div>`;m.onclick=e=>{if(e.target===m)closeModal()};document.body.appendChild(m)}
+function closeModal(){$('#modal')?.remove();confirmReset=false}
+function banner(t){const b=$('#banner');b.textContent=t;b.classList.add('show');clearTimeout(banner.t);banner.t=setTimeout(()=>b.classList.remove('show'),2600)}
+let DL=null;(async()=>{try{if(window.claude&&window.claude.use)DL=await window.claude.use('downloads')}catch(e){}})();
+$('#btSave').onclick=async()=>{T.enregistreLe=nowISO();persist();const txt=JSON.stringify(T,null,2),name='trajectoire_MCR_'+T.enregistreLe.slice(0,16).replace(/[:T]/g,'-')+'.json';
+ if(DL){try{await DL.save({filename:name,data:txt});banner('Trajectoire enregistrée : '+name);return}catch(e){}}
+ try{const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([txt],{type:'application/json'}));a.download=name;document.body.appendChild(a);a.click();a.remove()}catch(e){}
+ modal(`<h2>Trajectoire enregistrée</h2><p class="muted">Le fichier <b>${esc(name)}</b> a été proposé au téléchargement. S’il n’apparaît pas, copiez le texte ci-dessous dans un fichier .json.</p><textarea id="cpT" rows="8" style="font-family:monospace;font-size:11px">${esc(txt)}</textarea><div class="row"><button class="pri" id="cpB">Copier</button><button id="mNo">Fermer</button></div>`);
+ $('#mNo').onclick=closeModal;$('#cpB').onclick=async()=>{try{await navigator.clipboard.writeText(txt)}catch(e){$('#cpT').select();document.execCommand('copy')}$('#cpB').textContent='Copié'}};
+$('#fileIn').onchange=async e=>{const f=e.target.files[0];if(!f)return;try{const o=JSON.parse(await f.text());if(o.format!=='trajectoire-mcr-v2')throw 0;T=o;sel=null;persist();showView('plante');banner('Trajectoire reprise : '+T.plantes.length+' plante(s).')}catch(err){banner('Ce fichier n’est pas une trajectoire de cette application.')}e.target.value=''};
+window.addEventListener('resize',()=>{if(view==='plante')renderPlant();else if(view==='traj')renderTraj()});
+document.body.classList.toggle('helpon',PREF.aide);$('#helpTog').classList.toggle('on',PREF.aide);$('#helpLab').textContent=PREF.aide?'Aide active':'Aide arrêtée';
+renderAll();if(!PREF.vu)setTimeout(()=>tour(0),400);
+</script></body></html>

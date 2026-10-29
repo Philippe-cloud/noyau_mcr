@@ -1,0 +1,35 @@
+{
+ "format": "validation-mcr-v1",
+ "valideur": "Validatrice simulée (test)",
+ "items": {
+  "doc:D12": {
+   "statut": "valide",
+   "commentaire": "Conforme.",
+   "date": "2026-10-29T09:00:00"
+  },
+  "doc:D13": {
+   "fr": "Article paru dans Le Débat (1997) : résumé corrigé par l'auteure.",
+   "statut": "corriger",
+   "date": "2026-10-29T09:01:00"
+  },
+  "concept:n04": {
+   "statut": "valide",
+   "date": "2026-10-29T09:02:00"
+  },
+  "concept:n01": {
+   "def": "Opération physique ou abstraite par laquelle le concepteur introduit l'entité-objet, avant toute qualification.",
+   "statut": "valide",
+   "date": "2026-10-29T09:03:00"
+  },
+  "rel:n01|n02": {
+   "statut": "valide",
+   "date": "2026-10-29T09:04:00"
+  },
+  "q:Q5": {
+   "statut": "rejete",
+   "commentaire": "À reformuler.",
+   "date": "2026-10-29T09:05:00"
+  }
+ },
+ "_avertissement": "Fichier SIMULÉ pour les tests : ce ne sont pas des validations de Mioara Mugur-Schächter."
+}

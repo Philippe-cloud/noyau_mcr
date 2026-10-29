@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Noyau d'ancrage</title>
+<style>
+:root{--ink:#1f2328;--mut:#6b7280;--line:#e5e7eb;--bg:#f6f7f9;--acc:#2e5597;--ok:#15803d;--warn:#b45309;--bad:#b91c1c}
+*{box-sizing:border-box}[hidden]{display:none!important}body{margin:0;font:14px/1.5 system-ui,-apple-system,Segoe UI,Roboto,sans-serif;color:var(--ink);background:var(--bg)}
+header{background:#fff;border-bottom:1px solid var(--line);padding:10px 18px;display:flex;gap:12px;align-items:center;flex-wrap:wrap;position:sticky;top:0;z-index:5}
+h1{font-size:18px;margin:0 12px 0 0}.sp{flex:1}
+button{font:inherit;cursor:pointer;border:1px solid #cbd5e1;background:#fff;border-radius:7px;padding:5px 12px}
+button.pri{background:var(--acc);color:#fff;border-color:var(--acc)}button:disabled{opacity:.5;cursor:default}
+.seg button.on{background:var(--acc);color:#fff;border-color:var(--acc)}
+main{max-width:1150px;margin:0 auto;padding:16px;display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.card{background:#fff;border:1px solid var(--line);border-radius:12px;padding:14px 16px}.wide{grid-column:1/-1}
+h2{font-size:15px;margin:0 0 8px}h3{font-size:12.5px;color:var(--mut);text-transform:uppercase;letter-spacing:.04em;margin:14px 0 6px}
+.muted{color:var(--mut);font-size:13px}.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-top:8px}
+pre{background:#0f172a;color:#e2e8f0;border-radius:8px;padding:10px;font-size:12px;white-space:pre-wrap;max-height:260px;overflow:auto;margin:8px 0 0}
+table{border-collapse:collapse;width:100%;font-size:13px}td,th{border-bottom:1px solid #eef0f3;padding:5px 6px;text-align:left;vertical-align:top}
+.al{background:#fff7ed;border:1px solid #fed7aa;color:#9a3412;border-radius:8px;padding:6px 10px;margin:4px 0;font-size:13px}
+.drop{border:2px dashed #cbd5e1;border-radius:10px;padding:14px;text-align:center;color:var(--mut);cursor:pointer}.drop.over{border-color:var(--acc);background:#eef2ff}
+.f{display:flex;justify-content:space-between;gap:8px;border-bottom:1px solid #f1f3f6;padding:3px 0;font-size:13px}
+.lk{color:var(--acc);cursor:pointer;text-decoration:underline}
+textarea,input[type=text]{font:inherit;width:100%;border:1px solid #cbd5e1;border-radius:7px;padding:7px}
+.badge{display:inline-block;border-radius:8px;padding:0 7px;font-size:12px;border:1px solid}
+.b-ok{color:var(--ok);border-color:#a7e3b9;background:#f0fdf4}.b-w{color:var(--warn);border-color:#fcd34d;background:#fffbeb}.b-bad{color:var(--bad);border-color:#fecaca;background:#fef2f2}
+.steps{margin:0;padding-left:20px}.steps li{margin:2px 0}
+#toast{position:fixed;bottom:16px;left:50%;transform:translateX(-50%);background:#111827;color:#fff;border-radius:8px;padding:8px 14px;opacity:0;transition:.2s;pointer-events:none}#toast.show{opacity:1}
+details summary{cursor:pointer;color:var(--acc)}
+@media(max-width:900px){main{grid-template-columns:1fr}}
+</style></head><body>
+<header>
+ <h1>Noyau d'ancrage</h1>
+ <div class="seg" id="seg"></div>
+ <span class="sp"></span>
+ <span class="muted" id="dossier"></span>
+ <button id="quit">Quitter</button>
+</header>
+<main>
+ <section class="card wide">
+  <h2>Faire un tour de boucle</h2>
+  <ol class="steps muted">
+   <li>Ajoutez les fichiers reçus : la <b>validation</b> exportée par l'autorité (mode Validation de l'application), les <b>trajectoires</b> enregistrées par les apprenants.</li>
+   <li>Cliquez <b>Lancer la boucle</b> : le noyau trace la genèse, vérifie les règles, calcule les indices et produit une nouvelle version datée.</li>
+   <li>Récupérez les <b>sorties</b> : l'application régénérée à redistribuer, les vues pour l'autorité, l'IA et chaque apprenant.</li>
+  </ol>
+ </section>
+
+ <section class="card">
+  <h2>1. Entrées</h2>
+  <div class="drop" id="dropV">Déposez ici un fichier de <b>validation</b> (.json)<br><span class="muted">ou cliquez pour le choisir</span></div>
+  <div id="listeV" style="margin:6px 0 12px"></div>
+  <div class="drop" id="dropT">Déposez ici un fichier de <b>trajectoire</b> (.json)<br><span class="muted">ou cliquez pour le choisir</span></div>
+  <div id="listeT" style="margin-top:6px"></div>
+  <input type="file" id="fileIn" accept=".json" multiple hidden>
+ </section>
+
+ <section class="card">
+  <h2>2. Boucle</h2>
+  <div class="row"><button class="pri" id="go">Lancer la boucle</button><button id="cmp">Comparer avec la version précédente</button></div>
+  <div id="etat" style="margin-top:10px"></div>
+  <pre id="journal" hidden></pre>
+ </section>
+
+ <section class="card wide">
+  <h2>3. Sorties <span class="muted" id="sv"></span></h2>
+  <div id="sorties" class="muted">Aucune sortie : lancez la boucle.</div>
+  <div id="vues"></div>
+ </section>
+
+ <section class="card wide">
+  <h2>4. Interroger une IA sous contrôle</h2>
+  <p class="muted">Le noyau prépare la consigne (éléments, statuts, genèse, règles). Copiez-la dans l'IA de votre choix, collez sa réponse ci-dessous : le noyau la contrôle.</p>
+  <div class="row"><input type="text" id="question" placeholder="Votre question, par exemple : Que signifie prendre refuge ?" style="flex:1"><button class="pri" id="prep">Préparer la consigne</button></div>
+  <div id="ref"></div>
+  <textarea id="consigne" rows="8" hidden readonly style="margin-top:8px;font-family:ui-monospace,monospace;font-size:12px"></textarea>
+  <div class="row" id="copyRow" hidden><button id="copy">Copier la consigne</button></div>
+  <h3>Réponse de l'IA</h3>
+  <textarea id="reponse" rows="5" placeholder="Collez ici la réponse de l'IA…"></textarea>
+  <div class="row"><button class="pri" id="ctrl">Contrôler la réponse</button></div>
+  <div id="verdict"></div>
+ </section>
+</main>
+<div id="toast"></div>
+<script>
+const $=s=>document.querySelector(s),esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+let CORPUS='mcr',INFO={};
+function toast(t){const b=$('#toast');b.textContent=t;b.classList.add('show');clearTimeout(toast.t);toast.t=setTimeout(()=>b.classList.remove('show'),3000)}
+async function api(r,body){const o=body?{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({corpus:CORPUS,...body})}:{};
+ const res=await fetch(r+(body?'':(r.includes('?')?'&':'?')+'corpus='+CORPUS),o);const j=await res.json();if(!res.ok)throw new Error(j.erreur||'erreur');return j}
+async function init(){INFO=await api('/api/info');$('#dossier').textContent='Données : '+INFO.dossier;
+ $('#seg').innerHTML=Object.entries(INFO.corpus).map(([k,v])=>`<button data-c="${k}" class="${k===CORPUS?'on':''}">${esc(v)}</button>`).join(' ');
+ document.querySelectorAll('#seg button').forEach(b=>b.onclick=()=>{CORPUS=b.dataset.c;init()});refresh()}
+async function refresh(){const e=await api('/api/etat');liste(e.entrees);moniteur(e);sortiesUI(e.sorties)}
+function liste(en){for(const [t,id] of [['validations','#listeV'],['trajectoires','#listeT']])$(id).innerHTML=en[t].length?en[t].map(n=>`<div class="f"><span>${esc(n)}</span><span class="lk" data-r="${t}|${esc(n)}">retirer</span></div>`).join(''):'<div class="muted">Aucun fichier.</div>';
+ document.querySelectorAll('[data-r]').forEach(a=>a.onclick=async()=>{const [type,nom]=a.dataset.r.split('|');if(!confirm('Retirer '+nom+' des entrées ?'))return;liste((await api('/api/retirer',{type,nom})).entrees)})}
+function moniteur(e){const m=e.moniteur;if(!m){$('#etat').innerHTML='<div class="muted">Aucune version : lancez la boucle.</div>';return}
+ const L={part_validee:'Part validée',part_origine_ia_dans_valide:'Part d’origine IA dans le validé (circularité)',ecart_ia_reference:'Écart IA / référence',score_temoin:'Score sur le jeu témoin',taux_rejet:'Taux de rejet',ancrage_moyen:'Ancrage moyen'};
+ $('#etat').innerHTML=`<div class="muted">Version ${esc(e.version)} · ${m.entites} éléments · ${m.validations} validations · SHACL ${e.shacl&&e.shacl.conforme?'<span class="badge b-ok">conforme</span>':'<span class="badge b-bad">'+(e.shacl?e.shacl.violations.length:'?')+' violation(s)</span>'}</div>
+ <table>${Object.entries(L).map(([k,l])=>`<tr><td>${l}</td><td><b>${m[k]===null?'—':m[k]}</b></td></tr>`).join('')}<tr><td>Validateurs humains</td><td><b>${esc(m.validateurs_humains.join(', ')||'aucun')}</b></td></tr></table>${m.alertes.map(a=>`<div class="al">⚠ ${esc(a)}</div>`).join('')}`}
+function sortiesUI(s){if(!s){$('#sorties').innerHTML='<span class="muted">Aucune sortie : lancez la boucle.</span>';$('#vues').innerHTML='';$('#sv').textContent='';return}
+ $('#sv').textContent='· version '+s.version;
+ const app=s.fichiers.find(f=>f.endsWith('.html'));
+ $('#sorties').innerHTML=`<div class="row">${app?`<button class="pri" id="openApp">Ouvrir l'application régénérée</button><a href="/fichier?corpus=${CORPUS}&nom=${encodeURIComponent(app)}"><button>Télécharger l'application</button></a>`:''}<button id="openDir">Ouvrir le dossier des sorties</button></div>
+ <h3>Fichiers</h3>${s.fichiers.map(f=>`<div class="f"><span>${esc(f)}</span><a class="lk" href="/fichier?corpus=${CORPUS}&nom=${encodeURIComponent(f)}">télécharger</a></div>`).join('')}`;
+ if(app)$('#openApp').onclick=()=>window.open(`/fichier?corpus=${CORPUS}&nom=${encodeURIComponent(app)}&voir=1`,'_blank');
+ $('#openDir').onclick=async()=>{const r=await api('/api/ouvrir-dossier',{});toast('Dossier : '+r.dossier)};
+ vuesUI(s)}
+async function vuesUI(s){let h='';
+ const va=s.fichiers.find(f=>f.startsWith('vue_autorite')),vi=s.fichiers.find(f=>f.startsWith('vue_ia')),tr=s.fichiers.filter(f=>f.startsWith('trajectoire'));
+ if(va){const v=await api('/api/vue?nom='+encodeURIComponent(va));const R=v.regles_proposees;
+  h+=`<details open><summary><b>Vue pour l'autorité</b> (${esc(v.autorite)})</summary>
+  <div class="muted">Socle : ${v.socle.nombre} éléments · à traiter : ${Object.entries(v.a_traiter.par_type).map(([k,n])=>n+' '+k).join(', ')||'rien'} · corrections faites : ${v.corrections_faites.length}</div>
+  ${R.terminologie.length?`<h3>Règles de traduction proposées</h3><table>${R.terminologie.slice(0,10).map(r=>`<tr><td>${esc(r.proposition)}</td><td>${r.nb} attestation(s)</td><td>${esc(r.statut_actuel)}</td></tr>`).join('')}</table>`:''}
+  ${R.relations_a_qualifier.length?`<h3>Notions souvent réunies dans le socle, sans relation</h3><table>${R.relations_a_qualifier.slice(0,8).map(r=>`<tr><td>${esc(r.libelles.join(' / '))}</td><td>${r.co_mentions} élément(s)</td></tr>`).join('')}</table>`:''}
+  ${R.relations_des_apprenants.length?`<h3>Relations créées par les apprenants</h3><table>${R.relations_des_apprenants.slice(0,8).map(r=>`<tr><td>${esc(r.de)} — ${esc(r.type)} → ${esc(r.vers)}</td><td>${r.apprenants} apprenant(s)</td><td>${r.dans_la_base?esc(r.libelle_base)+' ('+esc(r.statut_base)+')':'absente de la base'}</td></tr>`).join('')}</table>`:''}
+  ${v.divergences.ia_vs_reference_les_plus_fortes.length?`<h3>Passages où l'IA s'écarte le plus de la référence</h3><div class="muted">${v.divergences.ia_vs_reference_les_plus_fortes.map(d=>esc(d.passage)+' ('+d.similarite+')').join(' · ')}</div>`:''}</details>`}
+ if(vi){const v=await api('/api/vue?nom='+encodeURIComponent(vi));
+  h+=`<details><summary><b>Vue pour l'IA</b> – ${esc(v.statut_de_cette_vue)}</summary><div class="muted">Écart moyen avec la référence : ${v.ma_trajectoire.ecart_moyen_avec_reference??'—'} · score témoin : ${v.ma_trajectoire.score_jeu_temoin??'—'} · retours des validateurs : ${v.retours_des_validateurs.length}</div>
+  ${v.mes_tendances.length?`<h3>Ses tendances</h3><table>${v.mes_tendances.slice(0,8).map(t=>`<tr><td>${esc(t.wylie||t.terme)}</td><td>référence : « ${esc(t.traduction_de_reference)} »</td><td>écart dans ${t.ecarts}/${t.sur}</td></tr>`).join('')}</table>`:''}</details>`}
+ for(const f of tr){const t=await api('/api/vue?nom='+encodeURIComponent(f));const D=t.noyau.descriptions;
+  h+=`<details><summary><b>Trajectoire enrichie</b> – ${esc(t.apprenant||'anonyme')}</summary>${Object.entries(D).map(([k,d])=>`<h3>${esc(k)} · ancrage ${d.ancrage.indice} (${esc(d.ancrage.niveau)})</h3>${d.relations.map(r=>`<div class="muted">• <b>${esc(r.vous)}</b><br>&nbsp;&nbsp;autorité : ${esc(r.autorite)}<br>&nbsp;&nbsp;IA : ${esc(r.ia)}</div>`).join('')||'<div class="muted">Aucune relation.</div>'}`).join('')}</details>`}
+ $('#vues').innerHTML=h?'<h3>Vues</h3>'+h:''}
+// dépôt de fichiers
+let cible='validations';
+async function envoyer(files){for(const f of files){try{const r=await api('/api/ajouter',{type:cible,nom:f.name,contenu:await f.text()});liste(r.entrees);toast(f.name+' ajouté')}catch(e){alert(e.message)}}}
+for(const [id,t] of [['#dropV','validations'],['#dropT','trajectoires']]){const d=$(id);d.onclick=()=>{cible=t;$('#fileIn').click()};
+ d.ondragover=e=>{e.preventDefault();d.classList.add('over')};d.ondragleave=()=>d.classList.remove('over');d.ondrop=e=>{e.preventDefault();d.classList.remove('over');cible=t;envoyer(e.dataTransfer.files)}}
+$('#fileIn').onchange=e=>{envoyer(e.target.files);e.target.value=''};
+$('#go').onclick=async()=>{$('#go').disabled=true;$('#go').textContent='Boucle en cours…';try{const r=await api('/api/boucle',{});$('#journal').hidden=false;$('#journal').textContent=r.journal;await refresh();toast('Nouvelle version produite')}catch(e){alert(e.message)}$('#go').disabled=false;$('#go').textContent='Lancer la boucle'};
+$('#cmp').onclick=async()=>{try{const r=await api('/api/comparer',{});$('#journal').hidden=false;$('#journal').textContent=r.journal||'Il faut au moins deux versions.'}catch(e){alert(e.message.includes('Aucune')?'Il faut au moins deux versions.':e.message)}};
+$('#prep').onclick=async()=>{const q=$('#question').value.trim();if(!q)return toast('Écrivez une question.');try{const r=await api('/api/consigne',{question:q});const f=r.referentiel;
+ $('#ref').innerHTML=`<div class="muted" style="margin-top:8px">Couverture ${f.couverture} · ancrage moyen ${f.ancrage_moyen} · part d'origine IA ${f.part_origine_ia} · validateurs : ${esc(f.validateurs.join(', ')||'aucun')}${f.question_reconnue?' · question de base '+esc(f.question_reconnue):''}</div>${f.alertes.map(a=>`<div class="al">⚠ ${esc(a)}</div>`).join('')}
+ <details><summary>${r.elements.length} élément(s) fournis à l'IA</summary><table>${r.elements.map(e=>`<tr><td>${esc(e.id)}</td><td>${esc(e.texte.slice(0,90))}</td><td>${esc(e.statut)}</td><td>${e.ancrage} ${esc(e.niveau)}</td></tr>`).join('')}</table></details>`;
+ $('#consigne').hidden=false;$('#consigne').value=r.consigne;$('#copyRow').hidden=false}catch(e){alert(e.message)}};
+$('#copy').onclick=async()=>{try{await navigator.clipboard.writeText($('#consigne').value)}catch(e){$('#consigne').select();document.execCommand('copy')}toast('Consigne copiée')};
+$('#ctrl').onclick=async()=>{const q=$('#question').value.trim(),r=$('#reponse').value.trim();if(!q||!r)return toast('Il faut la question et la réponse.');try{const v=await api('/api/controler',{question:q,reponse:r});
+ const cl=v.verdict==='conforme'?'b-ok':v.verdict==='refusée'?'b-bad':'b-w';
+ $('#verdict').innerHTML=`<h3>Verdict</h3><span class="badge ${cl}" style="font-size:14px">${esc(v.verdict)}</span> <span class="muted">${esc(v.phrases_conformes)} phrase(s) conforme(s)</span>${v.problemes_globaux.map(p=>`<div class="al">⚠ ${esc(p)}</div>`).join('')}
+ <table>${v.detail.map(d=>`<tr><td>${esc(d.phrase)}</td><td>${d.problemes.length?d.problemes.map(p=>`<div style="color:var(--bad)">${esc(p)}</div>`).join(''):'<span style="color:var(--ok)">conforme</span>'}</td></tr>`).join('')}</table>`}catch(e){alert(e.message)}};
+$('#quit').onclick=async()=>{if(!confirm('Arrêter le noyau ?'))return;await fetch('/api/quitter');document.body.innerHTML='<p style="padding:30px">Le noyau est arrêté. Vous pouvez fermer cet onglet.</p>'};
+init();
+</script></body></html>

@@ -1,0 +1,1 @@
+Selon la base, une opération de génération est une opération par laquelle le concepteur introduit l'entité-objet, avant toute qualification ; cette définition est une proposition non validée [DEF:n01]. Elle génère l'entité-objet, relation proposée et non validée [R:n01|n02]. La notion est exposée dans la synthèse de 2023 [S:D11].

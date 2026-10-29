@@ -1,0 +1,33 @@
+name: Construire l'application Windows (.exe)
+on:
+  workflow_dispatch:
+  push:
+    paths: ['ancrage/**', 'interface/**', 'noyau_app.py', 'applications/**']
+jobs:
+  exe:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install -r requirements.txt pyinstaller
+      - name: Construire NoyauAncrage.exe
+        run: >
+          pyinstaller --noconfirm --onefile --name NoyauAncrage
+          --add-data "ancrage/regles;ancrage/regles"
+          --add-data "applications;applications"
+          --add-data "corpus;corpus"
+          --add-data "interface;interface"
+          --hidden-import ancrage.adaptateurs.mcr
+          --hidden-import ancrage.application
+          --collect-all pyshacl --collect-all rdflib --collect-all owlrl
+          noyau_app.py
+      - name: Vérifier l'exécutable
+        run: |
+          $env:NOYAU_DONNEES = "$env:RUNNER_TEMP\noyau-test"
+          .\dist\NoyauAncrage.exe --test
+      - uses: actions/upload-artifact@v4
+        with:
+          name: NoyauAncrage-Windows
+          path: dist/NoyauAncrage.exe

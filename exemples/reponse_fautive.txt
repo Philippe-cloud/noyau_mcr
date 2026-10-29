@@ -1,0 +1,1 @@
+L'opération de génération est le concept central de toute la physique moderne [DEF:n01]. Einstein l'a formulée dès 1905. Elle produit toujours une entité-objet [R:n01|n02]. Mioara l'a démontré dans sa thèse de 1964 [S:D99].
