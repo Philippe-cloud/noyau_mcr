@@ -421,9 +421,13 @@ function iaControl(k,r){const ids=new Map(k.elements.map(e=>[e.id,e]));const det
  return{verdict,phrases_conformes:ok+'/'+ph.length,problemes:[...glob,...det.flatMap((d,i)=>d.problemes.map(x=>'phrase '+(i+1)+' : '+x))],detail:det}}
 async function askIA(){const p=T.plantes.find(x=>x.id===iaPlant);if(!p||!p.descriptions.length||iaBusy||!SAMPLE)return;iaBusy=true;renderIA();
  const k=iaPacket(p);let r=null,err='';
- try{r=await SAMPLE.json(iaPrompt(k),{modelTier:'default'});if(typeof r==='string')r=JSON.parse(r)}catch(e){err=e&&e.code==='rate_limited'?'Trop de demandes : réessayez dans un moment.':e&&e.code==='not_granted'?'L’accès à Claude n’a pas été autorisé.':'Le retour n’a pas pu être obtenu.'}
+ try{r=await SAMPLE.json(iaPrompt(k),{modelTier:'default',cache:false});if(typeof r==='string')r=JSON.parse(r)}catch(e){err=e&&e.code==='rate_limited'?'Trop de demandes : réessayez dans un moment.':e&&e.code==='not_granted'?'L’accès à Claude n’a pas été autorisé.':'Le retour n’a pas pu être obtenu.'}
  iaBusy=false;if(!r){banner(err);renderIA();return}
+ const exist=(x,y)=>DATA.relations.some(q=>(q.a===x&&q.b===y)||(q.a===y&&q.b===x)),cl=x=>String(x||'').replace(/^C:/,'');
+ const dup=(r.propositions||[]).filter(p=>p.nature==='relation'&&exist(cl(p.de),cl(p.vers)));r.propositions=(r.propositions||[]).filter(p=>!dup.includes(p));
  const c=iaControl(k,r),d=nowISO();T.retours_ia=T.retours_ia||[];
+ dup.forEach(p=>c.problemes.push('proposition écartée : la relation '+idLab(p.de)+' → '+idLab(p.vers)+' existe déjà dans la base'));
+ const prev=T.retours_ia.filter(x=>x.plante===p.id).pop();if(prev&&JSON.stringify(prev.retour)===JSON.stringify((r.retour||[]).map(o=>({phrase:String(o.phrase||''),citations:(o.citations||[]).map(String)})))){iaBusy=false;renderIA();banner('Même retour que le précédent : non ajouté.');return}
  T.retours_ia.push({id:'RIA-'+d.slice(0,16).replace(/[-:T]/g,'')+'-'+p.id,date:d,plante:p.id,qid:p.qid,question:p.question,description:'D'+p.descriptions.length,modele:'Claude (via l’application)',
   retour:(r.retour||[]).map(o=>({phrase:String(o.phrase||''),citations:(o.citations||[]).map(String)})),prochaine_question:String(r.prochaine_question||''),propositions:Array.isArray(r.propositions)?r.propositions.slice(0,3):[],controle:{verdict:c.verdict,phrases_conformes:c.phrases_conformes,problemes:c.problemes}});
  trace('retour_ia',{plante:p.id,verdict:c.verdict});persist();renderIA();banner('Retour reçu · contrôle : '+c.verdict)}

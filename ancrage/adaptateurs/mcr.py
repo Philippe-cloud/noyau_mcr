@@ -118,6 +118,9 @@ def ajouter_retour_ia(g, r, uid=None):
     statut « proposé » et plafonné tant que l'autorité ne l'a pas validé (onglet « Propositions IA »).
     """
     uid = uid or "utilisateur:anonyme"
+    texte = " ".join(ph["phrase"] for ph in r.get("retour", []))
+    if any(g.E[k]["contenu"]["destinataire"] == uid and g.E[k]["contenu"]["texte"] == texte for k in g.par_type("retour")):
+        return  # doublon d'un retour déjà ingéré
     if uid not in g.d["agents"]:
         g.agent(uid, uid.split(":", 1)[1], "humain", "apprenant")
     ok = lambda ids: [x for x in dict.fromkeys(ids) if x in g.E]
@@ -133,6 +136,8 @@ def ajouter_retour_ia(g, r, uid=None):
     if ctl.get("verdict") == "refusée":
         return  # un retour refusé par le contrôle reste tracé, mais ses propositions ne vont pas à l'autorité
     for k, p in enumerate(r.get("propositions", []), 1):
+        if p.get("nature") == "relation" and (f"R:{str(p.get('de'))[2:]}|{str(p.get('vers'))[2:]}" in g.E or f"R:{str(p.get('vers'))[2:]}|{str(p.get('de'))[2:]}" in g.E):
+            continue  # relation déjà dans la base : un conseil à l'apprenant, pas une proposition à l'autorité
         ids = [p.get("cible"), p.get("de"), p.get("vers")] + list(p.get("concepts", [])) + list(p.get("appuis", []))
         g.entite(f"PIA:{r['id']}-{k}", "proposition",
                  {"nature": p.get("nature", "autre"), "texte": p.get("texte", ""), "cible": p.get("cible"),

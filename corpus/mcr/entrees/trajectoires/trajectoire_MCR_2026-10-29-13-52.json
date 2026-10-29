@@ -1,0 +1,494 @@
+{
+  "format": "trajectoire-mcr-v2",
+  "apprenant": "",
+  "creeLe": "2026-10-29T13:44:52.256Z",
+  "plantes": [
+    {
+      "id": "P1",
+      "qid": "Q2",
+      "question": "Que veut dire « décrire » quelque chose selon la MCR ?",
+      "niveau": 1,
+      "creeLe": "2026-10-29T13:49:26.450Z",
+      "concepts": [
+        "n02",
+        "n04",
+        "n01"
+      ],
+      "docs": [
+        "D26"
+      ],
+      "ecartes": [],
+      "relations": [
+        {
+          "id": "r1793281791797",
+          "a": "n02",
+          "b": "n04",
+          "type": "entre dans",
+          "date": "2026-10-29T13:49:51.797Z",
+          "origine": "propose"
+        },
+        {
+          "id": "r1793281799166",
+          "a": "n01",
+          "b": "n04",
+          "type": "entre dans",
+          "date": "2026-10-29T13:49:59.166Z",
+          "origine": "propose"
+        },
+        {
+          "id": "r1793281825131",
+          "a": "D26",
+          "b": "n04",
+          "type": "précise",
+          "date": "2026-10-29T13:50:25.131Z",
+          "origine": "utilisateur"
+        }
+      ],
+      "descriptions": [
+        {
+          "n": 1,
+          "date": "2026-10-29T13:50:09.344Z",
+          "c": [
+            "n02",
+            "n04",
+            "n01"
+          ],
+          "d": [
+            "D26"
+          ],
+          "r": [
+            "n02|entre dans|n04",
+            "n01|entre dans|n04"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "P2",
+      "qid": "Q3",
+      "question": "Qu’est-ce qu’une opération de génération ?",
+      "niveau": 1,
+      "creeLe": "2026-10-29T13:50:32.814Z",
+      "concepts": [
+        "n01",
+        "n16",
+        "n02"
+      ],
+      "docs": [
+        "D61"
+      ],
+      "ecartes": [],
+      "relations": [
+        {
+          "id": "r1793281852032",
+          "a": "D61",
+          "b": "n01",
+          "type": "qualifie",
+          "date": "2026-10-29T13:50:52.032Z",
+          "origine": "utilisateur"
+        },
+        {
+          "id": "r1793281881047",
+          "a": "n16",
+          "b": "n02",
+          "type": "entre dans",
+          "date": "2026-10-29T13:51:21.047Z",
+          "origine": "utilisateur"
+        }
+      ],
+      "descriptions": [
+        {
+          "n": 1,
+          "date": "2026-10-29T13:51:01.580Z",
+          "c": [
+            "n01",
+            "n16"
+          ],
+          "d": [
+            "D61"
+          ],
+          "r": [
+            "D61|qualifie|n01"
+          ]
+        },
+        {
+          "n": 2,
+          "date": "2026-10-29T13:51:27.490Z",
+          "c": [
+            "n01",
+            "n16",
+            "n02"
+          ],
+          "d": [
+            "D61"
+          ],
+          "r": [
+            "D61|qualifie|n01",
+            "n16|entre dans|n02"
+          ],
+          "W": 0.16575075418901053
+        }
+      ]
+    }
+  ],
+  "active": "P2",
+  "traces": [
+    {
+      "date": "2026-10-29T13:49:26.450Z",
+      "type": "question",
+      "plante": "P1",
+      "question": "Que veut dire « décrire » quelque chose selon la MCR ?",
+      "qid": "Q2"
+    },
+    {
+      "date": "2026-10-29T13:49:40.877Z",
+      "type": "consulter",
+      "plante": "P1",
+      "el": "n04"
+    },
+    {
+      "date": "2026-10-29T13:49:51.797Z",
+      "type": "entre dans",
+      "plante": "P1",
+      "a": "n02",
+      "b": "n04"
+    },
+    {
+      "date": "2026-10-29T13:49:59.166Z",
+      "type": "entre dans",
+      "plante": "P1",
+      "a": "n01",
+      "b": "n04"
+    },
+    {
+      "date": "2026-10-29T13:50:09.344Z",
+      "type": "description",
+      "plante": "P1",
+      "n": 1
+    },
+    {
+      "date": "2026-10-29T13:50:25.131Z",
+      "type": "précise",
+      "plante": "P1",
+      "a": "D26",
+      "b": "n04"
+    },
+    {
+      "date": "2026-10-29T13:50:32.814Z",
+      "type": "question",
+      "plante": "P2",
+      "question": "Qu’est-ce qu’une opération de génération ?",
+      "qid": "Q3"
+    },
+    {
+      "date": "2026-10-29T13:50:36.547Z",
+      "type": "consulter",
+      "plante": "P2",
+      "el": "D61"
+    },
+    {
+      "date": "2026-10-29T13:50:40.754Z",
+      "type": "retenir",
+      "plante": "P2",
+      "el": "D61"
+    },
+    {
+      "date": "2026-10-29T13:50:52.032Z",
+      "type": "qualifie",
+      "plante": "P2",
+      "a": "D61",
+      "b": "n01"
+    },
+    {
+      "date": "2026-10-29T13:50:53.731Z",
+      "type": "consulter",
+      "plante": "P2",
+      "el": "n16"
+    },
+    {
+      "date": "2026-10-29T13:50:59.264Z",
+      "type": "retenir",
+      "plante": "P2",
+      "el": "n16"
+    },
+    {
+      "date": "2026-10-29T13:51:01.580Z",
+      "type": "description",
+      "plante": "P2",
+      "n": 1
+    },
+    {
+      "date": "2026-10-29T13:51:21.047Z",
+      "type": "entre dans",
+      "plante": "P2",
+      "a": "n16",
+      "b": "n02"
+    },
+    {
+      "date": "2026-10-29T13:51:27.490Z",
+      "type": "description",
+      "plante": "P2",
+      "n": 2,
+      "W": 0.16575075418901053
+    },
+    {
+      "date": "2026-10-29T13:51:51.850Z",
+      "type": "retour_ia",
+      "plante": "P1",
+      "verdict": "conforme"
+    },
+    {
+      "date": "2026-10-29T13:52:37.522Z",
+      "type": "retour_ia",
+      "plante": "P2",
+      "verdict": "conforme"
+    },
+    {
+      "date": "2026-10-29T13:52:48.083Z",
+      "type": "retour_ia",
+      "plante": "P1",
+      "verdict": "conforme"
+    }
+  ],
+  "retours_ia": [
+    {
+      "id": "RIA-202610291351-P1",
+      "date": "2026-10-29T13:51:51.850Z",
+      "plante": "P1",
+      "qid": "Q2",
+      "question": "Que veut dire « décrire » quelque chose selon la MCR ?",
+      "description": "D1",
+      "modele": "Claude (via l’application)",
+      "retour": [
+        {
+          "phrase": "Pour répondre à la question « que veut dire décrire ? », vous avez retenu l'entité-objet, l'opération de génération G et la description relativisée, notions que la base propose sans qu'elles soient validées [C:n02, C:n01, C:n04].",
+          "citations": [
+            "C:n02",
+            "C:n01",
+            "C:n04"
+          ]
+        },
+        {
+          "phrase": "Vous avez relié l'entité-objet à la description relativisée, et l'opération G à cette même description, avec le lien « entre dans » : ces deux liens figurent aussi dans la base, mais sous forme de relations proposées, non validées [R:n02|n04, R:n01|n04].",
+          "citations": [
+            "R:n02|n04",
+            "R:n01|n04"
+          ]
+        },
+        {
+          "phrase": "La base propose en outre que G « génère » l'entité-objet [R:n01|n02] ; ce lien n'apparaît pas parmi ceux que vous avez tracés, et il pourrait préciser l'ordre entre les deux notions que vous avez retenues.",
+          "citations": [
+            "R:n01|n02",
+            "C:n01",
+            "C:n02"
+          ]
+        },
+        {
+          "phrase": "Parmi les éléments proposés, vous n'avez pas encore mobilisé la vue / qualification (V), pourtant présente dans la définition proposée de la description relativisée D/G, œG, V/ [C:n03, C:n04], ni la notion générale de description [C:g4].",
+          "citations": [
+            "C:n03",
+            "C:n04",
+            "C:g4"
+          ]
+        },
+        {
+          "phrase": "Vous n'avez retenu qu'un document, l'article de 1995 [S:D26], qui est présenté dans la base comme détaillant le générateur d'objet, la vue et la description relative (résumé proposé, non validé) ; votre historique ne contient qu'une description datée (D1), donc aucun changement n'est encore observable entre vos descriptions.",
+          "citations": [
+            "S:D26"
+          ]
+        }
+      ],
+      "prochaine_question": "Si une description relativisée dépend de G, de l'entité-objet et de la vue V, que change le fait de qualifier la même entité-objet avec une autre vue ?",
+      "propositions": [
+        {
+          "nature": "relation",
+          "de": "C:n01",
+          "vers": "C:n02",
+          "concepts": [
+            "C:n01",
+            "C:n02"
+          ],
+          "texte": "Relation « génère » de l'opération G vers l'entité-objet : à relier explicitement dans votre parcours.",
+          "appuis": [
+            "S:D26"
+          ],
+          "justification": "La base contient déjà cette relation (proposée, non validée) ; elle n'est pas dans les liens de l'apprenant, et le résumé de S:D26 mentionne le générateur d'objet comme notion de base."
+        },
+        {
+          "nature": "question",
+          "concepts": [
+            "C:n03",
+            "C:n04"
+          ],
+          "texte": "Comment la vue V intervient-elle dans la description relativisée, et en quoi une description change-t-elle quand V change ?",
+          "appuis": [
+            "S:D26"
+          ],
+          "justification": "V figure dans la définition proposée de D/G, œG, V/ mais n'a pas été retenue ; S:D26 la cite parmi les notions de base."
+        }
+      ],
+      "controle": {
+        "verdict": "conforme",
+        "phrases_conformes": "5/5",
+        "problemes": []
+      }
+    },
+    {
+      "id": "RIA-202610291352-P2",
+      "date": "2026-10-29T13:52:37.522Z",
+      "plante": "P2",
+      "qid": "Q3",
+      "question": "Qu’est-ce qu’une opération de génération ?",
+      "description": "D2",
+      "modele": "Claude (via l’application)",
+      "retour": [
+        {
+          "phrase": "Vous avez retenu l'opération de génération, l'entité-objet et le référentiel épistémique, tous trois proposés et non validés, et vous les avez associés dans votre seconde description [C:n01, C:n02, C:n16].",
+          "citations": [
+            "C:n01",
+            "C:n02",
+            "C:n16"
+          ]
+        },
+        {
+          "phrase": "La base propose, sans validation, que l'opération de génération « génère » l'entité-objet, relation que votre passage de D1 à D2 rejoint puisque vous avez ajouté C:n02 à C:n01 [R:n01|n02, C:n02].",
+          "citations": [
+            "R:n01|n02",
+            "C:n01",
+            "C:n02"
+          ]
+        },
+        {
+          "phrase": "Votre lien entre le document de Szoniecky et l'opération de génération (« qualifie ») est votre lecture propre, absente de la base ; le résumé de ce document, lui aussi proposé et non validé, mentionne la MCR parmi trois outils analysés [S:D61, C:n01].",
+          "citations": [
+            "S:D61",
+            "C:n01"
+          ]
+        },
+        {
+          "phrase": "Votre lien « le référentiel épistémique entre dans l'entité-objet » est aussi votre lecture propre ; la base propose seulement, de façon non validée, que le référentiel « comprend » l'opération de génération [C:n16, C:n02, R:n16|n01].",
+          "citations": [
+            "C:n16",
+            "C:n02",
+            "R:n16|n01"
+          ]
+        },
+        {
+          "phrase": "Parmi les éléments proposés, vous n'avez pas encore mobilisé la description relativisée, que la base relie (proposition non validée) à l'opération de génération et à l'entité-objet, ni l'arbre de probabilité, ni les documents D15 et D11 qui présentent la génération de l'objet [C:n04, C:n14, S:D15, S:D11].",
+          "citations": [
+            "C:n04",
+            "C:n14",
+            "S:D15",
+            "S:D11"
+          ]
+        }
+      ],
+      "prochaine_question": "Comment l'opération de génération et l'entité-objet entrent-elles, selon vous, dans une description relativisée D/G, œG, V/ ?",
+      "propositions": [
+        {
+          "nature": "relation",
+          "de": "C:n16",
+          "vers": "C:n04",
+          "concepts": [
+            "C:n16",
+            "C:n04"
+          ],
+          "texte": "Relation à examiner : le référentiel épistémique (G, V) fixe le cadre d'une description relativisée.",
+          "appuis": [
+            "S:D11"
+          ],
+          "justification": "Le référentiel est défini comme le couple générateur–vue fixant le cadre d'une description [C:n16], et la description relativisée est relative à G, œG et V [C:n04] ; la base ne contient pas encore cette relation."
+        }
+      ],
+      "controle": {
+        "verdict": "conforme",
+        "phrases_conformes": "5/5",
+        "problemes": []
+      }
+    },
+    {
+      "id": "RIA-202610291352-P1",
+      "date": "2026-10-29T13:52:48.083Z",
+      "plante": "P1",
+      "qid": "Q2",
+      "question": "Que veut dire « décrire » quelque chose selon la MCR ?",
+      "description": "D1",
+      "modele": "Claude (via l’application)",
+      "retour": [
+        {
+          "phrase": "Pour répondre à la question « que veut dire décrire ? », vous avez retenu l'entité-objet, l'opération de génération G et la description relativisée, notions que la base propose sans qu'elles soient validées [C:n02, C:n01, C:n04].",
+          "citations": [
+            "C:n02",
+            "C:n01",
+            "C:n04"
+          ]
+        },
+        {
+          "phrase": "Vous avez relié l'entité-objet à la description relativisée, et l'opération G à cette même description, avec le lien « entre dans » : ces deux liens figurent aussi dans la base, mais sous forme de relations proposées, non validées [R:n02|n04, R:n01|n04].",
+          "citations": [
+            "R:n02|n04",
+            "R:n01|n04"
+          ]
+        },
+        {
+          "phrase": "La base propose en outre que G « génère » l'entité-objet [R:n01|n02] ; ce lien n'apparaît pas parmi ceux que vous avez tracés, et il pourrait préciser l'ordre entre les deux notions que vous avez retenues.",
+          "citations": [
+            "R:n01|n02",
+            "C:n01",
+            "C:n02"
+          ]
+        },
+        {
+          "phrase": "Parmi les éléments proposés, vous n'avez pas encore mobilisé la vue / qualification (V), pourtant présente dans la définition proposée de la description relativisée D/G, œG, V/ [C:n03, C:n04], ni la notion générale de description [C:g4].",
+          "citations": [
+            "C:n03",
+            "C:n04",
+            "C:g4"
+          ]
+        },
+        {
+          "phrase": "Vous n'avez retenu qu'un document, l'article de 1995 [S:D26], qui est présenté dans la base comme détaillant le générateur d'objet, la vue et la description relative (résumé proposé, non validé) ; votre historique ne contient qu'une description datée (D1), donc aucun changement n'est encore observable entre vos descriptions.",
+          "citations": [
+            "S:D26"
+          ]
+        }
+      ],
+      "prochaine_question": "Si une description relativisée dépend de G, de l'entité-objet et de la vue V, que change le fait de qualifier la même entité-objet avec une autre vue ?",
+      "propositions": [
+        {
+          "nature": "relation",
+          "de": "C:n01",
+          "vers": "C:n02",
+          "concepts": [
+            "C:n01",
+            "C:n02"
+          ],
+          "texte": "Relation « génère » de l'opération G vers l'entité-objet : à relier explicitement dans votre parcours.",
+          "appuis": [
+            "S:D26"
+          ],
+          "justification": "La base contient déjà cette relation (proposée, non validée) ; elle n'est pas dans les liens de l'apprenant, et le résumé de S:D26 mentionne le générateur d'objet comme notion de base."
+        },
+        {
+          "nature": "question",
+          "concepts": [
+            "C:n03",
+            "C:n04"
+          ],
+          "texte": "Comment la vue V intervient-elle dans la description relativisée, et en quoi une description change-t-elle quand V change ?",
+          "appuis": [
+            "S:D26"
+          ],
+          "justification": "V figure dans la définition proposée de D/G, œG, V/ mais n'a pas été retenue ; S:D26 la cite parmi les notions de base."
+        }
+      ],
+      "controle": {
+        "verdict": "conforme",
+        "phrases_conformes": "5/5",
+        "problemes": []
+      }
+    }
+  ],
+  "eps": 0.15,
+  "enregistreLe": "2026-10-29T13:52:56.190Z"
+}
