@@ -13,7 +13,8 @@ Le corpus fourni est celui de la **Méthode de Conceptualisation Relativisée (M
 - **Indice d'ancrage.** Il combine six composantes : source, transformations, origine, validation, indépendance de la validation, concordance. Il est toujours relatif à la chaîne de genèse ; ce n'est pas une mesure de vérité.
 - **Moniteur de boucle.** Il suit la part validée, la **part d'origine IA dans le validé** (le signal de circularité), la diversité des validateurs et le taux de rejet, et émet des alertes.
 - **Garde-fous SHACL.** Toute entité a une genèse ; aucun contenu d'IA n'est validé sans un validateur humain.
-- **Vues.** Une vue pour l'autorité (règles proposées, divergences), une pour l'IA (sa trajectoire de témoin, jamais socle), et une trajectoire enrichie pour chaque apprenant, avec la comparaison des trois vues.
+- **Trajectoires et IA.** L'IA n'est pas réentraînée ; les trajectoires la situent au moment de répondre. Chaque élément fourni porte un signal d'**usage** (combien de descriptions d'apprenants l'ont retenu pour cette question) ; c'est un signal d'utilité, jamais de validité. Avec `--apprenant`, la consigne inclut le **chemin de l'apprenant** : questions posées, éléments déjà retenus, liens construits et leur situation par rapport au socle. La vue IA mesure l'**écart IA/apprenants** : part de ce que les apprenants ont retenu qui figurait dans la sélection fournie à l'IA (rappel), et ce qu'elle omet.
+- **Vues.** Une vue pour l'autorité (règles proposées, divergences), une pour l'IA (sa trajectoire de témoin, jamais socle), une trajectoire enrichie pour chaque apprenant, avec la comparaison des trois vues, et une **fiche lisible pour l'autorité** (`fiche_autorite_mcr.html`).
 
 ## Utilisation dans le navigateur, sans rien installer
 
@@ -45,7 +46,8 @@ python noyau_app.py                      # interface dans le navigateur
 python -m ancrage boucle corpus/mcr      # construire + vues + application régénérée
 python -m ancrage etat corpus/mcr
 python -m ancrage element corpus/mcr C:n01
-python -m ancrage interroger corpus/mcr "Qu’est-ce qu’une opération de génération ?" --consigne
+python -m ancrage interroger corpus/mcr "Qu’est-ce qu’une opération de génération ?" --consigne [--apprenant NOM]
+python -m ancrage apprenants corpus/mcr
 python -m ancrage controler  corpus/mcr "Qu’est-ce qu’une opération de génération ?" exemples/reponse_fautive.txt
 python -m ancrage comparer corpus/mcr
 python exemples/test_garde_fou.py

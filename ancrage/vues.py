@@ -151,6 +151,27 @@ def tendances_terminologiques(g):
     return sorted(out, key=lambda x: -x["ecarts"])
 
 
+def ecart_avec_apprenants(g):
+    """Pour chaque question traitée par des apprenants : ce que le dispositif fournit à l'IA
+    (sans tenir compte de l'usage) comparé à ce que les apprenants ont effectivement retenu."""
+    from . import interroger as Q
+    par_q = {}
+    for d in g.par_type("description"):
+        par_q.setdefault(g.E[d]["contenu"]["question"], []).append(d)
+    out = []
+    for q, descs in par_q.items():
+        retenus = {x for d in descs for x in g.E[d]["contenu"]["elements"] if g.E.get(x, {}).get("type") in ("concept", "source", "passage")}
+        p = Q.interroger(g, q, inclure_usage=False)
+        fournis = {e["id"] for e in p["elements"] if e["type"] in ("concept", "source", "passage")}
+        fournis |= {g.E[e["id"]]["prov"]["derive_de"][0] for e in p["elements"] if e["type"] == "traduction" and g.E[e["id"]]["prov"]["derive_de"]}
+        inter = retenus & fournis
+        out.append({"question": q, "descriptions": len(descs),
+                    "rappel": round(len(inter) / len(retenus), 2) if retenus else None,
+                    "precision": round(len(inter) / len(fournis), 2) if fournis else None,
+                    "retenus_mais_non_fournis": sorted(retenus - fournis), "fournis_et_retenus": sorted(inter)})
+    return out
+
+
 def vue_ia(g):
     temoin = set(g.d.get("temoin", []))
     ecarts = []
@@ -174,9 +195,10 @@ def vue_ia(g):
             "ma_trajectoire": {"ecart_moyen_avec_reference": m.get("ecart_ia_reference"), "score_jeu_temoin": m.get("score_temoin"),
                                "jeu_temoin": "contenu non communiqué", "par_passage": sorted(ecarts, key=lambda x: x["similarite_avec_reference"])},
             "mes_tendances": tendances_terminologiques(g),
+            "ecart_avec_les_apprenants": ecart_avec_apprenants(g),
             "retours_des_validateurs": retours,
             "alertes": m.get("alertes", []),
-            "consigne": "Signale dans tes réponses les termes où tu t'écartes habituellement de la référence ; tes productions restent des propositions tant qu'un humain ne les a pas validées."}
+            "consigne": "Signale dans tes réponses les termes où tu t'écartes habituellement de la référence ; tes productions restent des propositions tant qu'un humain ne les a pas validées. Le rappel indique la part de ce que les apprenants ont retenu qui figurait dans ta sélection ; les éléments « retenus mais non fournis » sont ceux que tu omets."}
 
 
 # ---------------------------------------------------------------- apprenants

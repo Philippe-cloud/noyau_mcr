@@ -94,5 +94,5 @@ def ajouter_trajectoire(g, t):
         for d in p["descriptions"]:
             els = [x for x in ["C:" + x for x in d["c"]] + ["S:" + x for x in d["d"]] if x in g.E]
             g.entite(f"DESC:{uid}:{p['id']}:D{d['n']}", "description",
-                     {"question": p["question"], "elements": els, "relations": d["r"], "pourquoi": d.get("pourquoi", "")},
+                     {"question": p["question"], "qid": p.get("qid"), "elements": els, "relations": d["r"], "pourquoi": d.get("pourquoi", "")},
                      derive_de=els, operation="selection", operateur=uid, date=d["date"])

@@ -69,7 +69,8 @@ details summary{cursor:pointer;color:var(--acc)}
  <section class="card wide">
   <h2>4. Interroger une IA sous contrôle</h2>
   <p class="muted">Le noyau prépare la consigne (éléments, statuts, genèse, règles). Copiez-la dans l'IA de votre choix, collez sa réponse ci-dessous : le noyau la contrôle.</p>
-  <div class="row"><input type="text" id="question" placeholder="Votre question, par exemple : Que signifie prendre refuge ?" style="flex:1"><button class="pri" id="prep">Préparer la consigne</button></div>
+  <div class="row"><input type="text" id="question" placeholder="Votre question, par exemple : Qu’est-ce qu’une opération de génération ?" style="flex:1"><select id="appr" title="Apprenant qui pose la question" style="font:inherit;border:1px solid #cbd5e1;border-radius:7px;padding:6px"><option value="">Sans apprenant</option></select><button class="pri" id="prep">Préparer la consigne</button></div>
+  <p class="muted" style="margin:4px 0 0">Choisir un apprenant ajoute son chemin à la consigne : l'IA part de ce qu'il a déjà construit et signale où ses liens divergent du socle.</p>
   <div id="ref"></div>
   <textarea id="consigne" rows="8" hidden readonly style="margin-top:8px;font-family:ui-monospace,monospace;font-size:12px"></textarea>
   <div class="row" id="copyRow" hidden><button id="copy">Copier la consigne</button></div>
@@ -89,7 +90,8 @@ async function api(r,body){const o=body?{method:'POST',headers:{'Content-Type':'
 async function init(){INFO=await api('/api/info');$('#dossier').textContent='Données : '+INFO.dossier;
  $('#seg').innerHTML=Object.entries(INFO.corpus).map(([k,v])=>`<button data-c="${k}" class="${k===CORPUS?'on':''}">${esc(v)}</button>`).join(' ');
  document.querySelectorAll('#seg button').forEach(b=>b.onclick=()=>{CORPUS=b.dataset.c;init()});refresh()}
-async function refresh(){const e=await api('/api/etat');liste(e.entrees);moniteur(e);sortiesUI(e.sorties)}
+async function refresh(){const e=await api('/api/etat');liste(e.entrees);moniteur(e);sortiesUI(e.sorties);
+ const cur=$('#appr').value;$('#appr').innerHTML='<option value="">Sans apprenant</option>'+(e.apprenants||[]).map(a=>`<option ${a===cur?'selected':''}>${esc(a)}</option>`).join('')}
 function liste(en){for(const [t,id] of [['validations','#listeV'],['trajectoires','#listeT']])$(id).innerHTML=en[t].length?en[t].map(n=>`<div class="f"><span>${esc(n)}</span><span class="lk" data-r="${t}|${esc(n)}">retirer</span></div>`).join(''):'<div class="muted">Aucun fichier.</div>';
  document.querySelectorAll('[data-r]').forEach(a=>a.onclick=async()=>{const [type,nom]=a.dataset.r.split('|');if(!confirm('Retirer '+nom+' des entrées ?'))return;liste((await api('/api/retirer',{type,nom})).entrees)})}
 function moniteur(e){const m=e.moniteur;if(!m){$('#etat').innerHTML='<div class="muted">Aucune version : lancez la boucle.</div>';return}
@@ -116,6 +118,7 @@ async function vuesUI(s){let h='';
   ${v.divergences.ia_vs_reference_les_plus_fortes.length?`<h3>Passages où l'IA s'écarte le plus de la référence</h3><div class="muted">${v.divergences.ia_vs_reference_les_plus_fortes.map(d=>esc(d.passage)+' ('+d.similarite+')').join(' · ')}</div>`:''}</details>`}
  if(vi){const v=await api('/api/vue?nom='+encodeURIComponent(vi));
   h+=`<details><summary><b>Vue pour l'IA</b> – ${esc(v.statut_de_cette_vue)}</summary><div class="muted">Écart moyen avec la référence : ${v.ma_trajectoire.ecart_moyen_avec_reference??'—'} · score témoin : ${v.ma_trajectoire.score_jeu_temoin??'—'} · retours des validateurs : ${v.retours_des_validateurs.length}</div>
+  ${(v.ecart_avec_les_apprenants||[]).length?`<h3>Ce que l'IA reçoit / ce que les apprenants retiennent</h3><table><tr><th>Question</th><th>Rappel</th><th>Précision</th><th>Retenus mais non fournis</th></tr>${v.ecart_avec_les_apprenants.map(x=>`<tr><td>${esc(x.question)}</td><td>${x.rappel??'—'}</td><td>${x.precision??'—'}</td><td>${esc(x.retenus_mais_non_fournis.join(', '))}</td></tr>`).join('')}</table>`:''}
   ${v.mes_tendances.length?`<h3>Ses tendances</h3><table>${v.mes_tendances.slice(0,8).map(t=>`<tr><td>${esc(t.wylie||t.terme)}</td><td>référence : « ${esc(t.traduction_de_reference)} »</td><td>écart dans ${t.ecarts}/${t.sur}</td></tr>`).join('')}</table>`:''}</details>`}
  for(const f of tr){const t=await api('/api/vue?nom='+encodeURIComponent(f));const D=t.noyau.descriptions;
   h+=`<details><summary><b>Trajectoire enrichie</b> – ${esc(t.apprenant||'anonyme')}</summary>${Object.entries(D).map(([k,d])=>`<h3>${esc(k)} · ancrage ${d.ancrage.indice} (${esc(d.ancrage.niveau)})</h3>${d.relations.map(r=>`<div class="muted">• <b>${esc(r.vous)}</b><br>&nbsp;&nbsp;autorité : ${esc(r.autorite)}<br>&nbsp;&nbsp;IA : ${esc(r.ia)}</div>`).join('')||'<div class="muted">Aucune relation.</div>'}`).join('')}</details>`}
@@ -128,12 +131,13 @@ for(const [id,t] of [['#dropV','validations'],['#dropT','trajectoires']]){const 
 $('#fileIn').onchange=e=>{envoyer(e.target.files);e.target.value=''};
 $('#go').onclick=async()=>{$('#go').disabled=true;$('#go').textContent='Boucle en cours…';try{const r=await api('/api/boucle',{});$('#journal').hidden=false;$('#journal').textContent=r.journal;await refresh();toast('Nouvelle version produite')}catch(e){alert(e.message)}$('#go').disabled=false;$('#go').textContent='Lancer la boucle'};
 $('#cmp').onclick=async()=>{try{const r=await api('/api/comparer',{});$('#journal').hidden=false;$('#journal').textContent=r.journal||'Il faut au moins deux versions.'}catch(e){alert(e.message.includes('Aucune')?'Il faut au moins deux versions.':e.message)}};
-$('#prep').onclick=async()=>{const q=$('#question').value.trim();if(!q)return toast('Écrivez une question.');try{const r=await api('/api/consigne',{question:q});const f=r.referentiel;
+$('#prep').onclick=async()=>{const q=$('#question').value.trim();if(!q)return toast('Écrivez une question.');try{const r=await api('/api/consigne',{question:q,apprenant:$('#appr').value});const f=r.referentiel;
  $('#ref').innerHTML=`<div class="muted" style="margin-top:8px">Couverture ${f.couverture} · ancrage moyen ${f.ancrage_moyen} · part d'origine IA ${f.part_origine_ia} · validateurs : ${esc(f.validateurs.join(', ')||'aucun')}${f.question_reconnue?' · question de base '+esc(f.question_reconnue):''}</div>${f.alertes.map(a=>`<div class="al">⚠ ${esc(a)}</div>`).join('')}
- <details><summary>${r.elements.length} élément(s) fournis à l'IA</summary><table>${r.elements.map(e=>`<tr><td>${esc(e.id)}</td><td>${esc(e.texte.slice(0,90))}</td><td>${esc(e.statut)}</td><td>${e.ancrage} ${esc(e.niveau)}</td></tr>`).join('')}</table></details>`;
+ <details><summary>${r.elements.length} élément(s) fournis à l'IA</summary><table>${r.elements.map(e=>`<tr><td>${esc(e.id)}</td><td>${esc(e.texte.slice(0,90))}</td><td>${esc(e.statut)}</td><td>${e.ancrage} ${esc(e.niveau)}</td><td>${e.usage?'retenu '+e.usage.retenu_dans+' fois':''}</td></tr>`).join('')}</table></details>
+ ${r.trajectoire&&r.trajectoire.descriptions?`<details><summary>Chemin de l'apprenant transmis à l'IA (${r.trajectoire.descriptions} descriptions)</summary><div class="muted">Questions : ${r.trajectoire.questions_posees.map(esc).join(' · ')}</div>${r.trajectoire.liens_construits.map(l=>`<div class="muted">• ${esc(l.vous)} — ${esc(l.autorite)}</div>`).join('')}</details>`:''}`;
  $('#consigne').hidden=false;$('#consigne').value=r.consigne;$('#copyRow').hidden=false}catch(e){alert(e.message)}};
 $('#copy').onclick=async()=>{try{await navigator.clipboard.writeText($('#consigne').value)}catch(e){$('#consigne').select();document.execCommand('copy')}toast('Consigne copiée')};
-$('#ctrl').onclick=async()=>{const q=$('#question').value.trim(),r=$('#reponse').value.trim();if(!q||!r)return toast('Il faut la question et la réponse.');try{const v=await api('/api/controler',{question:q,reponse:r});
+$('#ctrl').onclick=async()=>{const q=$('#question').value.trim(),r=$('#reponse').value.trim();if(!q||!r)return toast('Il faut la question et la réponse.');try{const v=await api('/api/controler',{question:q,reponse:r,apprenant:$('#appr').value});
  const cl=v.verdict==='conforme'?'b-ok':v.verdict==='refusée'?'b-bad':'b-w';
  $('#verdict').innerHTML=`<h3>Verdict</h3><span class="badge ${cl}" style="font-size:14px">${esc(v.verdict)}</span> <span class="muted">${esc(v.phrases_conformes)} phrase(s) conforme(s)</span>${v.problemes_globaux.map(p=>`<div class="al">⚠ ${esc(p)}</div>`).join('')}
  <table>${v.detail.map(d=>`<tr><td>${esc(d.phrase)}</td><td>${d.problemes.length?d.problemes.map(p=>`<div style="color:var(--bad)">${esc(p)}</div>`).join(''):'<span style="color:var(--ok)">conforme</span>'}</td></tr>`).join('')}</table>`}catch(e){alert(e.message)}};

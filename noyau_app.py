@@ -79,7 +79,7 @@ def api(route, q, corps):
         g = derniere(c)
         return {"corpus": c, "entrees": entrees(c), "sorties": sorties(c),
                 "version": g.d.get("version") if g else None, "moniteur": g.d.get("moniteur") if g else None,
-                "shacl": g.d.get("shacl") if g else None}
+                "shacl": g.d.get("shacl") if g else None, "apprenants": Q.apprenants(g) if g else []}
     if route == "/api/ajouter":
         typ = corps["type"]
         if typ not in ("validations", "trajectoires"):
@@ -119,13 +119,14 @@ def api(route, q, corps):
         g = derniere(c)
         if not g:
             raise ValueError("Lancez d'abord la boucle.")
-        p = Q.interroger(g, corps["question"])
-        return {"referentiel": p["referentiel"], "elements": p["elements"], "consigne": Q.consigne(p)}
+        p = Q.interroger(g, corps["question"], corps.get("apprenant") or None)
+        return {"referentiel": p["referentiel"], "elements": p["elements"], "trajectoire": p.get("trajectoire_apprenant"),
+                "consigne": Q.consigne(p)}
     if route == "/api/controler":
         g = derniere(c)
         if not g:
             raise ValueError("Lancez d'abord la boucle.")
-        return Q.controler(Q.interroger(g, corps["question"]), corps["reponse"])
+        return Q.controler(Q.interroger(g, corps["question"], corps.get("apprenant") or None), corps["reponse"])
     if route == "/api/vue":
         s = sorties(c)
         nom = q.get("nom", [""])[0]

@@ -3,8 +3,9 @@
   python -m ancrage construire  <corpus>            ingérer, vérifier, calculer, exporter une version datée
   python -m ancrage etat        <corpus>            moniteur de boucle de la dernière version
   python -m ancrage element     <corpus> <id>       chaîne de provenance et indice d'un élément
-  python -m ancrage interroger  <corpus> "<question>" [--consigne]
-  python -m ancrage controler   <corpus> "<question>" <reponse.txt>
+  python -m ancrage interroger  <corpus> "<question>" [--consigne] [--apprenant NOM]
+  python -m ancrage controler   <corpus> "<question>" <reponse.txt> [--apprenant NOM]
+  python -m ancrage apprenants  <corpus>            apprenants dont les trajectoires sont dans la base
   python -m ancrage comparer    <corpus> [<v1> <v2>] comparer deux versions (par défaut les deux dernières)
   python -m ancrage exporter-vues <corpus>          vues autorité, IA, trajectoires enrichies, moniteur
   python -m ancrage mettre-a-jour-app <corpus>      régénérer l'application HTML à partir de la dernière version
@@ -66,16 +67,19 @@ def main(a):
         main(["exporter-vues", corpus]); main(["mettre-a-jour-app", corpus]); return
     g = Graphe.charger(_derniere(corpus)[0])
     if cmd == "etat":
-        print("Version", g.d["version"]); etat_affiche(g.d["moniteur"])
-    elif cmd == "element":
+        print("Version", g.d["version"]); etat_affiche(g.d["moniteur"]); return
+    if cmd == "element":
         eid = a[2]; e = g.E[eid]
         print(json.dumps({"id": eid, "type": e["type"], "statut": g.statut(eid), "ancrage": e["ancrage"],
-                          "chaine": g.chaine(eid), "validations": g.validations_de(eid)}, ensure_ascii=False, indent=1))
-    elif cmd == "interroger":
-        p = Q.interroger(g, a[2])
+                          "chaine": g.chaine(eid), "validations": g.validations_de(eid)}, ensure_ascii=False, indent=1)); return
+    app = a[a.index("--apprenant") + 1] if "--apprenant" in a else None
+    if cmd == "apprenants":
+        print("\n".join(Q.apprenants(g)) or "aucun"); return
+    if cmd == "interroger":
+        p = Q.interroger(g, a[2], app)
         print(Q.consigne(p) if "--consigne" in a else json.dumps(p, ensure_ascii=False, indent=1))
     elif cmd == "controler":
-        p = Q.interroger(g, a[2])
+        p = Q.interroger(g, a[2], app)
         print(json.dumps(Q.controler(p, open(a[3], encoding="utf-8").read()), ensure_ascii=False, indent=1))
     elif cmd == "comparer":
         v1, v2 = (a[2], a[3]) if len(a) > 3 else _derniere(corpus, 2)

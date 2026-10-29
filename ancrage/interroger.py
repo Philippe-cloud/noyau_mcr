@@ -3,7 +3,7 @@ Contrôle : vérification d'une réponse d'IA au regard de ce même paquet."""
 import re, json
 from .calcul import SEUILS, _norm
 
-def regles_ia(g):
+def regles_ia(g, avec_apprenant=False):
     aut = g.config.get("autorite", "l'autorité")
     ref = g.config.get("exemple_reference", "")
     return [
@@ -14,7 +14,11 @@ def regles_ia(g):
     f"Quand une lecture humaine validée existe (traduction ou résumé de {aut}), c'est la référence ; une lecture produite par l'IA n'est qu'une proposition.",
     "Si la couverture est inférieure au seuil, dis clairement que la question sort du corpus validé (« hors corpus ») et n'invente rien.",
     f"Si un seul validateur est indiqué, présente la réponse comme une vue (« selon {aut}… »), non comme un savoir établi.",
-    ]
+    "Le champ « usage » indique ce que des apprenants ont retenu pour cette question : c'est un signal d'utilité, pas de validité ; l'ancrage et le statut restent prioritaires.",
+    "Une lecture d'apprenant non validée se présente comme telle (« lecture d'un apprenant, non validée »), jamais comme la position de l'autorité.",
+    ] + ([
+    "Une trajectoire d'apprenant est fournie : pars de ce qu'il a déjà construit, ne réexplique pas ce qu'il a déjà retenu, et signale explicitement où ses liens divergent du socle.",
+    ] if avec_apprenant else [])
 MOTS_VIDES = set("que quoi qui est ce cette ces les des une un du de la le et en a au aux pour par sur dans comment pourquoi quel quelle quels quelles signifie sont qu est-ce".split())
 
 
@@ -43,7 +47,58 @@ def trouver_concepts(g, question):
     return [c for _, c in sc[:5]], None
 
 
-def interroger(g, question):
+def descriptions_de_la_question(g, question, qid):
+    """Descriptions d'apprenants qui répondent à cette question (même question de base ou même texte)."""
+    qn = _norm(question).strip()
+    out = []
+    for d in g.par_type("description"):
+        c = g.E[d]["contenu"]
+        if (qid and c.get("qid") and "Q:" + c["qid"] == qid) or _norm(c.get("question", "")).strip() == qn:
+            out.append(d)
+    return out
+
+
+def usage(g, descs):
+    """Pour chaque élément : nombre de descriptions qui le retiennent et nombre d'apprenants."""
+    n, qui = {}, {}
+    for d in descs:
+        for x in g.E[d]["contenu"]["elements"]:
+            n[x] = n.get(x, 0) + 1
+            qui.setdefault(x, set()).add(g.E[d]["prov"]["operateur"])
+    return {x: {"descriptions": n[x], "apprenants": len(qui[x])} for x in n}
+
+
+def trajectoire_apprenant(g, apprenant):
+    """Résumé du chemin d'un apprenant : questions, éléments retenus, liens et leur situation."""
+    from .vues import _comparer_relation, _lib
+    uid = next((k for k, a in g.d["agents"].items() if k.startswith("utilisateur:")
+                and (k == apprenant or k == "utilisateur:" + apprenant or a["nom"] == apprenant)), None)
+    if not uid:
+        return None
+    descs = sorted((d for d in g.par_type("description") if g.E[d]["prov"]["operateur"] == uid), key=lambda d: g.E[d]["prov"]["date"] or "")
+    if not descs:
+        return None
+    qs, cnt, liens = [], {}, {}
+    for d in descs:
+        c = g.E[d]["contenu"]
+        if c["question"] not in qs:
+            qs.append(c["question"])
+        for x in c["elements"]:
+            cnt[x] = cnt.get(x, 0) + 1
+        for r in c["relations"]:
+            liens[r] = liens.get(r, 0) + 1
+    return {"apprenant": g.d["agents"][uid]["nom"], "descriptions": len(descs), "questions_posees": qs,
+            "elements_deja_retenus": [{"id": x, "libelle": _lib(g, x), "fois": n, "statut": g.statut(x)}
+                                      for x, n in sorted(cnt.items(), key=lambda t: -t[1]) if x in g.E][:15],
+            "liens_construits": [{**{k: v for k, v in _comparer_relation(g, r).items() if k in ("vous", "autorite", "ia")}, "fois": n}
+                                 for r, n in sorted(liens.items(), key=lambda t: -t[1])]}
+
+
+def apprenants(g):
+    return [a["nom"] for k, a in g.d["agents"].items() if k.startswith("utilisateur:")]
+
+
+def interroger(g, question, apprenant=None, inclure_usage=True):
     concepts, qid = trouver_concepts(g, question)
     voisins = []
     for rid in g.par_type("relation"):
@@ -69,6 +124,11 @@ def interroger(g, question):
         r = g.reference(p)
         elements += [r] if r else ([] if g.E[p]["type"] == "source" else [p])
     elements += voisins
+    descs_q = descriptions_de_la_question(g, question, qid)
+    us = usage(g, descs_q)
+    for x in (sorted(us, key=lambda x: -us[x]["descriptions"])[:4] if inclure_usage else []):   # retenus par des apprenants
+        if x not in elements:
+            elements.append(x)
     for p in rang[:3]:                                        # propositions IA, pour comparaison
         ia = g.proposition_ia(p)
         if ia: elements.append(ia)
@@ -104,11 +164,19 @@ def interroger(g, question):
         ch = " ← ".join(f"{et['operation']} par {g.d['agents'].get(et['operateur'] or '', {}).get('nom', '?')}" for et in g.chaine(e) if et["type"] != "source")
         src = next((et for et in g.chaine(e) if et["type"] == "source"), None)
         vs = "; ".join(f"{g.d['agents'].get(v['agent'], {}).get('nom', v['agent'])} : {v['statut']}" for v in g.validations_de(e)) or "aucune"
-        els.append({"id": e, "type": x["type"], "texte": texte, "statut": g.statut(e),
-                    "ancrage": x["ancrage"]["indice"], "niveau": x["ancrage"]["niveau"],
-                    "provenance": ch + (f" ← {g.E[src['entite']]['contenu']['titre']}" if src else ""),
-                    "validations": vs})
-    return {"question": question, "referentiel": ref, "regles": regles_ia(g), "elements": els}
+        el = {"id": e, "type": x["type"], "texte": texte, "statut": g.statut(e),
+              "ancrage": x["ancrage"]["indice"], "niveau": x["ancrage"]["niveau"],
+              "provenance": ch + (f" ← {g.E[src['entite']]['contenu']['titre']}" if src else ""),
+              "validations": vs}
+        if e in us:
+            el["usage"] = {"retenu_dans": us[e]["descriptions"], "apprenants": us[e]["apprenants"]}
+        els.append(el)
+    ref["descriptions_d_apprenants_sur_cette_question"] = len(descs_q)
+    paquet = {"question": question, "referentiel": ref, "regles": regles_ia(g, apprenant is not None), "elements": els}
+    if apprenant:
+        t = trajectoire_apprenant(g, apprenant)
+        paquet["trajectoire_apprenant"] = t if t else {"apprenant": apprenant, "descriptions": 0}
+    return paquet
 
 
 def consigne(paquet):
@@ -117,6 +185,7 @@ def consigne(paquet):
             "Règles :\n- " + "\n- ".join(paquet["regles"]) +
             "\n\nRéférentiel épistémique :\n" + json.dumps(paquet["referentiel"], ensure_ascii=False, indent=1) +
             "\n\nÉléments (avec statut, ancrage et provenance) :\n" + json.dumps(paquet["elements"], ensure_ascii=False, indent=1) +
+            (("\n\nTrajectoire de l'apprenant qui pose la question :\n" + json.dumps(paquet["trajectoire_apprenant"], ensure_ascii=False, indent=1)) if paquet.get("trajectoire_apprenant") else "") +
             f"\n\nQuestion : {paquet['question']}\nRéponse (en français, chaque affirmation suivie de ses identifiants) :")
 
 
