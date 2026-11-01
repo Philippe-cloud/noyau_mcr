@@ -1,7 +1,7 @@
 name: Boucle du noyau
 on:
   push:
-    paths: ['corpus/**/entrees/**', 'ancrage/**']
+    paths: ['corpus/**/entrees/**', 'ancrage/**', '!corpus/**/audits_ia/**']
   workflow_dispatch:
 jobs:
   boucle:

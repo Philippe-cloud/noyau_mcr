@@ -1,0 +1,82 @@
+{
+ "format": "trajectoire-ia-v1",
+ "_note": "DONNÉES SIMULÉES pour test : ce n'est pas une vraie réponse d'IA.",
+ "question": "Que veut dire « décrire » quelque chose selon la MCR ?",
+ "modele": "IA simulée (test)",
+ "date": "2026-11-01T19:00:00",
+ "raisonnement": [
+  {
+   "texte": "La question porte sur la description : je pars de la notion de description relativisée.",
+   "appuis": [
+    "C:n04",
+    "S:D26"
+   ]
+  },
+  {
+   "texte": "Une description relativisée suppose une génération, une entité-objet et une vue.",
+   "appuis": [
+    "R:n01|n04",
+    "R:n02|n04",
+    "R:n03|n04"
+   ]
+  },
+  {
+   "texte": "Je rapproche cette idée du perspectivisme en philosophie.",
+   "appuis": []
+  }
+ ],
+ "relations": [
+  {
+   "de": "C:n16",
+   "vers": "C:n04",
+   "type": "fixe le cadre de",
+   "appuis": [
+    "S:D11"
+   ]
+  }
+ ],
+ "sources_externes": [
+  {
+   "id": "EXT:1",
+   "titre": "Ouvrage de philosophie sur le perspectivisme",
+   "auteur": "Auteur externe",
+   "date": "",
+   "lien": ""
+  }
+ ],
+ "reponse": [
+  {
+   "phrase": "Selon la base, encore non validée sur ce point, décrire revient à produire une description relativisée [C:n04].",
+   "appuis": [
+    "C:n04",
+    "E1"
+   ]
+  },
+  {
+   "phrase": "Cette description est relative à une opération de génération, à l'entité-objet qu'elle produit et à une vue qui la qualifie.",
+   "appuis": [
+    "E2",
+    "C:n01",
+    "C:n02",
+    "C:n03"
+   ]
+  },
+  {
+   "phrase": "Le référentiel épistémique fixe ainsi le cadre de toute description, proposition de l'IA à confirmer.",
+   "appuis": [
+    "R1"
+   ]
+  },
+  {
+   "phrase": "Cette approche prolonge directement le perspectivisme philosophique.",
+   "appuis": [
+    "E3",
+    "EXT:1"
+   ]
+  },
+  {
+   "phrase": "Mioara Mugur-Schächter a d'ailleurs fondé cette idée dès ses premiers travaux de 1960.",
+   "appuis": []
+  }
+ ]
+}

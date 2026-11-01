@@ -29,7 +29,8 @@ def vers_rdf(g, base="https://noyau-ancrage.org/corpus/"):
     TYP = {"source": DCTERMS.BibliographicResource, "passage": EX.Passage, "traduction": EX.Traduction,
            "concept": SKOS.Concept, "definition": EX.Definition, "relation": EX.Relation,
            "question": EX.Question, "description": EX.Description, "resume": EX.Resume,
-           "retour": EX.RetourIA, "proposition": EX.PropositionIA}
+           "retour": EX.RetourIA, "proposition": EX.PropositionIA,
+           "affirmation": EX.AffirmationIA, "etape_ia": EX.EtapeRaisonnementIA}
     for eid, e in g.E.items():
         u = U[eid]; c = e["contenu"]
         G.add((u, RDF.type, PROV.Entity)); G.add((u, RDF.type, TYP[e["type"]]))
@@ -64,6 +65,8 @@ def vers_rdf(g, base="https://noyau-ancrage.org/corpus/"):
         elif e["type"] == "retour":
             G.add((u, EX.texte, Literal(c["texte"], lang="fr")))
             if c["controle"].get("verdict"): G.add((u, EX.verdictControle, Literal(c["controle"]["verdict"])))
+        elif e["type"] in ("affirmation", "etape_ia"):
+            G.add((u, EX.texte, Literal(c["texte"], lang="fr")))
         elif e["type"] == "proposition":
             G.add((u, EX.nature, Literal(c["nature"]))); G.add((u, EX.texte, Literal(c["texte"], lang="fr")))
             if c.get("cible") in U: G.add((u, EX.porteSur, U[c["cible"]]))

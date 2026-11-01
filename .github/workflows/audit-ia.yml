@@ -1,0 +1,22 @@
+name: Audit d'une réponse d'IA
+# Cas d'usage séparé de la boucle : n'alimente pas la base, ne produit aucune validation.
+on:
+  push:
+    paths: ['corpus/**/audits_ia/entrees/**']
+  workflow_dispatch:
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install -r requirements.txt
+      - run: |
+          python -m ancrage construire corpus/mcr
+          python -m ancrage auditer-ia corpus/mcr
+      - uses: actions/upload-artifact@v4
+        with:
+          name: audits-ia
+          path: corpus/*/audits_ia/sorties/

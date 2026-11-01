@@ -56,7 +56,7 @@ def _concordance(g, eid, cache):
         pas = {p for p, c in g.d["mentions"] if c == eid}
         n = sum(1 for p in pas if g.appui_atteste(p)) if pas else 0
         return (1 - 0.5 ** n) if n else 0.3, f"{n} élément(s) du socle attesté(s) le mentionnent"
-    if t in ("definition", "question", "relation", "description", "retour", "proposition"):
+    if t in ("definition", "question", "relation", "description", "retour", "proposition", "affirmation", "etape_ia"):
         par = [p for p in e["prov"]["derive_de"] if p in g.E]
         if not par:
             return 0.3, "aucun appui"

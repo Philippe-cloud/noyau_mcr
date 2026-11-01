@@ -53,6 +53,18 @@ python -m ancrage comparer corpus/mcr
 python exemples/test_garde_fou.py
 ```
 
+## Audit d'une réponse d'IA (cas séparé)
+
+Une IA répond à une question en déclarant sa trajectoire : les éléments du corpus qu'elle mobilise, les sources externes qu'elle cite, les relations qu'elle établit, les étapes de son raisonnement et les affirmations de sa réponse, chacune avec ses appuis (format `trajectoire-ia-v1`).
+
+Cette trajectoire passe par le même moteur de règles (graphe de genèse, règles de forme, indice d'ancrage, contrôle des statuts), mais **sur une copie du graphe** : l'audit ne modifie pas la base, ne compte pas dans le moniteur et ne produit aucune proposition pour l'autorité. Les sources externes sont plafonnées comme les contenus d'IA non validés.
+
+1. Obtenir la consigne : `python -m ancrage consigne-audit corpus/mcr "votre question"`, puis la donner à l'IA.
+2. Déposer sa réponse JSON dans `corpus/mcr/audits_ia/entrees/`.
+3. Le traitement « Audit d'une réponse d'IA » produit `audit.html` (lisible) et `audit.json` dans l'artefact « audits-ia ».
+
+Limite assumée : le raisonnement déclaré est la description que l'IA donne de son chemin, pas son fonctionnement interne.
+
 ## Retours de l'IA
 
 Dans l'application, l'onglet *Ma trajectoire* propose « Demander un retour » : Claude lit la dernière description d'une plante avec les éléments de la base (et leurs statuts) et commente le chemin de l'apprenant. Chaque phrase cite ses appuis ; un contrôle intégré vérifie le retour (identifiants du paquet seulement, éléments « proposés » présentés comme tels) avant de l'afficher.

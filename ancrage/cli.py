@@ -10,6 +10,11 @@
   python -m ancrage exporter-vues <corpus>          vues autorité, IA, trajectoires enrichies, moniteur
   python -m ancrage mettre-a-jour-app <corpus>      régénérer l'application HTML à partir de la dernière version
   python -m ancrage boucle      <corpus>            construire + exporter-vues + mettre-a-jour-app
+
+Audit d'une réponse d'IA (cas séparé : ne modifie pas la base) :
+  python -m ancrage consigne-audit <corpus> "<question>"   consigne à donner à l'IA (réponse en trajectoire-ia-v1)
+  python -m ancrage auditer-ia  <corpus> [fichier.json…]    auditer une ou plusieurs trajectoires d'IA
+                                (par défaut : tous les fichiers de <corpus>/audits_ia/entrees/)
 """
 import sys, os, json, glob, importlib, datetime
 from .graphe import Graphe
@@ -98,6 +103,19 @@ def main(a):
             print(f"  {k:28s} {s1:9s}→ {s2:9s} ancrage {x:.3f} → {y:.3f} ({d:+.3f})")
         for k in ("part_validee", "part_origine_ia_dans_valide", "ancrage_moyen"):
             print(f"  moniteur {k}: {A.d['moniteur'][k]} → {B.d['moniteur'][k]}")
+    elif cmd == "consigne-audit":
+        from . import audit_ia
+        print(audit_ia.consigne(g, a[2]))
+    elif cmd == "auditer-ia":
+        from . import audit_ia
+        fs = a[2:] or sorted(glob.glob(os.path.join(corpus, "audits_ia", "entrees", "*.json")))
+        if not fs:
+            print("Aucune trajectoire d'IA à auditer."); return
+        for f in fs:
+            r, out = audit_ia.executer(g, f, corpus)
+            print(f"{os.path.basename(f)} : {r['verdict']} ({r['affirmations_conformes']} affirmations conformes, "
+                  f"ancrage moyen {r['synthese']['ancrage_moyen']}) → {out}")
+            for p in r["problemes"] + r["avertissements"]: print("  -", p)
     elif cmd == "exporter-vues":
         out, fs = vues.exporter(g, corpus)
         print(f"Vues de la version {g.d['version']} → {out}")
