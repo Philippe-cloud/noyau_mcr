@@ -1,8 +1,15 @@
 name: Boucle du noyau
 on:
   push:
-    paths: ['corpus/**/entrees/**', 'ancrage/**', '!corpus/**/audits_ia/**']
+    paths: ['corpus/**/entrees/**', 'ancrage/**', 'applications/**', '!corpus/**/audits_ia/**']
   workflow_dispatch:
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+concurrency:
+  group: pages
+  cancel-in-progress: false
 jobs:
   boucle:
     runs-on: ubuntu-latest
@@ -18,3 +25,20 @@ jobs:
         with:
           name: sorties
           path: corpus/*/sorties/
+      - name: Préparer le site (application publique)
+        run: |
+          mkdir -p site
+          cp "$(ls -d corpus/mcr/sorties/*/ | sort | tail -1)explorer_mcr.html" site/index.html
+          touch site/.nojekyll
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: site
+  publier:
+    needs: boucle
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deploiement.outputs.page_url }}
+    steps:
+      - id: deploiement
+        uses: actions/deploy-pages@v4

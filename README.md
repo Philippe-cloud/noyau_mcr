@@ -38,6 +38,10 @@ python noyau_app.py --sans-navigateur
 
 L'exécutable n'est pas signé. Au premier lancement : « Informations complémentaires », puis « Exécuter quand même ».
 
+## Application en ligne (GitHub Pages)
+
+À chaque passage de la boucle, l'application régénérée est publiée sur https://philippe-cloud.github.io/noyau_mcr/ (à activer une fois : *Settings → Pages → Source : GitHub Actions*). Cette version publique fonctionne sans compte ; seuls les boutons qui font appel à l'IA demandent la version publiée sur claude.ai.
+
 ## Utilisation en local (Python 3.10+)
 
 ```
