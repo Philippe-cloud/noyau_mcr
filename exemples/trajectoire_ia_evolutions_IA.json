@@ -2,7 +2,7 @@
  "format": "trajectoire-ia-v1",
  "question": "Quelles sont les évolutions possibles de l'IA ?",
  "modele": "Claude Opus 5.5 (Anthropic)",
- "date": "2026-11-01T19:55:00",
+ "date": "2026-11-01T20:05:00",
  "sources_externes": [
   {
    "id": "EXT:1",
@@ -96,58 +96,43 @@
  "raisonnement": [
   {
    "nature": "savoir_interne",
-   "texte": "Je structure la réponse en six axes : capacités, autonomie (agents), monde physique, science, contraintes matérielles, gouvernance. Ce découpage est le mien ; il ne vient d'aucune source."
+   "texte": "Avant de chercher, je choisis cinq thèmes à partir de ce que je sais déjà : agents, état général de l'IA, robotique, énergie, science."
   },
   {
-   "texte": "Je vérifie d'abord si les capacités progressent encore ou si elles plafonnent.",
+   "texte": "Je lis les extraits renvoyés et je garde les sources jugées fiables ; j'écarte les sites commerciaux, les réseaux sociaux et les chiffres contradictoires.",
    "appuis": [
     "EXT:1",
     "EXT:2",
-    "EXT:3"
-   ]
-  },
-  {
-   "texte": "Je cherche ensuite où ces capacités se déploient concrètement : les agents, notamment en entreprise.",
-   "appuis": [
-    "EXT:2",
-    "EXT:4"
-   ]
-  },
-  {
-   "texte": "J'examine l'extension au monde physique : robots et modèles du monde.",
-   "appuis": [
+    "EXT:3",
+    "EXT:4",
     "EXT:5",
-    "EXT:6"
-   ]
-  },
-  {
-   "texte": "J'examine l'usage de l'IA dans la découverte scientifique.",
-   "appuis": [
+    "EXT:6",
+    "EXT:7",
     "EXT:8",
     "EXT:9"
    ]
   },
   {
-   "texte": "Je regarde les contraintes matérielles, d'abord l'énergie.",
+   "texte": "Je réutilise deux recherches faites la veille, sur la régulation et l'interprétabilité.",
    "appuis": [
-    "EXT:7"
-   ]
-  },
-  {
-   "texte": "Je regarde enfin la transparence, l'interprétabilité et la régulation.",
-   "appuis": [
-    "EXT:3",
     "EXT:10",
     "EXT:11"
    ]
   },
   {
-   "nature": "savoir_interne",
-   "texte": "Je projette ces tendances vers l'avenir : cette projection est une inférence de ma part, aucune source ne garantit qu'elles se prolongeront."
+   "texte": "Après lecture, j'organise la réponse en axes : capacités, agents, monde physique, science, contraintes, gouvernance.",
+   "appuis": [
+    "E2",
+    "E3"
+   ]
   },
   {
    "nature": "savoir_interne",
-   "texte": "J'ajoute, de mémoire et sans vérification, la diffusion de modèles plus petits et spécialisés, exécutables localement."
+   "texte": "Je projette ces tendances vers l'avenir : c'est une inférence de ma part, aucune source ne garantit qu'elles se prolongeront."
+  },
+  {
+   "nature": "savoir_interne",
+   "texte": "J'ajoute de mémoire, sans vérification, la diffusion de modèles plus petits et spécialisés, exécutables localement."
   }
  ],
  "relations": [
@@ -164,23 +149,33 @@
   {
    "phrase": "Selon le rapport AI Index 2026 de Stanford, les capacités des IA continuent de progresser au lieu de plafonner.",
    "appuis": [
-    "E2",
+    "E4",
     "EXT:1",
     "EXT:3"
-   ]
+   ],
+   "ce_que_dit_la_source": {
+    "EXT:1": "les modèles dépassent les humains sur des questions scientifiques de niveau doctoral, tout en échouant encore à des tâches simples comme lire une horloge à aiguilles.",
+    "EXT:3": "sur un test de programmation de référence, les résultats sont passés d'environ 60 % en 2025 à presque 100 %."
+   }
   },
   {
    "phrase": "Les agents, capables d'agir sur un ordinateur, ont fait un bond : leur taux de réussite sur un test de tâches informatiques réelles est passé d'environ 12 % à 66 %.",
    "appuis": [
     "EXT:2"
-   ]
+   ],
+   "ce_que_dit_la_source": {
+    "EXT:2": "le taux de réussite des agents sur un test de tâches informatiques réelles (OSWorld) est passé d'environ 12 % à environ 66 %."
+   }
   },
   {
    "phrase": "Leur intégration dans les logiciels d'entreprise est l'évolution la plus immédiate : Gartner prévoit que 40 % des applications d'entreprise intégreront des agents spécialisés fin 2026, contre moins de 5 % en 2025.",
    "appuis": [
-    "E3",
+    "E4",
     "EXT:4"
-   ]
+   ],
+   "ce_que_dit_la_source": {
+    "EXT:4": "Gartner prévoit que 40 % des applications d'entreprise utiliseront des agents fin 2026, contre moins de 5 % en 2025."
+   }
   },
   {
    "phrase": "L'IA s'étend au monde physique : des modèles du monde, qui simulent l'environnement, servent à entraîner des robots, et 13 modèles de ce type ont été présentés en juin 2026.",
@@ -188,65 +183,217 @@
     "E4",
     "EXT:5",
     "EXT:6"
-   ]
+   ],
+   "ce_que_dit_la_source": {
+    "EXT:5": "13 modèles pour robots et modèles du monde ont été présentés en juin 2026, soit un tous les deux jours ; l'enjeu se déplace vers la fiabilité.",
+    "EXT:6": "les modèles du monde deviennent des simulateurs dans lesquels les robots apprennent, au lieu de seulement représenter le monde."
+   }
   },
   {
    "phrase": "En science, des systèmes multi-agents proposent des hypothèses ensuite vérifiées en laboratoire, comme Co-Scientist de Google, publié dans Nature en 2026.",
    "appuis": [
-    "E5",
+    "E4",
     "EXT:8",
     "EXT:9"
-   ]
+   ],
+   "ce_que_dit_la_source": {
+    "EXT:8": "Co-Scientist, système multi-agents fondé sur Gemini, a été publié dans Nature et est utilisé en recherche biomédicale.",
+    "EXT:9": "Co-Scientist a proposé des candidats médicaments contre une leucémie, validés par des expériences en laboratoire ; ses évaluations montrent qu'il s'améliore quand on lui donne plus de calcul au moment de répondre."
+   }
   },
   {
    "phrase": "Ces systèmes s'améliorent aussi en consacrant davantage de calcul au moment de répondre, ce qui augmente la qualité des hypothèses produites.",
    "appuis": [
     "EXT:9"
-   ]
+   ],
+   "ce_que_dit_la_source": {
+    "EXT:9": "Co-Scientist a proposé des candidats médicaments contre une leucémie, validés par des expériences en laboratoire ; ses évaluations montrent qu'il s'améliore quand on lui donne plus de calcul au moment de répondre."
+   }
   },
   {
    "phrase": "La contrainte énergétique s'alourdit : selon l'AIE, la consommation des centres de données doublerait d'ici 2030, pour atteindre environ 3 % de l'électricité mondiale, et celle liée à l'IA triplerait.",
    "appuis": [
-    "E6",
+    "E4",
     "EXT:7"
-   ]
+   ],
+   "ce_que_dit_la_source": {
+    "EXT:7": "la consommation des centres de données doublerait d'ici 2030 (de 485 à 950 TWh, environ 3 % de la demande mondiale), celle liée à l'IA triplerait, et les agents sont cités parmi les usages gourmands en hausse."
+   }
   },
   {
    "phrase": "L'essor des agents, usages gourmands en calcul, accentue cette pression : c'est un lien que j'établis par inférence à partir du rapport de l'AIE.",
    "appuis": [
-    "R1"
-   ]
+    "R1",
+    "EXT:7"
+   ],
+   "ce_que_dit_la_source": {
+    "EXT:7": "la consommation des centres de données doublerait d'ici 2030 (de 485 à 950 TWh, environ 3 % de la demande mondiale), celle liée à l'IA triplerait, et les agents sont cités parmi les usages gourmands en hausse."
+   }
   },
   {
    "phrase": "La transparence recule : les modèles les plus performants sont souvent les moins documentés, ce qui limite la possibilité de les auditer.",
    "appuis": [
-    "E7",
+    "E4",
     "EXT:3"
-   ]
+   ],
+   "ce_que_dit_la_source": {
+    "EXT:3": "les modèles les plus performants sont de moins en moins documentés, ce qui empêche les chercheurs extérieurs de reproduire, d'auditer et de vérifier les affirmations de sécurité."
+   }
   },
   {
    "phrase": "L'interprétabilité, qui cherche à comprendre le fonctionnement interne des modèles, progresse mais reste partielle.",
    "appuis": [
     "EXT:10"
-   ]
+   ],
+   "ce_que_dit_la_source": {
+    "EXT:10": "l'interprétabilité mécaniste figure parmi les percées de 2026, mais les modèles restent mal compris, même de leurs concepteurs."
+   }
   },
   {
    "phrase": "En Europe, les obligations de l'AI Act pour les systèmes à haut risque ont été repoussées au 2 décembre 2027.",
    "appuis": [
     "EXT:11"
-   ]
+   ],
+   "ce_que_dit_la_source": {
+    "EXT:11": "le règlement (UE) 2026/1744, en vigueur depuis le 27 juillet 2026, reporte au 2 décembre 2027 les obligations des systèmes à haut risque."
+   }
   },
   {
    "phrase": "Selon mes connaissances, non vérifiées ici, des modèles plus petits et spécialisés, utilisables localement, devraient aussi se développer.",
    "appuis": [
-    "E9"
-   ]
+    "E6"
+   ],
+   "ce_que_dit_la_source": {}
   },
   {
    "phrase": "Ces évolutions ne sont pas des certitudes : les prolonger dans l'avenir relève d'une inférence de ma part.",
    "appuis": [
-    "E8"
+    "E5"
+   ],
+   "ce_que_dit_la_source": {}
+  }
+ ],
+ "ordre_du_chemin": "Avant toute recherche, j'ai choisi cinq thèmes à partir de ce que je savais déjà. J'ai lancé les cinq recherches en même temps, puis j'ai réutilisé deux recherches faites la veille pour une autre question. Je n'ai ouvert aucune page en entier : je me suis fondé sur les extraits renvoyés par le moteur de recherche. Ce n'est qu'après avoir lu ces extraits que j'ai fixé les axes de la réponse.",
+ "recherches": [
+  {
+   "requete": "AI agents 2026 trends autonomous agents enterprise adoption report",
+   "moment": "1er nov., lancée avec les recherches 2 à 5",
+   "pourquoi": "Savoir où en est le déploiement des agents.",
+   "retenues": [
+    "EXT:4"
+   ],
+   "rejetees": [
+    {
+     "titre": "CMARIX, statistiques sur les agents",
+     "raison": "agrégateur commercial, chiffres non vérifiables"
+    },
+    {
+     "titre": "Salesmate, Future of AI agents",
+     "raison": "annonce 80 % d'applications avec agents, en contradiction avec la prévision de Gartner (40 %)"
+    },
+    {
+     "titre": "SecondTalent, prévisions sur les agents",
+     "raison": "prévisions sans source identifiée"
+    },
+    {
+     "titre": "Accelirate, Agentic AI Statistics",
+     "raison": "chiffre de 79 % sans méthode indiquée"
+    }
    ]
+  },
+  {
+   "requete": "Stanford AI Index 2026 key findings",
+   "moment": "1er nov.",
+   "pourquoi": "Vérifier si les capacités progressent ou plafonnent, à partir d'un rapport indépendant de référence.",
+   "retenues": [
+    "EXT:1",
+    "EXT:2",
+    "EXT:3"
+   ],
+   "rejetees": [
+    {
+     "titre": "Article Medium sur l'AI Index",
+     "raison": "auteur non identifiable"
+    },
+    {
+     "titre": "PW Skills, page sur les statistiques",
+     "raison": "page de formation commerciale, hors sujet"
+    }
+   ]
+  },
+  {
+   "requete": "world models embodied AI robotics 2026 progress",
+   "moment": "1er nov.",
+   "pourquoi": "Voir si l'IA sort de l'écran vers le monde physique.",
+   "retenues": [
+    "EXT:5",
+    "EXT:6"
+   ],
+   "rejetees": [
+    {
+     "titre": "Humanoid.guide, rapport 2026",
+     "raison": "rapport commercial vendu, à visée promotionnelle"
+    },
+    {
+     "titre": "BestHub, Embodied AI in 2026",
+     "raison": "origine incertaine (texte repris d'une autre source)"
+    },
+    {
+     "titre": "Revues arXiv sur les modèles du monde (2025)",
+     "raison": "trop générales et antérieures à 2026"
+    }
+   ]
+  },
+  {
+   "requete": "AI data center energy consumption 2026 IEA electricity demand",
+   "moment": "1er nov.",
+   "pourquoi": "Identifier les contraintes matérielles, à partir de l'Agence internationale de l'énergie.",
+   "retenues": [
+    "EXT:7"
+   ],
+   "rejetees": [
+    {
+     "titre": "Articles de 2024 annonçant 1 000 TWh en 2026",
+     "raison": "ancienne prévision, remplacée par le rapport 2026 de l'AIE"
+    },
+    {
+     "titre": "Our World in Data, énergie et IA",
+     "raison": "fiable mais redondant avec le rapport de l'AIE"
+    }
+   ]
+  },
+  {
+   "requete": "AI scientific discovery 2026 AI co-scientist results",
+   "moment": "1er nov.",
+   "pourquoi": "Savoir si l'IA contribue déjà à la découverte scientifique.",
+   "retenues": [
+    "EXT:8",
+    "EXT:9"
+   ],
+   "rejetees": [
+    {
+     "titre": "Publications LinkedIn sur les articles de Nature",
+     "raison": "réseaux sociaux ; elles signalaient que ces systèmes exigent une supervision humaine, point que je n'ai pas pu vérifier dans une source primaire"
+    }
+   ]
+  },
+  {
+   "requete": "AI Act obligations systèmes à haut risque report 2027 omnibus numérique",
+   "moment": "31 oct., faite pour une autre question, réutilisée",
+   "pourquoi": "Situer la régulation européenne.",
+   "retenues": [
+    "EXT:11"
+   ],
+   "rejetees": []
+  },
+  {
+   "requete": "mechanistic interpretability 2026 progress black box large language models",
+   "moment": "31 oct., faite pour une autre question, réutilisée",
+   "pourquoi": "Situer l'état de la compréhension interne des modèles.",
+   "retenues": [
+    "EXT:10"
+   ],
+   "rejetees": []
   }
  ]
 }

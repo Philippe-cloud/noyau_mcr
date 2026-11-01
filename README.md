@@ -63,7 +63,7 @@ Cette trajectoire passe par le même moteur de règles (graphe de genèse, règl
 2. Déposer sa réponse JSON dans `corpus/mcr/audits_ia/entrees/`.
 3. Le traitement « Audit d'une réponse d'IA » produit `audit.html` (lisible) et `audit.json` dans l'artefact « audits-ia ».
 
-**Sans corpus** : pour une question hors corpus, `python -m ancrage auditer-ia --sans-corpus fichier.json`. Les sources consultées (avec lien) tiennent lieu de socle provisoire ; les étapes `"nature": "savoir_interne"` déclarent ce que l'IA avance de son seul entraînement, et une affirmation qui ne remonte à aucune source doit le signaler. Exemple réel : `exemples/trajectoire_ia_evolutions_IA.json`.
+**Sans corpus** : pour une question hors corpus, `python -m ancrage auditer-ia --sans-corpus fichier.json`. Les sources consultées (avec lien) tiennent lieu de socle provisoire ; les étapes `"nature": "savoir_interne"` déclarent ce que l'IA avance de son seul entraînement, et une affirmation qui ne remonte à aucune source doit le signaler. Pour un chemin lisible, la trajectoire peut aussi déclarer ses `recherches` dans l'ordre réel (requête, sources retenues, sources rejetées avec leur raison) et, pour chaque affirmation, `ce_que_dit_la_source` ; le rapport raconte alors la genèse de chaque phrase en langage courant. Exemple réel : `exemples/trajectoire_ia_evolutions_IA.json`.
 
 Limite assumée : le raisonnement déclaré est la description que l'IA donne de son chemin, pas son fonctionnement interne.
 

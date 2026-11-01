@@ -41,6 +41,41 @@ def graphe_vide():
     return g
 
 
+def _court(x, n=110):
+    x = " ".join(str(x).split())
+    return x if len(x) <= n else x[:n].rsplit(" ", 1)[0] + "…"
+
+
+def genese_courante(g, fid, reformulations, trouve_par, vu=None):
+    """La genèse d'une affirmation racontée en phrases simples."""
+    vu = vu if vu is not None else set()
+    phrases = []
+    for x in g.E[fid]["prov"]["derive_de"]:
+        if x in vu:
+            continue
+        vu.add(x)
+        e = g.E[x]; c = e["contenu"]
+        if x.startswith("ETP:"):
+            if c.get("savoir_interne"):
+                phrases.append(f"Elle repose sur ce que l'IA sait de son entraînement, sans vérification (étape {x[4:]} : « {_court(c['texte'])} »).")
+            else:
+                phrases.append(f"Elle prolonge l'étape {x[4:]} du raisonnement : « {_court(c['texte'])} ».")
+        elif x.startswith("RIA:"):
+            phrases.append(f"Elle s'appuie sur un rapprochement fait par l'IA : « {_lib(g, c['de'])} » {c['libelle']} « {_lib(g, c['vers'])} ».")
+            phrases += genese_courante(g, x, reformulations, trouve_par, vu)
+        elif e["type"] == "source":
+            d = f"Elle s'appuie sur « {_court(c['titre'], 90)} » ({c.get('auteurs', '')}{', ' + c['date'] if c.get('date') else ''})"
+            if x in trouve_par:
+                d += f", trouvé par la recherche n° {trouve_par[x][0]} (« {trouve_par[x][1]} »)"
+            d += "."
+            if reformulations.get(x):
+                d += f" Ce que dit la source, reformulé par l'IA : {reformulations[x]}"
+            phrases.append(d)
+        else:
+            phrases.append(f"Elle s'appuie sur « {_court(_lib(g, x), 90)} » ({g.statut(x)}).")
+    return phrases
+
+
 def auditer(g0, t, sans_corpus=False):
     """Retourne le rapport d'audit d'une trajectoire d'IA, sans toucher au graphe g0.
 
@@ -81,6 +116,16 @@ def auditer(g0, t, sans_corpus=False):
             (ok if y else inconnus).append(y or x)
         return list(dict.fromkeys(ok)), inconnus
 
+    # recherches effectuées, dans l'ordre réel
+    rech = t.get("recherches", [])
+    trouve_par = {}
+    for k, q in enumerate(rech, 1):
+        for x in q.get("retenues", []):
+            trouve_par.setdefault(ext.get(x, x), (k, q.get("requete", "")))
+    for sid in [x for x in g.E if x.startswith("EXT:")]:
+        if rech and sid not in trouve_par:
+            avert.append(f"{sid} : source dont la recherche d'origine n'est pas déclarée")
+
     # relations établies par l'IA
     locaux = {}
     for k, r in enumerate(t.get("relations", []), 1):
@@ -111,7 +156,7 @@ def auditer(g0, t, sans_corpus=False):
             avert.append(f"étape {k} sans appui : elle ne repose que sur l'IA")
 
     # affirmations de la réponse
-    affs = []
+    affs, reformul = [], {}
     for k, a in enumerate(t.get("reponse", []), 1):
         ph = a.get("phrase", "").strip()
         ap, inc = resoudre(a.get("appuis"), locaux)
@@ -129,6 +174,11 @@ def auditer(g0, t, sans_corpus=False):
             elif st == "rejete":
                 pb.append(f"{x} a été rejeté par l'autorité")
         affs.append((fid, ph, ap, pb))
+        refs = {ext.get(k, k): v for k, v in (a.get("ce_que_dit_la_source") or {}).items()}
+        for x in ap:
+            if g.E[x]["type"] == "source" and x not in refs:
+                avert.append(f"affirmation {k} : ce que dit {x} n'est pas précisé")
+        reformul[fid] = refs
 
     # moteur de règles : ancrage puis formes SHACL, sur la copie
     calcul.tout_calculer(g)
@@ -177,7 +227,8 @@ def auditer(g0, t, sans_corpus=False):
         brut = round(__import__("math").prod(cp) ** (1 / len(cp)), 3) if cp and min(cp) > 0 else 0
         lignes.append({"id": fid, "phrase": ph, "ancrage": a["indice"], "ancrage_avant_plafond": brut, "niveau": a["niveau"],
                        "composantes": a["composantes"], "explications": a["explications"],
-                       "genese": _genese(g, fid), "appuis": [el(x) for x in ap], "problemes": pb})
+                       "genese": _genese(g, fid), "genese_courante": genese_courante(g, fid, reformul.get(fid, {}), trouve_par),
+                       "appuis": [el(x) for x in ap], "problemes": pb})
         nb_ok += not pb
     taux = nb_ok / len(affs) if affs else 0
     verdict = "conforme" if taux == 1 and not problemes and not viol else ("à reprendre" if taux >= 0.6 else "refusée")
@@ -198,6 +249,10 @@ def auditer(g0, t, sans_corpus=False):
             "problemes": problemes, "avertissements": avert,
             "regles_de_forme": {"conforme": not viol, "violations": viol},
             "affirmations": lignes,
+            "recherches": [{"n": k, "requete": q.get("requete", ""), "moment": q.get("moment", ""), "pourquoi": q.get("pourquoi", ""),
+                            "retenues": [{"id": ext.get(x, x), "titre": g.E[ext.get(x, x)]["contenu"]["titre"]} for x in q.get("retenues", []) if ext.get(x, x) in g.E],
+                            "rejetees": q.get("rejetees", [])} for k, q in enumerate(rech, 1)],
+            "ordre_du_chemin": t.get("ordre_du_chemin", ""),
             "raisonnement_declare": [{"id": e, "texte": g.E[e]["contenu"]["texte"], "appuis": [el(x) for x in g.E[e]["prov"]["derive_de"]],
                                       "ancrage": g.E[e]["ancrage"]["indice"]} for e in etapes],
             "sources_externes": [el(x) | {"lien": g.E[x]["contenu"].get("lien", "")} for x in g.E if x.startswith("EXT:")],
@@ -233,11 +288,19 @@ def rapport_html(r):
     def ligne(l):
         pbs = "".join("<div class='pb'>⚠ " + e(p) + "</div>" for p in l["problemes"])
         aps = "".join(ap(a) for a in l["appuis"]) or "<i>aucun appui</i>"
-        return ("<tr><td>" + e(l["phrase"]) + "<div class='gen'>Genèse : " + e(l["genese"]) + "</div>" + pbs + "</td>"
+        gc = "".join("<li>" + e(x) + "</li>" for x in l.get("genese_courante", []))
+        return ("<tr><td><b>" + e(l["phrase"]) + "</b><ul class='gc'>" + gc + "</ul>"
+                "<details class='gen'><summary>chaîne technique</summary>" + e(l["genese"]) + "</details>" + pbs + "</td>"
                 "<td class='c'><b style='color:" + col[l["niveau"]] + "'>" + str(l["ancrage"]) + "</b><br><small>" + l["niveau"] + "</small>"
                 + ("<br><small title='indice sans le plafond appliqué aux contenus d’IA non validés'>sans plafond : " + str(l["ancrage_avant_plafond"]) + "</small>" if l["ancrage_avant_plafond"] > l["ancrage"] else "") + "</td>"
                 "<td>" + aps + "</td></tr>")
     rows = "".join(ligne(l) for l in r["affirmations"])
+    def rech(q):
+        ret = "".join("<li>✔ " + e(x["titre"]) + "</li>" for x in q["retenues"]) or "<li><i>aucune retenue</i></li>"
+        rej = "".join("<li>✘ " + e(x.get("titre", "")) + " — <i>" + e(x.get("raison", "")) + "</i></li>" for x in q["rejetees"])
+        return ("<div class='rq'><b>Recherche " + str(q["n"]) + "</b> · « " + e(q["requete"]) + " »" + (" · " + e(q["moment"]) if q["moment"] else "")
+                + ("<div class='pq'>" + e(q["pourquoi"]) + "</div>" if q["pourquoi"] else "") + "<ul>" + ret + rej + "</ul></div>")
+    chemin = "".join(rech(q) for q in r.get("recherches", []))
     if r.get("mode") == "sans corpus":
         nsrc = len(r["sources_externes"])
         synth = (f"<ul><li>Mode <b>sans corpus</b> : aucune autorité n'a validé de socle ; les sources consultées tiennent lieu de socle provisoire.</li>"
@@ -256,14 +319,17 @@ h2{{font-size:17px;color:#1f3864;border-bottom:1px solid #dce3ee;padding-bottom:
 .v{{display:inline-block;padding:3px 10px;border-radius:10px;color:#fff;background:{vcol[r['verdict']]}}}
 table{{border-collapse:collapse;width:100%;font-size:14px}}td,th{{border-bottom:1px solid #e5e7eb;padding:7px;vertical-align:top;text-align:left}}th{{background:#f3f6fb}}
 .c{{text-align:center;white-space:nowrap}}.ap{{display:block;margin:2px 0}}.gen{{color:#6b7280;font-size:12.5px;margin-top:4px}}.pb{{color:#b91c1c;font-size:13px}}
+.gc{{margin:4px 0 2px 18px;padding:0;font-size:13.5px;color:#374151}}.gc li{{margin:2px 0}}.gen summary{{cursor:pointer;color:#6b7280;font-size:12px}}
+.rq{{border:1px solid #e5e7eb;border-radius:8px;padding:8px 12px;margin:8px 0;font-size:14px}}.rq ul{{margin:4px 0 0 0;padding-left:18px}}.pq{{color:#4b5563;font-size:13.5px;font-style:italic}}
 .lim{{background:#f3f6fb;border-left:4px solid #2e5597;padding:8px 12px;font-size:14px}}</style></head><body>
 <h1>Audit d'une réponse d'IA</h1>
 <p class="sous">{e(r['modele'])} · {e(r['date'])} · {e(r['corpus'])}{(', version ' + e(r['version_du_modele'])) if r['version_du_modele'] else ''}</p>
 <p><b>Question :</b> {e(r['question'])}</p>
 <p><span class="v">{e(r['verdict'])}</span> &nbsp; {e(r['affirmations_conformes'])} affirmations conformes · ancrage moyen <b>{s['ancrage_moyen']}</b></p>
 {synth}
-<h2>Affirmations</h2><p style="font-size:13.5px;color:#4b5563">Tant qu'aucun humain n'a validé une affirmation d'IA, son ancrage est plafonné à 0,5. L'indice « sans plafond » montre ce que vaudrait son chemin de sources s'il était validé : il permet de distinguer une affirmation bien sourcée d'une affirmation qui ne repose que sur l'IA.</p><table><tr><th>Affirmation</th><th>Ancrage</th><th>Appuis</th></tr>{rows}</table>
-<h2>Raisonnement déclaré</h2><ol>{etapes or '<li>Aucun.</li>'}</ol>
+{("<h2>Mon chemin, dans l'ordre réel</h2><p class='pq'>" + e(r.get("ordre_du_chemin", "")) + "</p>" + chemin) if chemin else ""}
+<h2>Comment j'ai construit la réponse</h2><ol>{etapes or '<li>Aucun.</li>'}</ol>
+<h2>Affirmations</h2><p style="font-size:13.5px;color:#4b5563">Tant qu'aucun humain n'a validé une affirmation d'IA, son ancrage est plafonné à 0,5. L'indice « sans plafond » montre ce que vaudrait son chemin de sources s'il était validé : il permet de distinguer une affirmation bien sourcée d'une affirmation qui ne repose que sur l'IA.</p><table><tr><th>Affirmation et sa genèse</th><th>Ancrage</th><th>Appuis</th></tr>{rows}</table>
 <h2>{'Sources consultées' if r.get('mode') == 'sans corpus' else 'Sources externes'}</h2><ul>{ext or '<li>Aucune.</li>'}</ul>
 <h2>Points relevés</h2><ul>{pbs}</ul>
 <p class="lim">{e(r['limite'])}</p></body></html>"""
