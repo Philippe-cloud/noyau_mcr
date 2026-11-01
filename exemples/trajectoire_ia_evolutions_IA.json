@@ -1,0 +1,252 @@
+{
+ "format": "trajectoire-ia-v1",
+ "question": "Quelles sont les évolutions possibles de l'IA ?",
+ "modele": "Claude Opus 5.5 (Anthropic)",
+ "date": "2026-11-01T19:55:00",
+ "sources_externes": [
+  {
+   "id": "EXT:1",
+   "titre": "Stanford's AI Index 2026 shows rapid progress, growing safety concerns, and declining public trust",
+   "auteur": "The Decoder (résumé du rapport Stanford HAI)",
+   "date": "2026-04",
+   "lien": "https://the-decoder.com/?p=34331",
+   "consultee_le": "2026-11-01"
+  },
+  {
+   "id": "EXT:2",
+   "titre": "Stanford AI Index 2026 report: 5 key insights on AI adoption and competency",
+   "auteur": "Digit (résumé du rapport Stanford HAI)",
+   "date": "2026-04",
+   "lien": "https://www.digit.in/features/general/stanford-ai-index-2026-report-5-key-insights-on-ai-adoption-and-competency.html/amp/",
+   "consultee_le": "2026-11-01"
+  },
+  {
+   "id": "EXT:3",
+   "titre": "Key Insights from Stanford's 2026 AI Index Report",
+   "auteur": "Fudan University, CGAIG",
+   "date": "2026-04-16",
+   "lien": "https://cgaig.fudan.edu.cn/d9/c5/c54667a776645/page.htm",
+   "consultee_le": "2026-11-01"
+  },
+  {
+   "id": "EXT:4",
+   "titre": "2026: The Year of Agentic AI in Enterprise (prévision Gartner relayée)",
+   "auteur": "Ainauten News",
+   "date": "2026",
+   "lien": "https://news.ainauten.com/en/story/agentic-ai-enterprise-adoption-2026",
+   "consultee_le": "2026-11-01"
+  },
+  {
+   "id": "EXT:5",
+   "titre": "Every 48 Hours, a New Embodied AI Model Arrived in June 2026",
+   "auteur": "eWeek, A. Abdullahi",
+   "date": "2026-07-14",
+   "lien": "https://www.eweek.com/news/embodied-ai-robot-foundation-models/",
+   "consultee_le": "2026-11-01"
+  },
+  {
+   "id": "EXT:6",
+   "titre": "AGIBOT unveils Genie Envisioner 2.0 to advance world models into scalable simulators",
+   "auteur": "The Robot Report",
+   "date": "2026-04-10",
+   "lien": "https://www.therobotreport.com/agibot-unveils-genie-envisioner-2-0-advance-world-models-scalable-simulators-embodied-ai/",
+   "consultee_le": "2026-11-01"
+  },
+  {
+   "id": "EXT:7",
+   "titre": "AI and data centre electricity use continue to surge, IEA finds",
+   "auteur": "Enlit World, J. Spencer Jones (rapport AIE)",
+   "date": "2026-04-17",
+   "lien": "https://www.enlit.world/library/ai-and-data-centre-electricity-use-continue-to-surge-iea-finds",
+   "consultee_le": "2026-11-01"
+  },
+  {
+   "id": "EXT:8",
+   "titre": "A New Era of Discovery: Google Research at I/O 2026",
+   "auteur": "Google Research, Y. Matias",
+   "date": "2026-05-28",
+   "lien": "https://research.google/blog/a-new-era-of-innovation-google-research-at-io-2026",
+   "consultee_le": "2026-11-01"
+  },
+  {
+   "id": "EXT:9",
+   "titre": "Accelerating scientific discovery with Co-Scientist (Nature, vol. 655)",
+   "auteur": "Gottweis, Weng et al.",
+   "date": "2026-07-09",
+   "lien": "https://cris.huji.ac.il/en/publications/accelerating-scientific-discovery-with-co-scientist/",
+   "consultee_le": "2026-11-01"
+  },
+  {
+   "id": "EXT:10",
+   "titre": "Mechanistic interpretability: 10 Breakthrough Technologies 2026",
+   "auteur": "MIT Technology Review",
+   "date": "2026-01-12",
+   "lien": "https://www.technologyreview.com/2026/01/12/1130003/mechanistic-interpretability-ai-research-models-2026-breakthrough-technologies/",
+   "consultee_le": "2026-11-01"
+  },
+  {
+   "id": "EXT:11",
+   "titre": "Omnibus numérique IA : règlement (UE) 2026/1744",
+   "auteur": "donneespersonnelles.fr",
+   "date": "2026-07",
+   "lien": "https://donneespersonnelles.fr/omnibus-numerique-ia",
+   "consultee_le": "2026-11-01"
+  }
+ ],
+ "raisonnement": [
+  {
+   "nature": "savoir_interne",
+   "texte": "Je structure la réponse en six axes : capacités, autonomie (agents), monde physique, science, contraintes matérielles, gouvernance. Ce découpage est le mien ; il ne vient d'aucune source."
+  },
+  {
+   "texte": "Je vérifie d'abord si les capacités progressent encore ou si elles plafonnent.",
+   "appuis": [
+    "EXT:1",
+    "EXT:2",
+    "EXT:3"
+   ]
+  },
+  {
+   "texte": "Je cherche ensuite où ces capacités se déploient concrètement : les agents, notamment en entreprise.",
+   "appuis": [
+    "EXT:2",
+    "EXT:4"
+   ]
+  },
+  {
+   "texte": "J'examine l'extension au monde physique : robots et modèles du monde.",
+   "appuis": [
+    "EXT:5",
+    "EXT:6"
+   ]
+  },
+  {
+   "texte": "J'examine l'usage de l'IA dans la découverte scientifique.",
+   "appuis": [
+    "EXT:8",
+    "EXT:9"
+   ]
+  },
+  {
+   "texte": "Je regarde les contraintes matérielles, d'abord l'énergie.",
+   "appuis": [
+    "EXT:7"
+   ]
+  },
+  {
+   "texte": "Je regarde enfin la transparence, l'interprétabilité et la régulation.",
+   "appuis": [
+    "EXT:3",
+    "EXT:10",
+    "EXT:11"
+   ]
+  },
+  {
+   "nature": "savoir_interne",
+   "texte": "Je projette ces tendances vers l'avenir : cette projection est une inférence de ma part, aucune source ne garantit qu'elles se prolongeront."
+  },
+  {
+   "nature": "savoir_interne",
+   "texte": "J'ajoute, de mémoire et sans vérification, la diffusion de modèles plus petits et spécialisés, exécutables localement."
+  }
+ ],
+ "relations": [
+  {
+   "de": "EXT:4",
+   "vers": "EXT:7",
+   "type": "accroît la pression sur",
+   "appuis": [
+    "EXT:7"
+   ]
+  }
+ ],
+ "reponse": [
+  {
+   "phrase": "Selon le rapport AI Index 2026 de Stanford, les capacités des IA continuent de progresser au lieu de plafonner.",
+   "appuis": [
+    "E2",
+    "EXT:1",
+    "EXT:3"
+   ]
+  },
+  {
+   "phrase": "Les agents, capables d'agir sur un ordinateur, ont fait un bond : leur taux de réussite sur un test de tâches informatiques réelles est passé d'environ 12 % à 66 %.",
+   "appuis": [
+    "EXT:2"
+   ]
+  },
+  {
+   "phrase": "Leur intégration dans les logiciels d'entreprise est l'évolution la plus immédiate : Gartner prévoit que 40 % des applications d'entreprise intégreront des agents spécialisés fin 2026, contre moins de 5 % en 2025.",
+   "appuis": [
+    "E3",
+    "EXT:4"
+   ]
+  },
+  {
+   "phrase": "L'IA s'étend au monde physique : des modèles du monde, qui simulent l'environnement, servent à entraîner des robots, et 13 modèles de ce type ont été présentés en juin 2026.",
+   "appuis": [
+    "E4",
+    "EXT:5",
+    "EXT:6"
+   ]
+  },
+  {
+   "phrase": "En science, des systèmes multi-agents proposent des hypothèses ensuite vérifiées en laboratoire, comme Co-Scientist de Google, publié dans Nature en 2026.",
+   "appuis": [
+    "E5",
+    "EXT:8",
+    "EXT:9"
+   ]
+  },
+  {
+   "phrase": "Ces systèmes s'améliorent aussi en consacrant davantage de calcul au moment de répondre, ce qui augmente la qualité des hypothèses produites.",
+   "appuis": [
+    "EXT:9"
+   ]
+  },
+  {
+   "phrase": "La contrainte énergétique s'alourdit : selon l'AIE, la consommation des centres de données doublerait d'ici 2030, pour atteindre environ 3 % de l'électricité mondiale, et celle liée à l'IA triplerait.",
+   "appuis": [
+    "E6",
+    "EXT:7"
+   ]
+  },
+  {
+   "phrase": "L'essor des agents, usages gourmands en calcul, accentue cette pression : c'est un lien que j'établis par inférence à partir du rapport de l'AIE.",
+   "appuis": [
+    "R1"
+   ]
+  },
+  {
+   "phrase": "La transparence recule : les modèles les plus performants sont souvent les moins documentés, ce qui limite la possibilité de les auditer.",
+   "appuis": [
+    "E7",
+    "EXT:3"
+   ]
+  },
+  {
+   "phrase": "L'interprétabilité, qui cherche à comprendre le fonctionnement interne des modèles, progresse mais reste partielle.",
+   "appuis": [
+    "EXT:10"
+   ]
+  },
+  {
+   "phrase": "En Europe, les obligations de l'AI Act pour les systèmes à haut risque ont été repoussées au 2 décembre 2027.",
+   "appuis": [
+    "EXT:11"
+   ]
+  },
+  {
+   "phrase": "Selon mes connaissances, non vérifiées ici, des modèles plus petits et spécialisés, utilisables localement, devraient aussi se développer.",
+   "appuis": [
+    "E9"
+   ]
+  },
+  {
+   "phrase": "Ces évolutions ne sont pas des certitudes : les prolonger dans l'avenir relève d'une inférence de ma part.",
+   "appuis": [
+    "E8"
+   ]
+  }
+ ]
+}

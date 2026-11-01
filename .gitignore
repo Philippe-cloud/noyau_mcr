@@ -6,3 +6,4 @@ dist/
 corpus/*/versions/*.json
 corpus/*/versions/*.jsonld
 corpus/*/sorties/
+audits_sans_corpus/

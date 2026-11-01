@@ -15,6 +15,7 @@ Audit d'une réponse d'IA (cas séparé : ne modifie pas la base) :
   python -m ancrage consigne-audit <corpus> "<question>"   consigne à donner à l'IA (réponse en trajectoire-ia-v1)
   python -m ancrage auditer-ia  <corpus> [fichier.json…]    auditer une ou plusieurs trajectoires d'IA
                                 (par défaut : tous les fichiers de <corpus>/audits_ia/entrees/)
+  python -m ancrage auditer-ia --sans-corpus <fichier.json>  question hors corpus : sources du web, savoir interne déclaré
 """
 import sys, os, json, glob, importlib, datetime
 from .graphe import Graphe
@@ -65,6 +66,14 @@ def main(a):
     if len(a) < 2:
         print(__doc__); return
     cmd, corpus = a[0], a[1]
+    if cmd == "auditer-ia" and corpus == "--sans-corpus":
+        from . import audit_ia
+        for f in a[2:]:
+            r, out = audit_ia.executer(audit_ia.graphe_vide(), f, "audits_sans_corpus", sans_corpus=True)
+            print(f"{os.path.basename(f)} : {r['verdict']} ({r['affirmations_conformes']} affirmations conformes, "
+                  f"ancrage moyen {r['synthese']['ancrage_moyen']}) → {out}")
+            for p in r["problemes"] + r["avertissements"]: print("  -", p)
+        return
     if cmd == "construire":
         return construire(corpus)
     if cmd == "boucle":

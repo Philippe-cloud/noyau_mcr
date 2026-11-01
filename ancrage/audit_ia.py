@@ -17,13 +17,14 @@ from . import calcul, rdf, interroger as Q
 from .vues import genese_lisible
 
 FORMAT = "trajectoire-ia-v1"
+INTERNE = re.compile(r"mes connaissances|savoir interne|non vérifi|inférence|hypoth|de ma part|je suppose|incertain", re.I)
 EXTERNE = re.compile(r"externe|hors (du )?socle|hors corpus|selon |d'après ", re.I)
 
 
 def _lib(g, eid):
     c = g.E[eid]["contenu"]
     if eid.startswith("ETP:"):
-        return f"étape {eid[4:]} : {c['texte'][:70]}"
+        return ("savoir interne · " if c.get("savoir_interne") else "") + f"étape {eid[4:]} : {c['texte'][:70]}"
     if g.E[eid]["type"] == "relation" and c.get("de") in g.E and c.get("vers") in g.E:
         return f"{_lib(g, c['de'])} → {_lib(g, c['vers'])} ({c.get('libelle', '')})"
     return c.get("libelle") or c.get("titre") or (c.get("texte") or eid)[:90]
@@ -33,8 +34,20 @@ def _genese(g, eid):
     return re.sub(r"([^←()]{70})[^←()]*\(", r"\1… (", genese_lisible(g, eid))
 
 
-def auditer(g0, t):
-    """Retourne le rapport d'audit d'une trajectoire d'IA, sans toucher au graphe g0."""
+def graphe_vide():
+    from .graphe import Graphe
+    g = Graphe("sans corpus")
+    g.d["config"] = {"autorite": None}
+    return g
+
+
+def auditer(g0, t, sans_corpus=False):
+    """Retourne le rapport d'audit d'une trajectoire d'IA, sans toucher au graphe g0.
+
+    Mode sans corpus : aucun socle validé ; les sources consultées (avec lien) tiennent lieu de
+    socle provisoire, sans validation d'autorité. Les étapes « savoir_interne » déclarent ce que
+    l'IA avance à partir de son seul entraînement, sans source.
+    """
     if t.get("format") != FORMAT:
         raise ValueError(f"format attendu : {FORMAT}")
     g = copy.deepcopy(g0)
@@ -53,7 +66,8 @@ def auditer(g0, t):
         if xa not in g.d["agents"]:
             g.agent(xa, auteur, "humain", "auteur d'une source externe citée par l'IA")
         g.entite(sid, "source", {"titre": s.get("titre", "(sans titre)"), "auteurs": auteur, "date": s.get("date", ""),
-                                 "lien": s.get("lien", ""), "langue": "fr", "externe": True},
+                                 "lien": s.get("lien", ""), "consultee_le": s.get("consultee_le", ""), "langue": "fr",
+                                 "externe": not (sans_corpus and s.get("lien"))},
                  operation="creation", operateur=xa, date="")
         ext[s.get("id") or sid] = sid; ext[sid] = sid
         if not (s.get("lien") or s.get("reference")):
@@ -85,12 +99,15 @@ def auditer(g0, t):
     for k, e in enumerate(t.get("raisonnement", []), 1):
         ap, inc = resoudre(e.get("appuis"), locaux)
         eid = f"ETP:{k}"
-        g.entite(eid, "etape_ia", {"texte": e.get("texte", "")}, derive_de=ap,
+        interne = e.get("nature") == "savoir_interne"
+        g.entite(eid, "etape_ia", {"texte": e.get("texte", ""), "savoir_interne": interne}, derive_de=ap,
                  operation="raisonnement_ia", operateur=aid, date=date)
         locaux[f"E{k}"] = eid; locaux[eid] = eid
         etapes.append(eid)
         problemes += [f"étape {k} : appui inconnu {x}" for x in inc]
-        if not ap:
+        if interne:
+            avert.append(f"étape {k} : savoir interne du modèle, déclaré comme non sourcé")
+        elif not ap:
             avert.append(f"étape {k} sans appui : elle ne repose que sur l'IA")
 
     # affirmations de la réponse
@@ -107,7 +124,7 @@ def auditer(g0, t):
             st = g.statut(x)
             if g.E[x]["contenu"].get("externe") and not EXTERNE.search(ph):
                 pb.append(f"{x} est une source externe non attestée, non signalée comme telle")
-            elif st == "propose" and not Q.HEDGE.search(ph) and not x.startswith(("ETP:", "RIA:")):
+            elif st == "propose" and not Q.HEDGE.search(ph) and not x.startswith(("ETP:", "RIA:", "EXT:")):
                 pb.append(f"{x} est « proposé » mais présenté comme établi")
             elif st == "rejete":
                 pb.append(f"{x} a été rejeté par l'autorité")
@@ -135,22 +152,43 @@ def auditer(g0, t):
                 "ancrage": e["ancrage"]["indice"], "niveau": e["ancrage"]["niveau"],
                 "externe": bool(e["contenu"].get("externe"))}
 
+    appuis = {x for _, _, ap, _ in affs for x in ap}
+    base = [x for x in appuis if not x.startswith(nouveaux)]
+
+    def racines(x, vu=None):
+        vu = vu if vu is not None else set()
+        if x in vu: return set()
+        vu.add(x)
+        e = g.E[x]
+        if e["type"] == "source": return {"source"}
+        if e["contenu"].get("savoir_interne"): return {"interne"}
+        par = e["prov"]["derive_de"]
+        return set().union(*[racines(p, vu) for p in par]) if par else {"rien"}
+    seul_interne = 0
+    for fid, ph, ap, pb in affs:
+        if ap and "source" not in racines(fid):
+            seul_interne += 1
+            if not INTERNE.search(ph):
+                pb.append("repose sur le seul savoir interne du modèle sans le signaler")
     lignes, nb_ok = [], 0
     for fid, ph, ap, pb in affs:
         a = g.E[fid]["ancrage"]
-        lignes.append({"id": fid, "phrase": ph, "ancrage": a["indice"], "niveau": a["niveau"],
+        cp = [v for v in a["composantes"].values()]
+        brut = round(__import__("math").prod(cp) ** (1 / len(cp)), 3) if cp and min(cp) > 0 else 0
+        lignes.append({"id": fid, "phrase": ph, "ancrage": a["indice"], "ancrage_avant_plafond": brut, "niveau": a["niveau"],
                        "composantes": a["composantes"], "explications": a["explications"],
                        "genese": _genese(g, fid), "appuis": [el(x) for x in ap], "problemes": pb})
         nb_ok += not pb
-    appuis = {x for _, _, ap, _ in affs for x in ap}
-    base = [x for x in appuis if not x.startswith(nouveaux)]
     taux = nb_ok / len(affs) if affs else 0
     verdict = "conforme" if taux == 1 and not problemes and not viol else ("à reprendre" if taux >= 0.6 else "refusée")
     moy = round(sum(l["ancrage"] for l in lignes) / len(lignes), 3) if lignes else 0
     return {"format": "audit-ia-v1", "question": t.get("question", ""), "modele": t.get("modele", ""), "date": date,
             "corpus": g0.d["nom"], "version_du_modele": g0.d.get("version"),
             "verdict": verdict, "affirmations_conformes": f"{nb_ok}/{len(affs)}",
+            "mode": "sans corpus" if sans_corpus else "corpus",
             "synthese": {"ancrage_moyen": moy,
+                         "affirmations_sans_aucune_source": seul_interne,
+                         "etapes_de_savoir_interne": sum(1 for e in etapes if g.E[e]["contenu"].get("savoir_interne")),
                          "appuis_dans_la_base": len(base),
                          "dont_valides": sum(1 for x in base if g.statut(x) in ("valide", "variable")),
                          "dont_sources_du_socle": sum(1 for x in base if g.E[x]["type"] == "source"),
@@ -190,15 +228,25 @@ def rapport_html(r):
     vcol = {"conforme": "#15803d", "à reprendre": "#b45309", "refusée": "#b91c1c"}
     s = r["synthese"]
     def ap(a):
-        tag = "source externe" if a["externe"] else "raisonnement de l'IA" if a["type"] == "etape_ia" else "relation établie par l'IA" if a["id"].startswith("RIA:") else a["statut"]
+        tag = "source externe" if a["externe"] else "source consultée" if a["type"] == "source" else "raisonnement de l'IA" if a["type"] == "etape_ia" else "relation établie par l'IA" if a["id"].startswith("RIA:") else a["statut"]
         return f"<span class='ap' title='{e(a['id'])}'>{e(a['libelle'][:70])} <i>({e(tag)}, {a['ancrage']})</i></span>"
     def ligne(l):
         pbs = "".join("<div class='pb'>⚠ " + e(p) + "</div>" for p in l["problemes"])
         aps = "".join(ap(a) for a in l["appuis"]) or "<i>aucun appui</i>"
         return ("<tr><td>" + e(l["phrase"]) + "<div class='gen'>Genèse : " + e(l["genese"]) + "</div>" + pbs + "</td>"
-                "<td class='c'><b style='color:" + col[l["niveau"]] + "'>" + str(l["ancrage"]) + "</b><br><small>" + l["niveau"] + "</small></td>"
+                "<td class='c'><b style='color:" + col[l["niveau"]] + "'>" + str(l["ancrage"]) + "</b><br><small>" + l["niveau"] + "</small>"
+                + ("<br><small title='indice sans le plafond appliqué aux contenus d’IA non validés'>sans plafond : " + str(l["ancrage_avant_plafond"]) + "</small>" if l["ancrage_avant_plafond"] > l["ancrage"] else "") + "</td>"
                 "<td>" + aps + "</td></tr>")
     rows = "".join(ligne(l) for l in r["affirmations"])
+    if r.get("mode") == "sans corpus":
+        nsrc = len(r["sources_externes"])
+        synth = (f"<ul><li>Mode <b>sans corpus</b> : aucune autorité n'a validé de socle ; les sources consultées tiennent lieu de socle provisoire.</li>"
+                 f"<li>Sources consultées : {nsrc} · étapes de raisonnement déclarées : {s['etapes_de_raisonnement']}, dont {s['etapes_de_savoir_interne']} de savoir interne</li>"
+                 f"<li>Affirmations qui ne remontent à aucune source : {s['affirmations_sans_aucune_source']}</li></ul>")
+    else:
+        synth = (f"<ul><li>Appuis pris dans la base : {s['appuis_dans_la_base']} (dont {s['dont_valides']} validés, {s['dont_sources_du_socle']} textes du socle)</li>"
+                 f"<li>Sources externes citées : {s['sources_externes']} · étapes de raisonnement déclarées : {s['etapes_de_raisonnement']}</li>"
+                 f"<li>Affirmations sans aucun appui dans la base : {s['affirmations_sans_appui_de_la_base']}</li></ul>")
     etapes = "".join(f"<li>{e(x['texte'])} <small>— appuis : {', '.join(e(a['libelle'][:50]) for a in x['appuis']) or 'aucun'}</small></li>" for x in r["raisonnement_declare"])
     ext = "".join(f"<li>{e(x['libelle'])} {('— ' + e(x['lien'])) if x['lien'] else '— <i>sans lien</i>'}</li>" for x in r["sources_externes"])
     pbs = "".join(f"<li>{e(p)}</li>" for p in r["problemes"] + r["avertissements"] + [f"forme : {v['message']}" for v in r["regles_de_forme"]["violations"]]) or "<li>Aucun.</li>"
@@ -210,22 +258,20 @@ table{{border-collapse:collapse;width:100%;font-size:14px}}td,th{{border-bottom:
 .c{{text-align:center;white-space:nowrap}}.ap{{display:block;margin:2px 0}}.gen{{color:#6b7280;font-size:12.5px;margin-top:4px}}.pb{{color:#b91c1c;font-size:13px}}
 .lim{{background:#f3f6fb;border-left:4px solid #2e5597;padding:8px 12px;font-size:14px}}</style></head><body>
 <h1>Audit d'une réponse d'IA</h1>
-<p class="sous">{e(r['modele'])} · {e(r['date'])} · {e(r['corpus'])}, version {e(r['version_du_modele'])}</p>
+<p class="sous">{e(r['modele'])} · {e(r['date'])} · {e(r['corpus'])}{(', version ' + e(r['version_du_modele'])) if r['version_du_modele'] else ''}</p>
 <p><b>Question :</b> {e(r['question'])}</p>
 <p><span class="v">{e(r['verdict'])}</span> &nbsp; {e(r['affirmations_conformes'])} affirmations conformes · ancrage moyen <b>{s['ancrage_moyen']}</b></p>
-<ul><li>Appuis pris dans la base : {s['appuis_dans_la_base']} (dont {s['dont_valides']} validés, {s['dont_sources_du_socle']} textes du socle)</li>
-<li>Sources externes citées : {s['sources_externes']} · étapes de raisonnement déclarées : {s['etapes_de_raisonnement']}</li>
-<li>Affirmations sans aucun appui dans la base : {s['affirmations_sans_appui_de_la_base']}</li></ul>
-<h2>Affirmations</h2><table><tr><th>Affirmation</th><th>Ancrage</th><th>Appuis</th></tr>{rows}</table>
+{synth}
+<h2>Affirmations</h2><p style="font-size:13.5px;color:#4b5563">Tant qu'aucun humain n'a validé une affirmation d'IA, son ancrage est plafonné à 0,5. L'indice « sans plafond » montre ce que vaudrait son chemin de sources s'il était validé : il permet de distinguer une affirmation bien sourcée d'une affirmation qui ne repose que sur l'IA.</p><table><tr><th>Affirmation</th><th>Ancrage</th><th>Appuis</th></tr>{rows}</table>
 <h2>Raisonnement déclaré</h2><ol>{etapes or '<li>Aucun.</li>'}</ol>
-<h2>Sources externes</h2><ul>{ext or '<li>Aucune.</li>'}</ul>
+<h2>{'Sources consultées' if r.get('mode') == 'sans corpus' else 'Sources externes'}</h2><ul>{ext or '<li>Aucune.</li>'}</ul>
 <h2>Points relevés</h2><ul>{pbs}</ul>
 <p class="lim">{e(r['limite'])}</p></body></html>"""
 
 
-def executer(g, chemin, dossier_corpus):
+def executer(g, chemin, dossier_corpus, sans_corpus=False):
     t = json.load(open(chemin, encoding="utf-8"))
-    r = auditer(g, t)
+    r = auditer(g, t, sans_corpus)
     nom = os.path.splitext(os.path.basename(chemin))[0]
     out = os.path.join(dossier_corpus, "audits_ia", "sorties", f"{datetime.datetime.now():%Y%m%d-%H%M%S}_{nom}")
     os.makedirs(out, exist_ok=True)
