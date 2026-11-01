@@ -186,8 +186,9 @@ function plant(qid,text,niveau){const id=newPlantId();const p={id,qid:qid||null,
  T.plantes.push(p);T.active=id;sel=null;linkFrom=null;trace('question',{question:text,qid});persist();renderAll();if(innerWidth<1000)$('#stage').scrollIntoView({behavior:'smooth'});banner('Nouvelle plante : « '+text.slice(0,60)+' »')}
 function toggleKeep(id){const p=P();if(!p)return;const isC=!!C[id],arr=isC?p.concepts:p.docs;const i=arr.indexOf(id);
  if(i>=0){arr.splice(i,1);p.relations=p.relations.filter(r=>r.a!==id&&r.b!==id);trace('lacher',{el:id})}else{arr.push(id);p.ecartes=p.ecartes.filter(x=>x!==id);trace('retenir',{el:id})}persist();renderAll()}
-function discard(id){const p=P();if(!p)return;p.ecartes.push(id);p.concepts=p.concepts.filter(x=>x!==id);p.docs=p.docs.filter(x=>x!==id);p.relations=p.relations.filter(r=>r.a!==id&&r.b!==id);if(sel===id)sel=null;trace('ecarter',{el:id});persist();renderAll()}
-function addRel(a,b,type,origine){const p=P();if(!p||a===b)return;[a,b].forEach(x=>{const arr=C[x]?p.concepts:p.docs;if(!arr.includes(x))arr.push(x)});
+function discard(id){const p=P();if(!p)return;modal(`<h2>Écarter « ${esc((C[id]?.lab)||(DOC[id]?id+' · '+DOC[id].titre.slice(0,60):id))} »</h2><label class="muted">Pourquoi l’écartez-vous ? (facultatif)<input type="text" id="dRaison" placeholder="par exemple : hors sujet, trop technique, redondant…"></label><div class="row"><button class="pri" id="dOk">Écarter</button><button id="mNo">Annuler</button></div>`);$('#mNo').onclick=closeModal;const go=()=>{const r=$('#dRaison').value.trim();closeModal();discardOk(id,r)};$('#dOk').onclick=go;$('#dRaison').onkeydown=e=>{if(e.key==='Enter')go()};$('#dRaison').focus()}
+function discardOk(id,raison){const p=P();if(!p)return;p.ecartes.push(id);p.concepts=p.concepts.filter(x=>x!==id);p.docs=p.docs.filter(x=>x!==id);p.relations=p.relations.filter(r=>r.a!==id&&r.b!==id);if(sel===id)sel=null;trace('ecarter',{el:id,...(raison?{raison}:{})});persist();renderAll()}
+function addRel(a,b,type,origine){const p=P();if(!p||a===b)return;[a,b].forEach(x=>{const arr=C[x]?p.concepts:p.docs;if(!arr.includes(x)){arr.push(x);p.ecartes=p.ecartes.filter(y=>y!==x);trace('retenir',{el:x,via:'lien'})}});
  if(p.relations.some(r=>r.a===a&&r.b===b&&r.type===type))return banner('Cette relation existe déjà.');
  p.relations.push({id:'r'+Date.now(),a,b,type,date:nowISO(),origine:origine||'utilisateur'});trace('relier',{a,b,rtype:type});persist();renderAll()}
 function elems(p){return{c:[...p.concepts],d:[...p.docs],r:p.relations.map(r=>r.a+'|'+r.type+'|'+r.b)}}
@@ -268,7 +269,7 @@ function renderDesc(){const p=P(),el=$('#descBox');if(!p){el.innerHTML='<div cla
  if(p.relations.length)h+=`<h3>Mes relations</h3>`+p.relations.map(r=>`<div class="muted">${esc(C[r.a]?.lab||r.a)} <b style="color:#2563eb">${esc(r.type)}</b> ${esc(C[r.b]?.lab||r.b)} <span class="lk" data-rdel="${r.id}">retirer</span></div>`).join('');
  if(DS.length){h+=`<h3>Journal de cette plante</h3>`+DS.slice().reverse().map(d=>`<div class="desc"><b>D${d.n}</b> · ${fmt(d.date)}<div class="muted">${d.c.length} concept(s) · ${d.d.length} doc(s) · ${d.r.length} relation(s)${d.W!=null?' · W = '+d.W.toFixed(2)+' bit':''}</div>${d.explication?`<div class="expl">« ${esc(d.explication)} »</div>`:''}</div>`).join('');
   h+=stability(p)}
- el.innerHTML=h;if($('#btDesc'))$('#btDesc').onclick=saveDesc;el.querySelectorAll('[data-rdel]').forEach(a=>a.onclick=()=>{p.relations=p.relations.filter(r=>r.id!==a.dataset.rdel);persist();renderAll()})}
+ el.innerHTML=h;if($('#btDesc'))$('#btDesc').onclick=saveDesc;el.querySelectorAll('[data-rdel]').forEach(a=>a.onclick=()=>{const rr=p.relations.find(r=>r.id===a.dataset.rdel);if(rr)trace('delier',{a:rr.a,b:rr.b,rtype:rr.type});p.relations=p.relations.filter(r=>r.id!==a.dataset.rdel);persist();renderAll()})}
 function stability(p){const DS=p.descriptions;if(DS.length<2)return `<div class="muted">Il faut au moins deux descriptions pour mesurer la stabilité (W).</div>`;let st=0;for(let i=DS.length-1;i>0&&DS[i].W<T.eps;i--)st++;
  return `<div class="card" data-help="W"><b>Stabilité</b> : ${st>=2?'<span style="color:#15803d">le fruit est mûr</span> – W reste sous ε depuis '+st+' descriptions.':st===1?'W vient de passer sous ε ; une description de plus pour confirmer.':'la plante bouge encore (W au-dessus de ε = '+T.eps+').'}</div>`}
 // ---------- guide (étapes) ----------
@@ -386,7 +387,7 @@ function bindCmp(){if($('#epsIn'))$('#epsIn').onchange=e=>{T.eps=+e.target.value
   const ap=[...B].filter(x=>!A.has(x)),di=[...A].filter(x=>!B.has(x));$('#cmpOut').innerHTML=`<div class="muted"><b style="color:#15803d">Apparus</b> : ${ap.map(nm).map(esc).join(' ; ')||'—'}<br><b style="color:#b91c1c">Disparus</b> : ${di.map(nm).map(esc).join(' ; ')||'—'}</div>`};
  $('#cmpP').onchange=fill;$('#cmpA').onchange=cmp;$('#cmpB').onchange=cmp;fill()}
 // ---------- retour de l'IA ----------
-let SAMPLE=null,iaBusy=false,iaPlant=null;(async()=>{try{if(window.claude&&window.claude.use)SAMPLE=await window.claude.use('sample')}catch(e){}if(view==='traj')renderTraj()})();
+let SAMPLE=null,iaBusy=false,iaPlant=null;(async()=>{try{if(window.claude&&window.claude.use)SAMPLE=await window.claude.use('sample')}catch(e){}setTimeout(()=>{if(view==='traj')renderTraj();else if(view==='chemin')renderChemin()},0)})();
 if(!T.retours_ia)T.retours_ia=[];
 const HEDGE=/propos|non valid|hypoth|\bia\b|à confirmer|lecture propre|votre lecture/i,HORS=/hors corpus|ne couvre pas|sort du corpus|pas dans la base/i,ABST=/je ne peux|pas (de )?répon|ne permet pas|faute de source/i;
 const stNoyau=s=>({valide:'validé',corriger:'à corriger',rejete:'rejeté'}[s]||'proposé, non validé');
@@ -460,33 +461,38 @@ function renderIA(){const box=$('#iaBox');if(!box)return;T.retours_ia=T.retours_
 // ---------- protocole de trace commun (trace-v1) et chemins comparés ----------
 if(!T.chemins_ia)T.chemins_ia={};
 let chPlant=null,chBusy=false;
-const KNOWN=new Set(['question','consulter','retenir','lacher','ecarter','relier','description','retour_ia','supprimer','chemin_ia']);
+const KNOWN=new Set(['question','consulter','retenir','lacher','ecarter','relier','description','retour_ia','supprimer','chemin_ia','delier']);
 const eid=x=>(C[x]?'C:':DOC[x]?'S:':'')+x;
 const rawId=x=>String(x||'').replace(/^(C|S):/,'');
 const labOf=x=>{const r=rawId(x);return C[r]?C[r].lab:DOC[r]?(r+' · '+DOC[r].titre.slice(0,60)):x};
 const relBase=(a,b)=>DATA.relations.find(r=>(r.a===a&&r.b===b)||(r.a===b&&r.b===a));
+function relOrigine(a,b){a=rawId(a);b=rawId(b);const rb=relBase(a,b);if(rb)return{origine:'base',rb};const d=DOC[a]?a:DOC[b]?b:null,c=C[a]?a:C[b]?b:null;
+ if(d&&c&&(DOC[d].concepts||[]).includes(c))return{origine:'indexation'};return{origine:'propre'}}
+const ORIG_LAB={base:'relation de la base',indexation:'rejoint l’indexation de la base',propre:'lecture propre'};
 const stLab=s=>({valide:'validé par l’autorité',propose:'proposé, non validé',corriger:'à corriger',rejete:'rejeté'}[s]||s);
 function evPlant(p){return T.traces.filter(t=>t.plante===p.id)}
 function evText(t){const L=x=>esc(labOf(x));
  if(t.type==='question')return `pose la question « ${esc(t.question||'')} »`;
  if(t.type==='consulter')return `consulte ${L(t.el)}`;
- if(t.type==='retenir')return `retient ${L(t.el)}${t.depuis?' (depuis le corpus)':''}`;
+ if(t.type==='retenir')return `retient ${L(t.el)}${t.depuis?' (depuis le corpus)':''}${t.via==='lien'?' (en créant un lien)':''}`;
  if(t.type==='lacher')return `lâche ${L(t.el)}`;
- if(t.type==='ecarter')return `écarte ${L(t.el)}`;
+ if(t.type==='ecarter')return `écarte ${L(t.el)}${t.raison?' — <i>« '+esc(t.raison)+' »</i>':''}`;
  if(t.type==='description')return `enregistre la description D${t.n}${t.W!=null?' (W = '+(+t.W).toFixed(2)+')':''}`;
  if(t.type==='retour_ia')return `demande un retour à l’IA (contrôle : ${esc(t.verdict||'')})`;
  if(t.type==='chemin_ia')return `demande à l’IA son propre chemin (contrôle : ${esc(t.verdict||'')})`;
- if(t.a&&t.b){const ty=t.type==='relier'?t.rtype:t.type;return `relie ${L(t.a)} → ${L(t.b)} (« ${esc(ty||'')} »)${relBase(t.a,t.b)?'':' — <i>lecture propre</i>'}`}
+ if(t.type==='delier')return `retire le lien ${L(t.a)} → ${L(t.b)} (« ${esc(t.rtype||'')} »)`;
+ if(t.a&&t.b){const ty=t.type==='relier'?t.rtype:t.type;const o=relOrigine(t.a,t.b).origine;return `relie ${L(t.a)} → ${L(t.b)} (« ${esc(ty||'')} ») — <i>${ORIG_LAB[o]}</i>`}
  return esc(t.type)}
 // trace-v1 de l'apprenant pour une plante
 function traceApprenant(p){const ev=evPlant(p);let n=0;
  const recherches=ev.filter(t=>['consulter','retenir','lacher','ecarter'].includes(t.type)).map(t=>({n:++n,moment:t.date,action:{consulter:'consultation',retenir:'retenu',lacher:'lâché',ecarter:'écarté'}[t.type],objet:eid(t.el),
-  ...(t.type==='retenir'?{retenues:[eid(t.el)]}:{}),...(['lacher','ecarter'].includes(t.type)?{rejetees:[{id:eid(t.el),raison:t.type==='ecarter'?'écarté par l’apprenant':'lâché par l’apprenant'}]}:{})}));
+  ...(t.type==='retenir'?{retenues:[eid(t.el)]}:{}),...(t.via?{via:t.via}:{}),...(['lacher','ecarter'].includes(t.type)?{rejetees:[{id:eid(t.el),raison:t.raison||(t.type==='ecarter'?'écarté par l’apprenant (sans raison donnée)':'lâché par l’apprenant')}]}:{})}));
+ const liens_retires=ev.filter(t=>t.type==='delier').map(t=>({moment:t.date,de:eid(t.a),vers:eid(t.b),type:t.rtype}));
  const etapes=p.descriptions.map(d=>({n:d.n,date:d.date,nature:'sourcee',texte:`Description D${d.n} : ${d.c.length} concept(s), ${d.d.length} document(s), ${d.r.length} relation(s)`+(d.W!=null?`, W = ${d.W.toFixed(2)}`:''),appuis:[...d.c.map(x=>'C:'+x),...d.d.map(x=>'S:'+x)]}));
  const last=p.descriptions[p.descriptions.length-1];
- const relations=(last?last.r:[]).map(s=>{const [a,ty,b]=s.split('|');const rb=relBase(a,b);return{de:eid(a),vers:eid(b),type:ty,origine:rb?'base':'propre',...(rb?{relation_de_base:'R:'+rb.a+'|'+rb.b,statut_base:rb.statut}:{})}});
+ const relations=(last?last.r:[]).map(s=>{const [a,ty,b]=s.split('|');const o=relOrigine(a,b),rb=o.rb;return{de:eid(a),vers:eid(b),type:ty,origine:o.origine,...(rb?{relation_de_base:'R:'+rb.a+'|'+rb.b,statut_base:rb.statut}:{})}});
  const affirmations=p.descriptions.filter(d=>d.explication).map(d=>({phrase:d.explication,description:'D'+d.n,appuis:[...d.c.map(x=>'C:'+x),...d.d.map(x=>'S:'+x)]}));
- return{id:p.id,question:p.question,qid:p.qid,recherches,etapes,relations,affirmations}}
+ return{id:p.id,question:p.question,qid:p.qid,recherches,etapes,relations,affirmations,...(liens_retires.length?{liens_retires}:{})}}
 function traceV1(role,nom,chemins,extra={}){return{format:'trace-v1',acteur:{role,nom},base:{corpus:'corpus MCR',version:(DATA.noyau&&DATA.noyau.version)||null},date:nowISO(),chemins,...extra}}
 // socle pour une question
 function socleQ(p){const q=p.qid?Q[p.qid]:null,pr=proposals(p);const cs=[...new Set([...(q?q.concepts:[]),...pr.concepts])].filter(x=>C[x]),ds=[...new Set([...(q?q.docs:[]),...pr.docs])].filter(x=>DOC[x]);
@@ -526,7 +532,7 @@ async function askChemin(){const p=T.plantes.find(x=>x.id===chPlant);if(!p||chBu
 function traceIA(p){const x=T.chemins_ia[p.id];if(!x)return null;const r=x.reponse;
  return{id:p.id,question:p.question,qid:p.qid,recherches:[{n:1,moment:x.date,action:'sélection',objet:'éléments fournis par la base',retenues:r.retenues||[],rejetees:(r.ecartees||[]).map(e=>({id:e.id,raison:e.raison}))}],
   etapes:(r.etapes||[]).map((e,i)=>({n:i+1,texte:e.texte,nature:e.nature==='savoir_propre'?'savoir_propre':'sourcee',appuis:e.appuis||[]})),
-  relations:(r.relations||[]).map(e=>{const rb=relBase(rawId(e.de),rawId(e.vers));return{de:e.de,vers:e.vers,type:e.type,appuis:e.appuis||[],origine:rb?'base':'propre'}}),
+  relations:(r.relations||[]).map(e=>({de:e.de,vers:e.vers,type:e.type,appuis:e.appuis||[],origine:relOrigine(e.de,e.vers).origine})),
   affirmations:(r.affirmations||[]).map(a=>({phrase:a.phrase,appuis:a.appuis||[]})),controle:x.controle}}
 function chip(id,cls){return `<span class="badge ${cls||'b-n'}" title="${esc(id)}">${esc(labOf(id).slice(0,48))}</span>`}
 const stCls=s=>({valide:'b-ok',propose:'b-prop',corriger:'b-warn',rejete:'b-rej'}[s]||'b-n');
@@ -546,7 +552,7 @@ function renderChemin(){const box=$('#chBox');if(!box)return;T.chemins_ia=T.chem
  const colSocle=`<div class="col3"><h4>Le socle</h4><div class="muted">Ce que la base propose pour cette question, avec le statut donné par l’autorité.</div>
   ${['valide','propose','corriger','rejete'].map(st=>{const L=[...s.cs.filter(c=>C[c].statut===st).map(c=>'C:'+c),...s.ds.filter(d=>DOC[d].statut===st).map(d=>'S:'+d)];return L.length?`<div class="sm-h">${stLab(st)} (${L.length})</div>`+L.map(x=>chip(x,stCls(st))).join(''):''}).join('')}
   ${soc.size?'':'<div class="muted" style="margin-top:6px"><i>Rien n’est encore validé : toute la base reste une proposition.</i></div>'}</div>`;
- const relsMine=last.r.map(x=>{const [a,ty,b]=x.split('|');const rb=relBase(a,b);return `<div class="muted">${esc(labOf(a))} <b>${esc(ty)}</b> ${esc(labOf(b))} · ${rb?'<span class="badge '+stCls(rb.statut)+'">dans la base : '+stLab(rb.statut)+'</span>':'<span class="badge b-usr">lecture propre</span>'}</div>`}).join('');
+ const relsMine=last.r.map(x=>{const [a,ty,b]=x.split('|');const o=relOrigine(a,b),rb=o.rb;return `<div class="muted">${esc(labOf(a))} <b>${esc(ty)}</b> ${esc(labOf(b))} · ${rb?'<span class="badge '+stCls(rb.statut)+'">dans la base : '+stLab(rb.statut)+'</span>':o.origine==='indexation'?'<span class="badge b-prop">rejoint l’indexation de la base</span>':'<span class="badge b-usr">lecture propre</span>'}</div>`}).join('');
  const colMoi=`<div class="col3"><h4>Mon chemin</h4><div class="muted">Dernière description (D${last.n}).</div>${[...mine].map(x=>chip(x,soc.has(x)?'b-ok':'b-usr')).join('')}
   ${relsMine?'<div class="sm-h">Mes liens</div>'+relsMine:''}${last.explication?`<div class="sm-h">Ce que je sais expliquer</div><div class="expl">« ${esc(last.explication)} »</div>`:'<div class="muted" style="margin-top:6px"><i>Vous pouvez noter ce que vous savez expliquer au moment d’enregistrer une description.</i></div>'}</div>`;
  let colIA=`<div class="col3"><h4>Le chemin de l’IA</h4><div class="muted">L’IA répond elle-même à la question, à partir des mêmes éléments, en déclarant son chemin.</div>`;

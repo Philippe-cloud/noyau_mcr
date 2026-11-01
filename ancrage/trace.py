@@ -4,7 +4,8 @@ Chaque trace décrit un ou plusieurs chemins vers une question :
   recherches    ce que l'acteur a consulté, retenu ou écarté (avec la raison), dans l'ordre réel
   etapes        les étapes du chemin (descriptions, validations, raisonnement), chacune avec ses appuis ;
                 nature « sourcee » ou « savoir_propre » (apport de l'auteur, lecture personnelle, savoir interne d'une IA)
-  relations     les liens établis, avec leur origine (« base » ou « propre »)
+  relations     les liens établis, avec leur origine : « base » (relation de la base), « indexation »
+                (rejoint l'indexation d'un document par la base) ou « propre » (lecture personnelle)
   affirmations  ce que l'acteur affirme ou sait expliquer, chaque phrase avec ses appuis
 
 Le savoir propre n'a pas le même statut selon l'acteur : contribution fondatrice pour l'autorité,
@@ -50,6 +51,12 @@ def depuis_validations(g):
 def depuis_trajectoire(g, t):
     """Trace d'un apprenant à partir d'un fichier « trajectoire-mcr-v2 »."""
     rel_base = {(r["contenu"]["de"], r["contenu"]["vers"]) for k, r in g.E.items() if k.startswith("R:")}
+    index = {(a, b) for a, b in g.d["mentions"]}
+
+    def origine(A, B):
+        if (A, B) in rel_base or (B, A) in rel_base: return "base"
+        if (A, B) in index or (B, A) in index: return "indexation"
+        return "propre"
     eid = lambda x: ("C:" if ("C:" + x) in g.E else "S:") + x
     chemins = []
     for p in t["plantes"]:
@@ -61,7 +68,9 @@ def depuis_trajectoire(g, t):
                 it = {"n": n, "moment": x["date"], "action": {"consulter": "consultation", "retenir": "retenu", "lacher": "lâché", "ecarter": "écarté"}[x["type"]],
                       "objet": eid(x["el"])}
                 if x["type"] == "retenir": it["retenues"] = [eid(x["el"])]
-                if x["type"] in ("lacher", "ecarter"): it["rejetees"] = [{"id": eid(x["el"]), "raison": "écarté par l'apprenant"}]
+                if x.get("via"): it["via"] = x["via"]
+                if x["type"] in ("lacher", "ecarter"):
+                    it["rejetees"] = [{"id": eid(x["el"]), "raison": x.get("raison") or "écarté par l'apprenant (sans raison donnée)"}]
                 rech.append(it)
         ds = p["descriptions"]
         etapes = [{"n": d["n"], "date": d["date"], "nature": "sourcee",
@@ -72,11 +81,12 @@ def depuis_trajectoire(g, t):
             for s in ds[-1]["r"]:
                 a, ty, b = s.split("|")
                 A, B = eid(a), eid(b)
-                rels.append({"de": A, "vers": B, "type": ty, "origine": "base" if (A, B) in rel_base or (B, A) in rel_base else "propre"})
+                rels.append({"de": A, "vers": B, "type": ty, "origine": origine(A, B)})
         affs = [{"phrase": d["explication"], "description": f"D{d['n']}", "appuis": ["C:" + x for x in d["c"]] + ["S:" + x for x in d["d"]]}
                 for d in ds if d.get("explication")]
+        retires = [{"moment": x["date"], "de": eid(x["a"]), "vers": eid(x["b"]), "type": x.get("rtype", "")} for x in ev if x.get("type") == "delier"]
         chemins.append({"id": p["id"], "question": p["question"], "qid": p.get("qid"), "recherches": rech,
-                        "etapes": etapes, "relations": rels, "affirmations": affs})
+                        "etapes": etapes, "relations": rels, "affirmations": affs, **({"liens_retires": retires} if retires else {})})
     return {"format": FORMAT, "acteur": {"role": "apprenant", "nom": t.get("apprenant") or "apprenant anonyme"},
             "base": _base(g), "chemins": chemins}
 
