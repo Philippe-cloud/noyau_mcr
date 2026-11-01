@@ -14,7 +14,8 @@
 Audit d'une réponse d'IA (cas séparé : ne modifie pas la base) :
   python -m ancrage consigne-audit <corpus> "<question>"   consigne à donner à l'IA (réponse en trajectoire-ia-v1)
   python -m ancrage auditer-ia  <corpus> [fichier.json…]    auditer une ou plusieurs trajectoires d'IA
-                                (par défaut : tous les fichiers de <corpus>/audits_ia/entrees/)
+                                (par défaut : tous les fichiers de <corpus>/audits_ia/entrees/ ;
+                                 accepte aussi les lots « traces-v1 » exportés par l'application)
   python -m ancrage auditer-ia --sans-corpus <fichier.json>  question hors corpus : sources du web, savoir interne déclaré
 """
 import sys, os, json, glob, importlib, datetime
@@ -120,7 +121,19 @@ def main(a):
         fs = a[2:] or sorted(glob.glob(os.path.join(corpus, "audits_ia", "entrees", "*.json")))
         if not fs:
             print("Aucune trajectoire d'IA à auditer."); return
+        from . import trace as TR
+        lots = []
         for f in fs:
+            o = json.load(open(f, encoding="utf-8"))
+            if o.get("format") in (TR.FORMAT, TR.LOT):
+                for k, (t, ch) in enumerate(TR.traces_ia(o), 1):
+                    import tempfile
+                    tmp = os.path.join(tempfile.mkdtemp(), f"{os.path.splitext(os.path.basename(f))[0]}_ia_{ch.get('id', k)}.json")
+                    json.dump(TR.vers_trajectoire_ia(t, ch), open(tmp, "w", encoding="utf-8"), ensure_ascii=False)
+                    lots.append(tmp)
+            else:
+                lots.append(f)
+        for f in lots:
             r, out = audit_ia.executer(g, f, corpus)
             print(f"{os.path.basename(f)} : {r['verdict']} ({r['affirmations_conformes']} affirmations conformes, "
                   f"ancrage moyen {r['synthese']['ancrage_moyen']}) → {out}")

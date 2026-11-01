@@ -37,6 +37,7 @@ textarea,input[type=text],select{font:inherit;width:100%;border:1px solid #cbd5e
 .b-prop{color:var(--prop);border-color:#f3d19e;background:#fff8eb}.b-ok{color:var(--ok);border-color:#a7e3b9;background:#f0fdf4}.b-usr{color:var(--usr);border-color:#bfdbfe;background:#eff6ff}.b-n{color:#475569;border-color:#e2e8f0;background:#f8fafc}
 .row{display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin-top:6px}
 a{color:var(--acc)}.lk{cursor:pointer;color:var(--acc);text-decoration:underline}
+.ch3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}@media(max-width:900px){.ch3{grid-template-columns:1fr}}.col3{border:1px solid var(--line);border-radius:10px;padding:10px;background:#fff}.col3 h4{margin:0 0 4px}.sm-h{font-size:12px;font-weight:600;color:#475569;margin:8px 0 3px}.chl{padding-left:20px;font-size:13.5px}.chl li{margin:3px 0}.expl{font-style:italic;color:#1f3864;background:#eef3fb;border-radius:6px;padding:4px 8px;margin:4px 0;font-size:13px}.cross{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;font-size:13px}@media(max-width:900px){.cross{grid-template-columns:1fr}}
 .desc{border-left:3px solid var(--seed);padding:4px 8px;margin-bottom:6px;background:#faf5ff;border-radius:0 6px 6px 0;font-size:13px}
 .hidden{display:none!important}
 #view-traj,#view-corpus{padding:10px;display:grid;gap:10px}
@@ -61,7 +62,7 @@ body.helpon [data-help]{outline:1px dashed transparent}body.helpon [data-help]:h
 <div id="vbar" class="hidden"></div>
 <header>
  <h1>Explorer la MCR</h1>
- <div class="tabs" data-help="tabs"><button id="tb-plante" class="on">Ma plante</button><button id="tb-traj">Ma trajectoire</button><button id="tb-corpus">Corpus</button></div>
+ <div class="tabs" data-help="tabs"><button id="tb-plante" class="on">Ma plante</button><button id="tb-traj">Ma trajectoire</button><button id="tb-chemin">Mon chemin</button><button id="tb-corpus">Corpus</button></div>
  <div class="sp"></div>
  <div id="helpTog" class="tog on" data-help="helpTog" title="Activer / arrêter l'aide"><span class="dot"></span><span id="helpLab">Aide active</span></div>
  <button id="btTour" data-help="btTour">Visite guidée</button>
@@ -104,6 +105,13 @@ body.helpon [data-help]{outline:1px dashed transparent}body.helpon [data-help]:h
   <h3>Graphe de la trajectoire</h3><div id="tg" data-help="trajGraph"></div>
  </section>
  <section class="panel" style="max-height:none"><div id="iaBox" data-help="iaBox"></div><div id="trajSide"></div></section>
+</div>
+
+<div id="view-chemin" class="hidden">
+ <section class="panel" style="max-height:none"><h2>Mon chemin</h2>
+  <div class="muted">Le même protocole de trace pour l’autorité, l’apprenant et l’IA : d’où l’on part, ce que l’on retient ou écarte, comment on relie, ce que l’on affirme. Ici, votre chemin, celui du socle et celui de l’IA, côte à côte.</div>
+  <div id="chBox" data-help="chBox"></div>
+ </section>
 </div>
 
 <div id="view-corpus" class="hidden">
@@ -158,7 +166,7 @@ const SRC={TI:'texte intégral consulté',RE:'résumé auteur/éditeur consulté
 const ACC={texte:'Texte intégral (copie reçue, diffusion à autoriser)',libre:'Texte en libre accès',lien:'Lien éditeur / catalogue',reference:'Référence seule'};
 // ---------- état ----------
 const KEY='mcr-trajectoire-v2';
-function newTraj(){return{format:'trajectoire-mcr-v2',apprenant:'',creeLe:nowISO(),plantes:[],active:null,traces:[],retours_ia:[],eps:0.15}}
+function newTraj(){return{format:'trajectoire-mcr-v2',apprenant:'',creeLe:nowISO(),plantes:[],active:null,traces:[],retours_ia:[],chemins_ia:{},eps:0.15}}
 let T;try{T=JSON.parse(localStorage.getItem(KEY))}catch(e){}if(!T||T.format!=='trajectoire-mcr-v2')T=newTraj();
 let PREF={aide:true,vu:false};try{Object.assign(PREF,JSON.parse(localStorage.getItem(KEY+'-pref'))||{})}catch(e){}
 function persist(){try{localStorage.setItem(KEY,JSON.stringify(T));localStorage.setItem(KEY+'-pref',JSON.stringify(PREF))}catch(e){}}
@@ -181,13 +189,13 @@ function toggleKeep(id){const p=P();if(!p)return;const isC=!!C[id],arr=isC?p.con
 function discard(id){const p=P();if(!p)return;p.ecartes.push(id);p.concepts=p.concepts.filter(x=>x!==id);p.docs=p.docs.filter(x=>x!==id);p.relations=p.relations.filter(r=>r.a!==id&&r.b!==id);if(sel===id)sel=null;trace('ecarter',{el:id});persist();renderAll()}
 function addRel(a,b,type,origine){const p=P();if(!p||a===b)return;[a,b].forEach(x=>{const arr=C[x]?p.concepts:p.docs;if(!arr.includes(x))arr.push(x)});
  if(p.relations.some(r=>r.a===a&&r.b===b&&r.type===type))return banner('Cette relation existe déjà.');
- p.relations.push({id:'r'+Date.now(),a,b,type,date:nowISO(),origine:origine||'utilisateur'});trace('relier',{a,b,type});persist();renderAll()}
+ p.relations.push({id:'r'+Date.now(),a,b,type,date:nowISO(),origine:origine||'utilisateur'});trace('relier',{a,b,rtype:type});persist();renderAll()}
 function elems(p){return{c:[...p.concepts],d:[...p.docs],r:p.relations.map(r=>r.a+'|'+r.type+'|'+r.b)}}
 function setOf(D){return new Set([...D.c.map(x=>'c:'+x),...D.d.map(x=>'d:'+x),...D.r.map(x=>'r:'+x)])}
 function Wopac(DS,k){const A=0.5;const cur=setOf(DS[k]);if(!cur.size)return 0;const cnt={};let tot=0;for(let i=0;i<k;i++)setOf(DS[i]).forEach(x=>{cnt[x]=(cnt[x]||0)+1;tot++});
  const U=new Set([...Object.keys(cnt),...cur]);const f=1/cur.size;let W=0;cur.forEach(x=>{const p=((cnt[x]||0)+A)/(tot+A*U.size);W+=f*Math.log2(f/p)});return Math.max(0,W)}
 function saveDesc(){const p=P();if(!p)return;const e=elems(p);if(e.c.length+e.d.length<1)return banner('Retenez au moins un élément avant d’enregistrer.');
- const D={n:p.descriptions.length+1,date:nowISO(),...e};p.descriptions.push(D);if(p.descriptions.length>1)D.W=Wopac(p.descriptions,p.descriptions.length-1);
+ const ex=($('#descExpl')?.value||'').trim();const D={n:p.descriptions.length+1,date:nowISO(),...e,...(ex?{explication:ex}:{})};p.descriptions.push(D);if(p.descriptions.length>1)D.W=Wopac(p.descriptions,p.descriptions.length-1);
  trace('description',{n:D.n,W:D.W});persist();renderAll();banner('Description D'+D.n+' enregistrée'+(D.W!=null?' · W = '+D.W.toFixed(2)+' bit':''))}
 // ---------- rendu gauche ----------
 function renderLeft(){$('#lvls').innerHTML=[0,1,2,3].map(l=>`<span class="chip ${lvl===l?'on':''}" data-l="${l}">${l?LV[l]:'Tous niveaux'}</span>`).join('');
@@ -255,9 +263,10 @@ function renderDetail(){const p=P(),el=$('#detail');if(!p){el.innerHTML='<h2>Dé
 function renderDesc(){const p=P(),el=$('#descBox');if(!p){el.innerHTML='<div class="muted">—</div>';return}
  const n=p.concepts.length+p.docs.length;const DS=p.descriptions;
  let h=`<div class="muted">${p.concepts.length} concept(s) · ${p.docs.length} document(s) · ${p.relations.length} relation(s) retenus.</div>
+ <label class="muted" style="display:block;margin-top:6px">Ce que je sais expliquer maintenant (facultatif)<textarea id="descExpl" rows="2" placeholder="En une ou deux phrases, avec vos mots"></textarea></label>
  <div class="row"><button class="pri" id="btDesc" ${n?'':'disabled'} data-help="btDesc">Enregistrer la description D${DS.length+1}</button></div>`;
  if(p.relations.length)h+=`<h3>Mes relations</h3>`+p.relations.map(r=>`<div class="muted">${esc(C[r.a]?.lab||r.a)} <b style="color:#2563eb">${esc(r.type)}</b> ${esc(C[r.b]?.lab||r.b)} <span class="lk" data-rdel="${r.id}">retirer</span></div>`).join('');
- if(DS.length){h+=`<h3>Journal de cette plante</h3>`+DS.slice().reverse().map(d=>`<div class="desc"><b>D${d.n}</b> · ${fmt(d.date)}<div class="muted">${d.c.length} concept(s) · ${d.d.length} doc(s) · ${d.r.length} relation(s)${d.W!=null?' · W = '+d.W.toFixed(2)+' bit':''}</div></div>`).join('');
+ if(DS.length){h+=`<h3>Journal de cette plante</h3>`+DS.slice().reverse().map(d=>`<div class="desc"><b>D${d.n}</b> · ${fmt(d.date)}<div class="muted">${d.c.length} concept(s) · ${d.d.length} doc(s) · ${d.r.length} relation(s)${d.W!=null?' · W = '+d.W.toFixed(2)+' bit':''}</div>${d.explication?`<div class="expl">« ${esc(d.explication)} »</div>`:''}</div>`).join('');
   h+=stability(p)}
  el.innerHTML=h;if($('#btDesc'))$('#btDesc').onclick=saveDesc;el.querySelectorAll('[data-rdel]').forEach(a=>a.onclick=()=>{p.relations=p.relations.filter(r=>r.id!==a.dataset.rdel);persist();renderAll()})}
 function stability(p){const DS=p.descriptions;if(DS.length<2)return `<div class="muted">Il faut au moins deux descriptions pour mesurer la stabilité (W).</div>`;let st=0;for(let i=DS.length-1;i>0&&DS[i].W<T.eps;i--)st++;
@@ -302,6 +311,7 @@ const HELP={tabs:['Les trois vues','Ma plante : une question et sa description. 
  descBox:['Ma description','Ce que vous avez retenu et relié. Enregistrer crée une description datée Dn.',5],
  btDesc:['Enregistrer la description','Fige l’état actuel de la plante, avec la date et l’heure. À partir de deux descriptions, W mesure la stabilité.',5],
  W:['Fonctionnelle d’opacité W','D’après D11 (ch. 7) : W compare la dernière description à celles qui la précèdent. W sous ε plusieurs fois de suite : la description se stabilise (« fruit mûr »). Transposition proposée par le projet.',6],
+ chBox:['Mon chemin','Votre chemin dans l’ordre réel, puis trois chemins côte à côte pour la même question : le socle (statuts donnés par l’autorité), le vôtre et celui de l’IA. Tous suivent le même protocole de trace, exportable.'],
  iaBox:['Retour de l’IA','Claude commente votre dernière description en citant ses appuis dans la base. Un contrôle vérifie que chaque phrase est sourcée et respecte les statuts. Ses propositions éventuelles vont à Mioara, jamais directement dans la base.'],
  timeline:['Frise','Une ligne par plante, un point par description, dans l’ordre du temps.'],trajGraph:['Graphe de la trajectoire','Les plantes (violet) et les éléments qu’elles partagent : ce sont les nœuds de votre trajectoire.'],
  corpusFilters:['Filtres','Recherchez par mot, par ensemble ou par fiabilité du résumé.']};
@@ -447,6 +457,123 @@ function renderIA(){const box=$('#iaBox');if(!box)return;T.retours_ia=T.retours_
   ${r.propositions.length?`<details><summary class="lk">Propositions ${r.controle.verdict==='refusée'?'non transmises (retour refusé)':'transmises à Mioara'} (${r.propositions.length})</summary><ul class="muted">${r.propositions.map(p=>`<li><span class="badge b-prop">proposé par l’IA</span>${esc(p.nature||'')} · ${esc([p.cible,p.de,p.vers].filter(Boolean).map(idLab).join(' → '))} : ${esc(p.texte||'')}</li>`).join('')}</ul></details>`:''}</div>`).join('');
  box.innerHTML=h;if($('#iaP'))$('#iaP').onchange=e=>{iaPlant=e.target.value;renderIA()};if($('#iaGo'))$('#iaGo').onclick=askIA;
  box.querySelectorAll('[data-plq]').forEach(b=>b.onclick=()=>plant(null,b.dataset.plq,null))}
+// ---------- protocole de trace commun (trace-v1) et chemins comparés ----------
+if(!T.chemins_ia)T.chemins_ia={};
+let chPlant=null,chBusy=false;
+const KNOWN=new Set(['question','consulter','retenir','lacher','ecarter','relier','description','retour_ia','supprimer','chemin_ia']);
+const eid=x=>(C[x]?'C:':DOC[x]?'S:':'')+x;
+const rawId=x=>String(x||'').replace(/^(C|S):/,'');
+const labOf=x=>{const r=rawId(x);return C[r]?C[r].lab:DOC[r]?(r+' · '+DOC[r].titre.slice(0,60)):x};
+const relBase=(a,b)=>DATA.relations.find(r=>(r.a===a&&r.b===b)||(r.a===b&&r.b===a));
+const stLab=s=>({valide:'validé par l’autorité',propose:'proposé, non validé',corriger:'à corriger',rejete:'rejeté'}[s]||s);
+function evPlant(p){return T.traces.filter(t=>t.plante===p.id)}
+function evText(t){const L=x=>esc(labOf(x));
+ if(t.type==='question')return `pose la question « ${esc(t.question||'')} »`;
+ if(t.type==='consulter')return `consulte ${L(t.el)}`;
+ if(t.type==='retenir')return `retient ${L(t.el)}${t.depuis?' (depuis le corpus)':''}`;
+ if(t.type==='lacher')return `lâche ${L(t.el)}`;
+ if(t.type==='ecarter')return `écarte ${L(t.el)}`;
+ if(t.type==='description')return `enregistre la description D${t.n}${t.W!=null?' (W = '+(+t.W).toFixed(2)+')':''}`;
+ if(t.type==='retour_ia')return `demande un retour à l’IA (contrôle : ${esc(t.verdict||'')})`;
+ if(t.type==='chemin_ia')return `demande à l’IA son propre chemin (contrôle : ${esc(t.verdict||'')})`;
+ if(t.a&&t.b){const ty=t.type==='relier'?t.rtype:t.type;return `relie ${L(t.a)} → ${L(t.b)} (« ${esc(ty||'')} »)${relBase(t.a,t.b)?'':' — <i>lecture propre</i>'}`}
+ return esc(t.type)}
+// trace-v1 de l'apprenant pour une plante
+function traceApprenant(p){const ev=evPlant(p);let n=0;
+ const recherches=ev.filter(t=>['consulter','retenir','lacher','ecarter'].includes(t.type)).map(t=>({n:++n,moment:t.date,action:{consulter:'consultation',retenir:'retenu',lacher:'lâché',ecarter:'écarté'}[t.type],objet:eid(t.el),
+  ...(t.type==='retenir'?{retenues:[eid(t.el)]}:{}),...(['lacher','ecarter'].includes(t.type)?{rejetees:[{id:eid(t.el),raison:t.type==='ecarter'?'écarté par l’apprenant':'lâché par l’apprenant'}]}:{})}));
+ const etapes=p.descriptions.map(d=>({n:d.n,date:d.date,nature:'sourcee',texte:`Description D${d.n} : ${d.c.length} concept(s), ${d.d.length} document(s), ${d.r.length} relation(s)`+(d.W!=null?`, W = ${d.W.toFixed(2)}`:''),appuis:[...d.c.map(x=>'C:'+x),...d.d.map(x=>'S:'+x)]}));
+ const last=p.descriptions[p.descriptions.length-1];
+ const relations=(last?last.r:[]).map(s=>{const [a,ty,b]=s.split('|');const rb=relBase(a,b);return{de:eid(a),vers:eid(b),type:ty,origine:rb?'base':'propre',...(rb?{relation_de_base:'R:'+rb.a+'|'+rb.b,statut_base:rb.statut}:{})}});
+ const affirmations=p.descriptions.filter(d=>d.explication).map(d=>({phrase:d.explication,description:'D'+d.n,appuis:[...d.c.map(x=>'C:'+x),...d.d.map(x=>'S:'+x)]}));
+ return{id:p.id,question:p.question,qid:p.qid,recherches,etapes,relations,affirmations}}
+function traceV1(role,nom,chemins,extra={}){return{format:'trace-v1',acteur:{role,nom},base:{corpus:'corpus MCR',version:(DATA.noyau&&DATA.noyau.version)||null},date:nowISO(),chemins,...extra}}
+// socle pour une question
+function socleQ(p){const q=p.qid?Q[p.qid]:null,pr=proposals(p);const cs=[...new Set([...(q?q.concepts:[]),...pr.concepts])].filter(x=>C[x]),ds=[...new Set([...(q?q.docs:[]),...pr.docs])].filter(x=>DOC[x]);
+ const rs=DATA.relations.filter(r=>cs.includes(r.a)&&cs.includes(r.b));return{cs,ds,rs}}
+// chemin propre de l'IA
+function iaCheminPrompt(p){const s=socleQ(p);const els=[...s.cs.map(c=>({id:'C:'+c,libelle:C[c].lab,definition:C[c].def,statut:stLab(C[c].statut)})),...s.ds.map(d=>({id:'S:'+d,titre:DOC[d].titre,resume:(DOC[d].fr||'').slice(0,400),statut_resume:stLab(DOC[d].statut)})),
+  ...s.rs.map(r=>({id:'R:'+r.a+'|'+r.b,de:'C:'+r.a,vers:'C:'+r.b,libelle:r.lab,statut:stLab(r.statut)}))];
+ return `Tu réponds toi-même à une question sur la Méthode de Conceptualisation Relativisée (MCR) de Mioara Mugur-Schächter, en déclarant ton chemin selon un protocole de trace commun aux humains et aux IA. Tu disposes UNIQUEMENT des éléments ci-dessous.
+
+Règles :
+1. « retenues » : les identifiants que tu retiens ; « ecartees » : ceux que tu écartes, chacun avec une raison courte.
+2. « etapes » : ton raisonnement dans l'ordre, chaque étape avec ses appuis (identifiants). Si une étape vient de ta connaissance générale et non des éléments fournis, mets "nature":"savoir_propre" et aucun appui.
+3. « relations » : les liens que tu établis (de, vers, type), avec leurs appuis.
+4. « affirmations » : 3 à 5 phrases de réponse, en français, chacune avec ses appuis. Un élément « proposé, non validé » doit être présenté comme tel. Une affirmation sans appui doit dire qu'elle relève de ta connaissance générale.
+5. N'invente aucun identifiant.
+
+Réponds en JSON strict :
+{"retenues":["C:…"],"ecartees":[{"id":"C:…","raison":"…"}],"etapes":[{"texte":"…","appuis":["C:…"],"nature":"sourcee|savoir_propre"}],"relations":[{"de":"C:…","vers":"C:…","type":"…","appuis":["S:…"]}],"affirmations":[{"phrase":"…","appuis":["C:…"]}]}
+
+Question : ${p.question}
+Éléments : ${JSON.stringify(els)}`}
+function iaCheminControle(p,r){const s=socleQ(p),ok=new Set([...s.cs.map(c=>'C:'+c),...s.ds.map(d=>'S:'+d),...s.rs.map(x=>'R:'+x.a+'|'+x.b)]);const pb=[];
+ const chk=(ids,ou)=>(ids||[]).forEach(x=>{if(!ok.has(String(x)))pb.push(ou+' : identifiant hors du socle '+x)});
+ chk(r.retenues,'retenues');(r.ecartees||[]).forEach(x=>{if(!ok.has(String(x.id)))pb.push('écartées : identifiant hors du socle '+x.id)});
+ (r.etapes||[]).forEach((e,i)=>{chk(e.appuis,'étape '+(i+1));if(e.nature!=='savoir_propre'&&!(e.appuis||[]).length)pb.push('étape '+(i+1)+' sans appui et non déclarée comme savoir propre')});
+ (r.relations||[]).forEach((x,i)=>{chk([x.de,x.vers],'relation '+(i+1));chk(x.appuis,'relation '+(i+1))});
+ (r.affirmations||[]).forEach((a,i)=>{const ap=a.appuis||[];chk(ap,'affirmation '+(i+1));const t=String(a.phrase||'');
+  if(!ap.length&&!/connaissance générale|savoir propre|non sourc/i.test(t))pb.push('affirmation '+(i+1)+' sans appui, non signalée');
+  ap.forEach(x=>{const rr=rawId(x),st=C[rr]?.statut;if(st==='propose'&&!HEDGE.test(t))pb.push('affirmation '+(i+1)+' : '+x+' est « proposé » mais présenté comme établi')})});
+ if(!(r.affirmations||[]).length)pb.push('aucune affirmation');
+ return{verdict:pb.length?(pb.length<=2?'à reprendre':'refusée'):'conforme',problemes:pb}}
+async function askChemin(){const p=T.plantes.find(x=>x.id===chPlant);if(!p||chBusy||!SAMPLE)return;chBusy=true;renderChemin();let r=null,err='';
+ try{r=await SAMPLE.json(iaCheminPrompt(p),{modelTier:'default',cache:false});if(typeof r==='string')r=JSON.parse(r)}catch(e){err=e&&e.code==='rate_limited'?'Trop de demandes : réessayez dans un moment.':e&&e.code==='not_granted'?'L’accès à Claude n’a pas été autorisé.':'Le chemin de l’IA n’a pas pu être obtenu.'}
+ chBusy=false;if(!r){banner(err);renderChemin();return}
+ const c=iaCheminControle(p,r);T.chemins_ia[p.id]={date:nowISO(),modele:'Claude (via l’application)',question:p.question,qid:p.qid,reponse:r,controle:c};
+ trace('chemin_ia',{plante:p.id,verdict:c.verdict});persist();renderChemin();banner('Chemin de l’IA reçu · contrôle : '+c.verdict)}
+function traceIA(p){const x=T.chemins_ia[p.id];if(!x)return null;const r=x.reponse;
+ return{id:p.id,question:p.question,qid:p.qid,recherches:[{n:1,moment:x.date,action:'sélection',objet:'éléments fournis par la base',retenues:r.retenues||[],rejetees:(r.ecartees||[]).map(e=>({id:e.id,raison:e.raison}))}],
+  etapes:(r.etapes||[]).map((e,i)=>({n:i+1,texte:e.texte,nature:e.nature==='savoir_propre'?'savoir_propre':'sourcee',appuis:e.appuis||[]})),
+  relations:(r.relations||[]).map(e=>{const rb=relBase(rawId(e.de),rawId(e.vers));return{de:e.de,vers:e.vers,type:e.type,appuis:e.appuis||[],origine:rb?'base':'propre'}}),
+  affirmations:(r.affirmations||[]).map(a=>({phrase:a.phrase,appuis:a.appuis||[]})),controle:x.controle}}
+function chip(id,cls){return `<span class="badge ${cls||'b-n'}" title="${esc(id)}">${esc(labOf(id).slice(0,48))}</span>`}
+const stCls=s=>({valide:'b-ok',propose:'b-prop',corriger:'b-warn',rejete:'b-rej'}[s]||'b-n');
+function renderChemin(){const box=$('#chBox');if(!box)return;T.chemins_ia=T.chemins_ia||{};const ps=T.plantes.filter(p=>p.descriptions.length);
+ if(!ps.length){box.innerHTML='<p class="muted">Enregistrez d’abord une description dans « Ma plante » : votre chemin apparaîtra ici.</p>';return}
+ if(!chPlant||!ps.some(p=>p.id===chPlant))chPlant=(P()&&P().descriptions.length?P().id:ps[0].id);
+ const p=ps.find(x=>x.id===chPlant),s=socleQ(p),last=p.descriptions[p.descriptions.length-1],ti=traceIA(p);
+ const mine=new Set([...last.c.map(x=>'C:'+x),...last.d.map(x=>'S:'+x)]),iaS=new Set(ti?(ti.affirmations.flatMap(a=>a.appuis).concat(ti.etapes.flatMap(e=>e.appuis))).filter(x=>!String(x).startsWith('R:')):[]);
+ const soc=new Set([...s.cs.filter(c=>C[c].statut==='valide').map(c=>'C:'+c),...s.ds.filter(d=>DOC[d].statut==='valide').map(d=>'S:'+d)]);
+ let h=`<div class="row"><select id="chP" style="width:auto;max-width:100%">${ps.map(x=>`<option value="${x.id}" ${x.id===chPlant?'selected':''}>${x.id} – ${esc(x.question.slice(0,60))}</option>`).join('')}</select>
+ <button id="chExp">Exporter mes traces (protocole commun)</button></div>`;
+ // A. chemin réel
+ const ev=evPlant(p);
+ h+=`<h3>1. Mon chemin, dans l’ordre réel</h3><div class="muted">Tout ce que vous avez fait pour cette question, dans l’ordre : ce que vous avez consulté, retenu, écarté et relié, et ce que vous savez expliquer.</div>
+ <ol class="chl">${ev.map(t=>`<li><span class="muted">${fmt(t.date)}</span> · ${evText(t)}${t.type==='description'&&p.descriptions[t.n-1]?.explication?`<div class="expl">« ${esc(p.descriptions[t.n-1].explication)} »</div>`:''}</li>`).join('')}</ol>`;
+ // B. trois chemins
+ const colSocle=`<div class="col3"><h4>Le socle</h4><div class="muted">Ce que la base propose pour cette question, avec le statut donné par l’autorité.</div>
+  ${['valide','propose','corriger','rejete'].map(st=>{const L=[...s.cs.filter(c=>C[c].statut===st).map(c=>'C:'+c),...s.ds.filter(d=>DOC[d].statut===st).map(d=>'S:'+d)];return L.length?`<div class="sm-h">${stLab(st)} (${L.length})</div>`+L.map(x=>chip(x,stCls(st))).join(''):''}).join('')}
+  ${soc.size?'':'<div class="muted" style="margin-top:6px"><i>Rien n’est encore validé : toute la base reste une proposition.</i></div>'}</div>`;
+ const relsMine=last.r.map(x=>{const [a,ty,b]=x.split('|');const rb=relBase(a,b);return `<div class="muted">${esc(labOf(a))} <b>${esc(ty)}</b> ${esc(labOf(b))} · ${rb?'<span class="badge '+stCls(rb.statut)+'">dans la base : '+stLab(rb.statut)+'</span>':'<span class="badge b-usr">lecture propre</span>'}</div>`}).join('');
+ const colMoi=`<div class="col3"><h4>Mon chemin</h4><div class="muted">Dernière description (D${last.n}).</div>${[...mine].map(x=>chip(x,soc.has(x)?'b-ok':'b-usr')).join('')}
+  ${relsMine?'<div class="sm-h">Mes liens</div>'+relsMine:''}${last.explication?`<div class="sm-h">Ce que je sais expliquer</div><div class="expl">« ${esc(last.explication)} »</div>`:'<div class="muted" style="margin-top:6px"><i>Vous pouvez noter ce que vous savez expliquer au moment d’enregistrer une description.</i></div>'}</div>`;
+ let colIA=`<div class="col3"><h4>Le chemin de l’IA</h4><div class="muted">L’IA répond elle-même à la question, à partir des mêmes éléments, en déclarant son chemin.</div>`;
+ if(!ti)colIA+=SAMPLE?`<div class="row"><button class="pri" id="chGo" ${chBusy?'disabled':''}>${chBusy?'Chemin en cours…':'Demander le chemin de l’IA'}</button></div>`:'<p class="muted">Disponible dans l’application publiée sur Claude.</p>';
+ else{colIA+=`<div class="muted">${fmt(T.chemins_ia[p.id].date)} · <span class="badge ${VCOL[ti.controle.verdict]||'b-n'}">contrôle : ${esc(ti.controle.verdict)}</span></div>
+  ${ti.recherches[0].retenues.length?'<div class="sm-h">Retenu</div>'+ti.recherches[0].retenues.map(x=>chip(x,soc.has(x)?'b-ok':'b-prop')).join(''):''}
+  ${ti.recherches[0].rejetees.length?'<div class="sm-h">Écarté</div>'+ti.recherches[0].rejetees.map(x=>`<div class="muted">${esc(labOf(x.id))} — <i>${esc(x.raison||'')}</i></div>`).join(''):''}
+  <div class="sm-h">Son raisonnement</div><ol class="muted" style="padding-left:18px;margin:2px 0">${ti.etapes.map(e=>`<li>${esc(e.texte)}${e.nature==='savoir_propre'?' <span class="badge b-warn">savoir propre de l’IA</span>':''}</li>`).join('')}</ol>
+  <div class="sm-h">Sa réponse</div>${ti.affirmations.map(a=>`<p style="margin:4px 0;font-size:13.5px">${esc(a.phrase)} ${(a.appuis||[]).map(x=>chip(x)).join('')}</p>`).join('')}
+  ${ti.controle.problemes.length?`<details><summary class="lk">Points relevés (${ti.controle.problemes.length})</summary><ul class="muted">${ti.controle.problemes.map(x=>`<li>${esc(x)}</li>`).join('')}</ul></details>`:''}
+  <div class="row"><button class="sm" id="chRe" ${chBusy?'disabled':''}>Redemander</button></div>`}
+ colIA+='</div>';
+ h+=`<h3>2. Trois chemins vers la même question</h3><div class="ch3">${colSocle}${colMoi}${colIA}</div>`;
+ // C. lecture croisée
+ if(ti){const both=[...mine].filter(x=>iaS.has(x)),onlyMe=[...mine].filter(x=>!iaS.has(x)),onlyIA=[...iaS].filter(x=>!mine.has(x)),iaNon=[...iaS].filter(x=>!soc.has(x));
+  h+=`<h3>3. Lecture croisée</h3><div class="cross"><div><b>Communs à vous et à l’IA</b><br>${both.map(x=>chip(x)).join('')||'<span class="muted">aucun</span>'}</div>
+  <div><b>Retenus par vous seul</b><br>${onlyMe.map(x=>chip(x,'b-usr')).join('')||'<span class="muted">aucun</span>'}</div>
+  <div><b>Mobilisés par l’IA seule</b><br>${onlyIA.map(x=>chip(x,'b-prop')).join('')||'<span class="muted">aucun</span>'}</div></div>
+  <div class="muted" style="margin-top:6px">${iaNon.length?`L’IA s’appuie sur ${iaNon.length} élément(s) que l’autorité n’a pas encore validé(s).`:'L’IA ne s’appuie que sur des éléments validés.'} ${soc.size?'':'Aucun élément n’étant validé, aucun des deux chemins ne s’appuie encore sur un socle confirmé.'}</div>`}
+ box.innerHTML=h;$('#chP').onchange=e=>{chPlant=e.target.value;renderChemin()};if($('#chGo'))$('#chGo').onclick=askChemin;if($('#chRe'))$('#chRe').onclick=askChemin;$('#chExp').onclick=exportTraces}
+async function exportTraces(){const ps=T.plantes.filter(p=>p.descriptions.length);
+ const tr=[traceV1('apprenant',T.apprenant||'apprenant anonyme',ps.map(traceApprenant))];const ia=ps.map(traceIA).filter(Boolean);if(ia.length)tr.push(traceV1('ia','Claude (via l’application)',ia));
+ const txt=JSON.stringify({format:'traces-v1',exporteLe:nowISO(),traces:tr},null,2),name='traces_MCR_'+nowISO().slice(0,16).replace(/[:T]/g,'-')+'.json';
+ if(DL){try{await DL.save({filename:name,data:txt});banner('Traces exportées : '+name);return}catch(e){}}
+ try{const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([txt],{type:'application/json'}));a.download=name;document.body.appendChild(a);a.click();a.remove()}catch(e){}
+ modal(`<h2>Traces exportées</h2><p class="muted">Le fichier <b>${esc(name)}</b> a été proposé au téléchargement. S’il n’apparaît pas, copiez le texte ci-dessous.</p><textarea id="cpT" rows="8" style="font-family:monospace;font-size:11px">${esc(txt)}</textarea><div class="row"><button class="pri" id="cpB">Copier</button><button id="mNo">Fermer</button></div>`);
+ $('#mNo').onclick=closeModal;$('#cpB').onclick=async()=>{try{await navigator.clipboard.writeText(txt)}catch(e){$('#cpT').select();document.execCommand('copy')}$('#cpB').textContent='Copié'}}
 // ---------- corpus ----------
 function renderCorpus(){const q=$('#cq').value.toLowerCase().trim(),f=$('#cfam').value,s=$('#csrc').value;
  const L=DATA.docs.filter(d=>(!f||d.fam===f)&&(!s||d.src===s)&&(!q||(d.id+' '+d.titre+' '+d.auteurs.join(' ')+' '+d.fr+' '+d.en).toLowerCase().includes(q)));$('#ccount').textContent=L.length+' document(s)';
@@ -496,9 +623,9 @@ async function exportVal(){VAL.exporteLe=nowISO();VAL.valideur=$('#vName').value
 async function importVal(e){const f=e.target.files[0];if(!f)return;try{const o=JSON.parse(await f.text());if(o.format!=='validation-mcr-v1')throw 0;VAL=o;persistVal();applyVal();renderValid();banner('Validation importée : '+Object.keys(o.items).length+' élément(s).')}catch(err){banner('Ce fichier n’est pas une validation de cette application.')}e.target.value=''}
 $('#btVal').onclick=()=>{if(vUnlocked)return showView('valid');modal(`<h2>Mode validation</h2><p class="muted">Ce mode est réservé à Mioara Mugur-Schächter, pour corriger et valider les contenus proposés. Entrez le code transmis par le projet.</p><input type="text" id="vCode" placeholder="Code"><div class="row"><button class="pri" id="vOk">Entrer</button><button id="mNo">Annuler</button></div>`);
  $('#mNo').onclick=closeModal;const go=()=>{if($('#vCode').value.trim().toUpperCase()===VCODE){vUnlocked=true;try{sessionStorage.setItem('mcr-val-ok','1')}catch(e){}closeModal();showView('valid')}else banner('Code incorrect.')};$('#vOk').onclick=go;$('#vCode').onkeydown=e=>{if(e.key==='Enter')go()};$('#vCode').focus()};
-let view='plante';function showView(v){view=v;['plante','traj','corpus','valid'].forEach(x=>{$('#view-'+x).classList.toggle('hidden',x!==v);$('#tb-'+x)?.classList.toggle('on',x===v)});renderAll()}
-$('#tb-plante').onclick=()=>showView('plante');$('#tb-traj').onclick=()=>showView('traj');$('#tb-corpus').onclick=()=>showView('corpus');
-function renderAll(){vbar();if(view==='plante'){renderLeft();renderPlant();renderDetail();renderDesc();renderGuide()}else if(view==='traj')renderTraj();else if(view==='valid')renderValid();else renderCorpus()}
+let view='plante';function showView(v){view=v;['plante','traj','chemin','corpus','valid'].forEach(x=>{$('#view-'+x).classList.toggle('hidden',x!==v);$('#tb-'+x)?.classList.toggle('on',x===v)});renderAll()}
+$('#tb-plante').onclick=()=>showView('plante');$('#tb-traj').onclick=()=>showView('traj');$('#tb-corpus').onclick=()=>showView('corpus');$('#tb-chemin').onclick=()=>showView('chemin');
+function renderAll(){vbar();if(view==='plante'){renderLeft();renderPlant();renderDetail();renderDesc();renderGuide()}else if(view==='traj')renderTraj();else if(view==='chemin')renderChemin();else if(view==='valid')renderValid();else renderCorpus()}
 function modal(h){closeModal();const m=document.createElement('div');m.id='modal';m.innerHTML=`<div class="box">${h}</div>`;m.onclick=e=>{if(e.target===m)closeModal()};document.body.appendChild(m)}
 function closeModal(){$('#modal')?.remove();confirmReset=false}
 function banner(t){const b=$('#banner');b.textContent=t;b.classList.add('show');clearTimeout(banner.t);banner.t=setTimeout(()=>b.classList.remove('show'),2600)}

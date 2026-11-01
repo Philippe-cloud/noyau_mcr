@@ -302,7 +302,9 @@ def exporter(g, dossier):
         json.dump(o, open(os.path.join(out, n), "w", encoding="utf-8"), ensure_ascii=False, indent=1)
     fiche = f"fiche_autorite_{nom}.html"
     open(os.path.join(out, fiche), "w", encoding="utf-8").write(fiche_autorite_html(g, fichiers[f"vue_autorite_{nom}.json"]))
-    return out, list(fichiers) + [fiche]
+    from . import trace
+    traces = trace.exporter(g, dossier, out)
+    return out, list(fichiers) + [fiche] + traces
 
 
 # ---------------------------------------------------------------- fiche lisible pour l'autorité

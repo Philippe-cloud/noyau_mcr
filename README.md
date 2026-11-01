@@ -53,6 +53,16 @@ python -m ancrage comparer corpus/mcr
 python exemples/test_garde_fou.py
 ```
 
+## Protocole de trace commun (trace-v1)
+
+Une même grammaire pour l'autorité, l'apprenant et l'IA (`ancrage/trace.py`) : pour chaque chemin vers une question, les **recherches** (consulté, retenu, écarté avec la raison, dans l'ordre réel), les **étapes** (avec leurs appuis ; nature « sourcée » ou « savoir propre »), les **relations** (origine « base » ou « propre ») et les **affirmations** (ce que l'acteur affirme ou sait expliquer, avec ses appuis).
+
+- **Autorité** : trajectoire fondatrice reconstituée à partir des validations (`trace_autorite.json` dans les sorties de la boucle).
+- **Apprenant** : reconstituée à partir de sa trajectoire (`trace_apprenant_*.json`) ; dans l'application, l'onglet *Mon chemin* l'affiche et l'exporte.
+- **IA** : dans *Mon chemin*, l'IA répond elle-même à la question en déclarant son chemin ; le lot exporté (`traces-v1`) peut être déposé dans `audits_ia/entrees/` pour un audit complet.
+
+Le savoir propre n'a pas le même statut selon l'acteur (contribution fondatrice, vue légitime, part non vérifiable) ; le plafond d'ancrage ne vaut que pour l'IA.
+
 ## Audit d'une réponse d'IA (cas séparé)
 
 Une IA répond à une question en déclarant sa trajectoire : les éléments du corpus qu'elle mobilise, les sources externes qu'elle cite, les relations qu'elle établit, les étapes de son raisonnement et les affirmations de sa réponse, chacune avec ses appuis (format `trajectoire-ia-v1`).
