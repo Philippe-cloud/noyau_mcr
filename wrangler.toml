@@ -3,6 +3,8 @@
 name = "noyau-mcr"
 main = "connecteur/worker.js"
 compatibility_date = "2026-10-01"
+# Conserver les variables définies dans le tableau de bord Cloudflare (dont JOURNAL_KEY) à chaque déploiement.
+keep_vars = true
 
 [[kv_namespaces]]
 binding = "JOURNAL"

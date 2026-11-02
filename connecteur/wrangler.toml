@@ -2,6 +2,8 @@
 name = "noyau-mcr"
 main = "worker.js"
 compatibility_date = "2026-10-01"
+# Conserver les variables définies dans le tableau de bord Cloudflare (dont JOURNAL_KEY) à chaque déploiement.
+keep_vars = true
 
 # Stockage durable du journal : espace KV « noyau-journal » créé dans Cloudflare.
 [[kv_namespaces]]
