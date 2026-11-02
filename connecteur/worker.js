@@ -11,7 +11,7 @@
 //   GET  /                    page d'accueil
 import CORPUS from "./corpus.json";
 
-const VERSION = "0.1.0";
+const VERSION = "0.2.0";
 const PROTOCOLES = ["2025-06-18", "2025-03-26", "2024-11-05"];
 const STATUT_LECTURE = "proposé par l'IA, non validé par l'autorité";
 const D = Object.fromEntries(CORPUS.documents.map(d => [d.id, d]));
@@ -72,19 +72,55 @@ function executer(nom, a) {
   return { texte: `Outil inconnu : ${nom}`, erreur: true };
 }
 
-// ---------------------------------------------------------------- journal (Cloudflare KV, ou mémoire à défaut)
-const MEMOIRE = new Map();
+// ---------------------------------------------------------------- journal
+// Chaque session est tenue par un Durable Object (SessionJournal) : ses écritures sont traitées une par une,
+// si bien que deux appels simultanés ne peuvent pas s'écraser. KV ne sert qu'à l'index des sessions.
+// Sans Durable Object (test local), repli sur KV ou sur la mémoire, avec une file d'attente par session.
+const MEMOIRE = new Map(), FILES = new Map();
 const kv = env => env && env.JOURNAL ? env.JOURNAL : { get: async k => MEMOIRE.get(k) ?? null, put: async (k, v) => void MEMOIRE.set(k, v),
   list: async ({ prefix }) => ({ keys: [...MEMOIRE.keys()].filter(k => k.startsWith(prefix)).map(name => ({ name })) }) };
-async function journaliser(env, session, entree) {
-  const k = `session:${session}`; const s = JSON.parse((await kv(env).get(k)) || "null") || { session, debut: new Date().toISOString(), client: entree.client || null, appels: [] };
+function ajouter(s, session, entree) {
+  s = s || { session, debut: new Date().toISOString(), client: null, appels: [] };
   if (entree.client) s.client = entree.client;
   if (entree.appel) s.appels.push(entree.appel);
   s.fin = new Date().toISOString();
-  await kv(env).put(k, JSON.stringify(s));
+  return s;
+}
+export class SessionJournal {
+  constructor(state) { this.state = state; }
+  async fetch(request) {
+    const url = new URL(request.url);
+    if (request.method === "POST") {
+      const { session, entree } = await request.json();
+      const s = ajouter(await this.state.storage.get("s"), session, entree);
+      await this.state.storage.put("s", s);
+      return Response.json(s);
+    }
+    return Response.json((await this.state.storage.get("s")) || null);
+  }
+}
+const stub = (env, session) => env.SESSIONS.get(env.SESSIONS.idFromName(session));
+async function journaliser(env, session, entree) {
+  if (env && env.SESSIONS) {
+    const s = await (await stub(env, session).fetch("https://journal/ajouter", { method: "POST", body: JSON.stringify({ session, entree }) })).json();
+    if (entree.client || s.appels.length <= 1) await kv(env).put("index:" + session, s.debut);
+    return s;
+  }
+  // repli : file d'attente par session (pas de perte en local)
+  const prev = FILES.get(session) || Promise.resolve();
+  const p = prev.then(async () => { const k = "session:" + session; const s = ajouter(JSON.parse((await kv(env).get(k)) || "null"), session, entree);
+    await kv(env).put(k, JSON.stringify(s)); await kv(env).put("index:" + session, s.debut); return s; });
+  FILES.set(session, p.catch(() => {}));
+  return p;
+}
+async function lireSession(env, session) {
+  if (env && env.SESSIONS) return await (await stub(env, session).fetch("https://journal/lire")).json();
+  return JSON.parse((await kv(env).get("session:" + session)) || "null");
+}
+async function listerSessions(env) {
+  return (await kv(env).list({ prefix: "index:" })).keys.map(k => k.name.slice(6));
 }
 
-// ---------------------------------------------------------------- comparaison déclaré / réel
 // Une session peut contenir plusieurs essais : chaque declarer_chemin clôt un essai, comparé aux seuls appels
 // faits depuis la déclaration précédente.
 function essais(s) {
@@ -125,18 +161,18 @@ table{border-collapse:collapse;width:100%;font-size:13.5px}td,th{border-bottom:1
 .m{color:#6b7280;font-size:13px}</style></head><body>${b}</body></html>`, { headers: { "content-type": "text/html; charset=utf-8" } });
 
 async function pageJournal(env, url) {
-  const ses = (await kv(env).list({ prefix: "session:" })).keys.map(k => k.name.slice(8));
+  const ses = await listerSessions(env);
   const one = url.searchParams.get("session"), cle = esc(url.searchParams.get("cle"));
   if (!one) {
     const rows = [];
-    for (const id of ses.slice(-200).reverse()) { const s = JSON.parse(await kv(env).get("session:" + id)); const E = essais(s);
+    for (const id of ses.slice(-200).reverse()) { const s = await lireSession(env, id); if (!s) continue; const E = essais(s);
       if (!E.essais.length) rows.push(`<tr><td><a href="?cle=${cle}&session=${esc(id)}">${esc(s.debut.slice(0, 16).replace("T", " "))}</a></td><td>${esc(s.client?.name || "")}</td><td>${E.en_cours.length}</td><td><span class="m">pas de déclaration</span></td><td>—</td></tr>`);
       E.essais.forEach(e => { const c = comparerEssai(e.appels, e.declaration);
         rows.push(`<tr><td><a href="?cle=${cle}&session=${esc(id)}#essai${e.n}">${esc(e.declaration.quand.slice(0, 16).replace("T", " "))}</a></td><td>${esc(s.client?.name || "")} · essai ${e.n}</td><td>${c.reel.appels}</td><td>${esc((c.declaration.question || "").slice(0, 70))}</td><td>${c.accord_declare_reel}</td></tr>`) }) }
     return page("Journal du témoin", `<h1>Journal du témoin · corpus MCR</h1><p class="m">Chaque ligne est une session d'une IA connectée. Le chemin réel est enregistré par ce serveur ; l'IA ne peut pas le modifier.</p>
       <table><tr><th>Début (UTC)</th><th>Client</th><th>Appels</th><th>Question déclarée</th><th>Accord déclaré / réel</th></tr>${rows.join("") || '<tr><td colspan="5" class="m">Aucune session.</td></tr>'}</table>`);
   }
-  const s = JSON.parse((await kv(env).get("session:" + one)) || "null"); if (!s) return page("Session inconnue", "<p>Session inconnue.</p>");
+  const s = await lireSession(env, one); if (!s) return page("Session inconnue", "<p>Session inconnue.</p>");
   const E = essais(s);
   const li = (L, f) => L.length ? "<ul>" + L.map(f).join("") + "</ul>" : '<p class="m">aucun</p>';
   const bloc = (e) => { const c = comparerEssai(e.appels, e.declaration); const X = c.ecarts;
@@ -168,11 +204,11 @@ async function traiter(msg, env, session) {
   if (method === "tools/call") {
     const nom = params.name, a = params.arguments || {};
     if (nom === "voir_journal") {
-      const ids = (await kv(env).list({ prefix: "session:" })).keys.map(k => k.name.slice(8));
-      if (a.session) { const s = JSON.parse((await kv(env).get("session:" + a.session)) || "null");
+      const ids = await listerSessions(env);
+      if (a.session) { const s = await lireSession(env, a.session);
         return rep(id, { content: [{ type: "text", text: s ? JSON.stringify({ session: s.session, client: s.client, debut: s.debut, fin: s.fin, appels_reels: s.appels.map(x => ({ quand: x.quand, outil: x.outil, arguments: x.outil === "declarer_chemin" ? "(déclaration)" : x.arguments, ouvert: x.lus })), essais: essais(s).essais.map(e => ({ essai: e.n, ...comparerEssai(e.appels, e.declaration) })) }, null, 1) : "Session inconnue." }] }); }
       const L = [];
-      for (const k of ids) { const s = JSON.parse(await kv(env).get("session:" + k));
+      for (const k of ids) { const s = await lireSession(env, k); if (!s) continue;
         essais(s).essais.forEach(e => { const c = comparerEssai(e.appels, e.declaration);
           L.push({ session: k, essai: e.n, quand: e.declaration.quand, client: s.client?.name, question: c.declaration.question, appels: c.reel.appels, accord: c.accord_declare_reel }); }); }
       return rep(id, { content: [{ type: "text", text: JSON.stringify({ sessions_enregistrees: ids.length, sessions_avec_declaration: L }, null, 1) }] });
@@ -180,9 +216,9 @@ async function traiter(msg, env, session) {
     const r = executer(nom, a);
     await journaliser(env, session, { appel: { quand: new Date().toISOString(), outil: nom, arguments: a, lus: r.lus || [], vus: r.vus || [] } });
     let texte = r.texte;
-    if (nom === "declarer_chemin") { const s = JSON.parse(await kv(env).get("session:" + session)); const c = comparer(s);
+    if (nom === "declarer_chemin") { const s = await lireSession(env, session); const c = comparer(s);
       const X = c.ecarts;
-      texte += `\nAccord déclaré / réel : ${c.accord_declare_reel} (sur les ${c.reel.appels} appel(s) faits depuis la déclaration précédente).`
+      texte += `\nAccord déclaré / réel : ${c.accord_declare_reel} (sur les ${c.reel.appels} appel(s) faits depuis la déclaration précédente ; témoin v${VERSION}${env && env.SESSIONS ? ", écritures sérialisées" : ""}).`
         + `\nEmbellissements : ${X.embellissements.map(x => x.id + " (" + x.nature + ")").join(", ") || "aucun"}.`
         + `\nCitations sans lecture : ${X.citations_sans_lecture.map(x => x.id + " (" + x.nature + ")").join(", ") || "aucune"}.`
         + `\nOmissions : ${X.omissions.join(", ") || "aucune"}.`; }
@@ -206,8 +242,8 @@ export default {
       return new Response(JSON.stringify(Array.isArray(corps) ? sorties : sorties[0]), { headers: h });
     }
     if (url.pathname === "/etat") {
-      const n = (await kv(env).list({ prefix: "session:" })).keys.length;
-      return Response.json({ connecteur: "noyau-mcr-temoin", version: VERSION, stockage_durable_relie: !!(env && env.JOURNAL),
+      const n = (await listerSessions(env)).length;
+      return Response.json({ connecteur: "noyau-mcr-temoin", version: VERSION, stockage_durable_relie: !!(env && env.JOURNAL), ecritures_serialisees: !!(env && env.SESSIONS),
         mot_de_passe_configure: !!(env && env.JOURNAL_KEY), sessions_enregistrees: n, heure_serveur: new Date().toISOString() });
     }
     if (url.pathname === "/journal" || url.pathname === "/journal.json") {
@@ -216,7 +252,7 @@ export default {
       if (!attendue) return new Response("Le mot de passe du journal n'est pas configuré sur le serveur (secret JOURNAL_KEY absent de ce déploiement).", { status: 503, headers: { "content-type": "text/plain; charset=utf-8" } });
       if (!donnee) return new Response("Ajoutez votre mot de passe à la fin de l'adresse : /journal?cle=VOTREMOTDEPASSE", { status: 403, headers: { "content-type": "text/plain; charset=utf-8" } });
       if (donnee !== attendue) return new Response(`Mot de passe incorrect (reçu : ${donnee.length} caractère(s)). Évitez les caractères # & + % ? et les espaces.`, { status: 403, headers: { "content-type": "text/plain; charset=utf-8" } });
-      if (url.pathname === "/journal.json") { const s = await kv(env).get("session:" + url.searchParams.get("session")); return new Response(s ? JSON.stringify({ ...JSON.parse(s), comparaison: comparer(JSON.parse(s)) }, null, 1) : "{}", { headers: { "content-type": "application/json" } }); }
+      if (url.pathname === "/journal.json") { const s = await lireSession(env, url.searchParams.get("session")); return new Response(s ? JSON.stringify({ ...s, essais: essais(s).essais.map(e => ({ essai: e.n, ...comparerEssai(e.appels, e.declaration) })) }, null, 1) : "{}", { headers: { "content-type": "application/json" } }); }
       return pageJournal(env, url);
     }
     return page("Témoin du noyau MCR", `<h1>Témoin du noyau MCR</h1><p>Serveur MCP : une IA peut explorer le corpus de la MCR avec des outils (chercher, lire un document, lire une notion, voir les relations). Chaque appel est enregistré par ce serveur, indépendamment de ce que l'IA déclare.</p>

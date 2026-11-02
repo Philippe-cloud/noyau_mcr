@@ -9,3 +9,12 @@ keep_vars = true
 [[kv_namespaces]]
 binding = "JOURNAL"
 id = "31105e507bac4bab9eb05e76533b4814"
+
+# Un Durable Object par session : les appels simultanés sont enregistrés un par un, sans perte.
+[[durable_objects.bindings]]
+name = "SESSIONS"
+class_name = "SessionJournal"
+
+[[migrations]]
+tag = "v1"
+new_sqlite_classes = ["SessionJournal"]
