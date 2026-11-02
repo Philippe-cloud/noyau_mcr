@@ -57,6 +57,10 @@ python -m ancrage comparer corpus/mcr
 python exemples/test_garde_fou.py
 ```
 
+## Connecteur « témoin » (MCP)
+
+Le dossier `connecteur/` contient un serveur MCP à héberger sur Cloudflare Workers : une IA y explore le corpus avec des outils, chaque appel est enregistré par le serveur, et une page compare le chemin déclaré par l'IA à son chemin réel. Procédure de mise en ligne : `connecteur/README.md`.
+
 ## Protocole de trace commun (trace-v1)
 
 Une même grammaire pour l'autorité, l'apprenant et l'IA (`ancrage/trace.py`) : pour chaque chemin vers une question, les **recherches** (consulté, retenu, écarté avec la raison, dans l'ordre réel), les **étapes** (avec leurs appuis ; nature « sourcée » ou « savoir propre »), les **relations** (origine « base » ou « propre ») et les **affirmations** (ce que l'acteur affirme ou sait expliquer, avec ses appuis).
