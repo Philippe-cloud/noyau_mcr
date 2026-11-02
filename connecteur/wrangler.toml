@@ -3,8 +3,7 @@ name = "noyau-mcr-temoin"
 main = "worker.js"
 compatibility_date = "2026-10-01"
 
-# Stockage durable du journal : créez un espace KV dans Cloudflare (Storage & Databases → KV),
-# puis retirez les « # » des trois lignes ci-dessous et collez son identifiant à la place de COLLER_ICI.
-# [[kv_namespaces]]
-# binding = "JOURNAL"
-# id = "COLLER_ICI"
+# Stockage durable du journal : espace KV « noyau-journal » créé dans Cloudflare.
+[[kv_namespaces]]
+binding = "JOURNAL"
+id = "31105e507bac4bab9eb05e76533b4814"
