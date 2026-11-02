@@ -20,14 +20,14 @@ Les intitulés de Cloudflare peuvent varier légèrement.
 3. **Sur GitHub**, ouvrez `connecteur/wrangler.toml`, cliquez sur le crayon, retirez les `#` des trois dernières lignes, collez l'identifiant à la place de `COLLER_ICI`, puis *Commit changes*.
 4. **Dans Cloudflare** : *Workers & Pages → Create → Import a repository*, reliez votre compte GitHub, choisissez `noyau_mcr`, indiquez **`connecteur`** comme dossier racine (*root directory*), puis *Deploy*. Chaque modification du dossier sur GitHub redéploiera le connecteur.
 5. **Protéger le journal** : dans le Worker, *Settings → Variables and secrets → Add*, type *Secret*, nom `JOURNAL_KEY`, valeur de votre choix (un mot de passe).
-6. **Vérifier** : ouvrez `https://noyau-mcr-temoin.<votre-sous-domaine>.workers.dev/`. La page d'accueil donne l'adresse du connecteur et signale si le stockage n'est pas relié.
-7. **Relier Claude** : dans Claude, *Paramètres → Connecteurs → Ajouter un connecteur personnalisé*, adresse `https://noyau-mcr-temoin.<votre-sous-domaine>.workers.dev/mcp`. (La possibilité d'ajouter un connecteur personnalisé dépend de l'abonnement.)
+6. **Vérifier** : ouvrez `https://noyau-mcr.<votre-sous-domaine>.workers.dev/`. La page d'accueil donne l'adresse du connecteur et signale si le stockage n'est pas relié.
+7. **Relier Claude** : dans Claude, *Paramètres → Connecteurs → Ajouter un connecteur personnalisé*, adresse `https://noyau-mcr.<votre-sous-domaine>.workers.dev/mcp`. (La possibilité d'ajouter un connecteur personnalisé dépend de l'abonnement.)
 
 ## Utilisation
 
 Posez à Claude une question sur la MCR en lui demandant d'utiliser le connecteur et de terminer par `declarer_chemin`. Puis ouvrez :
 
-`https://noyau-mcr-temoin.<votre-sous-domaine>.workers.dev/journal?cle=<votre JOURNAL_KEY>`
+`https://noyau-mcr.<votre-sous-domaine>.workers.dev/journal?cle=<votre JOURNAL_KEY>`
 
 ## À savoir
 

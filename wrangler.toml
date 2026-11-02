@@ -1,0 +1,9 @@
+# Déploiement Cloudflare Workers du connecteur « témoin » depuis la racine du dépôt.
+# (Le code est dans connecteur/ ; voir connecteur/README.md.)
+name = "noyau-mcr"
+main = "connecteur/worker.js"
+compatibility_date = "2026-10-01"
+
+[[kv_namespaces]]
+binding = "JOURNAL"
+id = "31105e507bac4bab9eb05e76533b4814"
