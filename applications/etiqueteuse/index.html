@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Étiqueteuse · profil MCR v0.1</title>
+<style>
+:root{--ink:#1f2328;--mut:#6b7280;--line:#dbe2ec;--acc:#2e5597;--bg:#f7f8fb;--lab:#fbf7ee;--lab-b:#b9a882;--ok:#15803d;--warn:#b45309;--err:#b91c1c}
+*{box-sizing:border-box}body{margin:0;font:15px/1.5 system-ui,-apple-system,"Segoe UI",sans-serif;color:var(--ink);background:var(--bg)}
+header{display:flex;gap:10px;align-items:center;flex-wrap:wrap;padding:10px 14px;background:#fff;border-bottom:1px solid var(--line);position:sticky;top:0;z-index:3}
+header h1{font-size:18px;margin:0 8px 0 0;font-weight:600}.sp{flex:1}
+button,.btn{font:inherit;font-size:13.5px;border:1px solid var(--line);background:#fff;border-radius:8px;padding:5px 11px;cursor:pointer;color:var(--ink)}
+button.pri{background:var(--acc);color:#fff;border-color:var(--acc)}button:disabled{opacity:.5;cursor:default}
+main{display:grid;grid-template-columns:240px minmax(0,1fr) minmax(0,420px);gap:12px;padding:12px;max-width:1500px;margin:0 auto}
+@media(max-width:1100px){main{grid-template-columns:1fr}#gauche{order:1}#droite{order:2}#form{order:3}header{position:static}}
+.panel{background:#fff;border:1px solid var(--line);border-radius:12px;padding:12px}
+.panel h2{font-size:15px;margin:0 0 8px}
+.muted{color:var(--mut);font-size:13px}
+.item{border:1px solid var(--line);border-radius:8px;padding:7px 9px;margin:6px 0;cursor:pointer;font-size:13.5px}
+.item.on{border-color:var(--acc);background:#eef3fb}
+label{display:block;font-size:12.5px;color:#374151;margin:8px 0 2px;font-weight:600}
+input,select,textarea{font:inherit;font-size:14px;width:100%;padding:6px 8px;border:1px solid var(--line);border-radius:7px;background:#fff}
+textarea{resize:vertical}
+fieldset{border:1px solid var(--line);border-radius:10px;margin:10px 0;padding:6px 10px 10px}
+legend{font-weight:600;font-size:13.5px;color:var(--acc);padding:0 4px}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:flex-end}.row>*{flex:1;min-width:120px}
+.sub{border:1px dashed var(--line);border-radius:8px;padding:6px 8px;margin:6px 0;position:relative}
+.del{position:absolute;top:4px;right:6px;border:none;background:none;color:var(--err);font-size:16px;padding:0 4px}
+.etiq{background:var(--lab);border:1.5px dashed var(--lab-b);outline:4px solid var(--lab);border-radius:6px;padding:12px 14px;font:13.5px/1.45 ui-monospace,"SFMono-Regular",Menlo,Consolas,monospace;color:#3b3325}
+.etiq .tt{font-weight:700;letter-spacing:.04em;border-bottom:1px solid var(--lab-b);padding-bottom:6px;margin-bottom:6px;display:flex;justify-content:space-between;gap:8px}
+.etiq table{border-collapse:collapse;width:100%}.etiq td{vertical-align:top;padding:2px 0}.etiq td:first-child{width:105px;font-weight:700;padding-right:8px}
+.etiq .nr{color:#9a8b6a;font-style:italic}
+.badge{display:inline-block;font-size:11.5px;border-radius:8px;padding:1px 7px;border:1px solid}
+.b-ok{color:var(--ok);border-color:#a7e3b9;background:#f0fdf4}.b-warn{color:var(--warn);border-color:#fcd34d;background:#fffbeb}.b-err{color:var(--err);border-color:#fecaca;background:#fef2f2}
+.chk li{margin:3px 0;font-size:13px}
+pre{background:#0f172a;color:#e2e8f0;border-radius:8px;padding:10px;font-size:11.5px;overflow:auto;max-height:380px;white-space:pre-wrap;word-break:break-word}
+#toast{position:fixed;bottom:16px;left:50%;transform:translateX(-50%);background:#111827;color:#fff;padding:8px 14px;border-radius:8px;font-size:13.5px;opacity:0;transition:opacity .2s;pointer-events:none}#toast.show{opacity:1}
+.hidden{display:none}
+@media print{header,#gauche,#form,.noprint{display:none!important}main{display:block}.panel{border:none}}
+</style></head><body>
+<header><h1>Étiqueteuse</h1><span class="muted">étiquettes de provenance · profil MCR v0.1</span><span class="sp"></span>
+<button class="pri" id="bNew">Nouvelle étiquette</button><button id="bEx">Exemple</button><button id="bExp">Exporter tout</button>
+<label class="btn" style="margin:0;font-weight:400;font-size:13.5px">Importer<input type="file" id="fImp" accept=".json" class="hidden"></label><button id="bAide">Aide</button></header>
+<main>
+<section class="panel" id="gauche"><h2>Mes étiquettes</h2><div class="muted" id="nb"></div><div id="liste"></div></section>
+<section class="panel" id="form"></section>
+<section class="panel" id="droite">
+ <h2>L'étiquette</h2><div id="apercu"></div>
+ <div class="row noprint" style="margin-top:10px"><button id="bPrint">Imprimer</button><button id="bCopy">Copier le JSON-LD</button><button id="bHtml">Copier la balise HTML</button><button id="bOne">Télécharger</button></div>
+ <h2 style="margin-top:14px">Conformité au profil</h2><ul class="chk" id="chk"></ul>
+ <h2 style="margin-top:14px">Version machine (JSON-LD)</h2><pre id="jsonld"></pre>
+</section>
+</main>
+<div id="toast"></div>
+<script>
+const REF={"docs": [{"id": "D11", "t": "Synthetic Exposition 2023 of: A Factual Second Quantum Mechanics FQM2 Rooted into the A-Conceptual Physical Fa", "a": "Mioara Mugur-Schächter", "d": "2025-01-24"}, {"id": "D12", "t": "Étude du caractère complet de la théorie quantique", "a": "Mioara Mugur-Schächter", "d": "1964"}, {"id": "D13", "t": "Les leçons de la mécanique quantique. Vers une épistémologie formelle", "a": "Mioara Mugur-Schächter", "d": "1997"}, {"id": "D14", "t": "Quantum Mechanics, Mathematics, Cognition and Action: Proposals for a Formalized Epistemology", "a": "Mioara Mugur-Schächter (dir.), Alwyn van der Merwe (dir.)", "d": "2002"}, {"id": "D15", "t": "Sur le tissage des connaissances", "a": "Mioara Mugur-Schächter", "d": "2006-05"}, {"id": "D16", "t": "L'Infra-mécanique quantique", "a": "Mioara Mugur-Schächter", "d": "2009-01"}, {"id": "D17", "t": "L'Infra-Mécanique Quantique, Indéterminisme, Non-localité", "a": "Mioara Mugur-Schächter", "d": "2017-07-24"}, {"id": "D18", "t": "Study of Wigner's Theorem on Joint Probabilities", "a": "Mioara Mugur-Schächter", "d": "1979"}, {"id": "D19", "t": "Le concept nouveau de fonctionnelle d'opacité d'une statistique. Étude des relations entre la loi des grands n", "a": "Mioara Mugur-Schächter", "d": "1980"}, {"id": "D20", "t": "The Probabilistic-Informational Concept of an Opacity Functional: New Proof of its Main Properties", "a": "Mioara Mugur-Schächter, N. Hadjisavvas", "d": "1982"}, {"id": "D21", "t": "Esquisse d'une représentation générale et formalisée des descriptions et le statut descriptionnel de la mécani", "a": "Mioara Mugur-Schächter", "d": "1984-10"}, {"id": "D22", "t": "Spacetime Quantum Probabilities, Relativized Descriptions, and Popperian Propensities. Part I: Spacetime Quant", "a": "Mioara Mugur-Schächter", "d": "1991"}, {"id": "D23", "t": "Spacetime Quantum Probabilities II: Relativized Descriptions and Popperian Propensities", "a": "Mioara Mugur-Schächter", "d": "1992-02"}, {"id": "D24", "t": "From Quantum Mechanics to Universal Structures of Conceptualization and Feedback on Quantum Mechanics", "a": "Mioara Mugur-Schächter", "d": "1993"}, {"id": "D25", "t": "Quantum Probabilities, Kolmogorov Probabilities, and Informational Probabilities", "a": "Mioara Mugur-Schächter", "d": "1994-01"}, {"id": "D26", "t": "Une méthode de conceptualisation relativisée", "a": "Mioara Mugur-Schächter", "d": "1995-09"}, {"id": "D27", "t": "Objectivity and Descriptional Relativities", "a": "Mioara Mugur-Schächter", "d": "2002"}, {"id": "D28", "t": "Quantum Mechanics Versus a Method of Relativized Conceptualization", "a": "Mioara Mugur-Schächter", "d": "2002"}, {"id": "D29", "t": "On the concept of probability", "a": "Mioara Mugur-Schächter", "d": "2014"}, {"id": "D30", "t": "Réflexion sur le problème de localité", "a": "Mioara Mugur-Schächter", "d": "1980"}, {"id": "D31", "t": "La structure intelligible de l'Univers : variations sur le thème symétries-brisures de symétrie", "a": "Francis Bailly", "d": "2015"}, {"id": "D32", "t": "Esquisse d'une méthode de conceptualisation relativisée", "a": "Mioara Mugur-Schächter", "d": "1990"}, {"id": "D33", "t": "L'archipel du danger : introduction aux cindyniques", "a": "Georges-Yves Kervern, Patrick Rubise", "d": "1991"}, {"id": "D34", "t": "Latest advances in cindynics", "a": "Georges-Yves Kervern", "d": "1994"}, {"id": "D35", "t": "Éléments fondamentaux des cindyniques", "a": "Georges-Yves Kervern", "d": "1995"}, {"id": "D36", "t": "Introduction aux cindyniques", "a": "Jean-Luc Wybo (dir.)", "d": "1998-06"}, {"id": "D37", "t": "Émergence et histoire des cindyniques. Déconstruction de la destruction", "a": "Georges-Yves Kervern", "d": "2005-06"}, {"id": "D38", "t": "Qualification des JT français contemporains", "a": "Sylvie Leleu-Merviel, Philippe Useille", "d": "2011"}, {"id": "D39", "t": "Note de lecture : Sur le tissage des connaissances (M. Mugur-Schächter)", "a": "Jean-Louis Le Moigne", "d": "2006-08"}, {"id": "D40", "t": "Note de lecture : Sur le tissage des connaissances (M. Mugur-Schächter)", "a": "Jean-Paul Baquiast", "d": "2006-09"}, {"id": "D41", "t": "Peut-on étudier les pratiques thérapeutiques énergétiques de façon scientifique ? ou Sur l'utilisation de la m", "a": "Geneviève Rivoire", "d": "2012-05"}, {"id": "D42", "t": "Présentation du groupe de Nantes (Groupe de recherche en psychologie transdisciplinaire)", "a": "Jean-Pierre Courtial", "d": ""}, {"id": "D43", "t": "A la rencontre du grand E, notre Enigme Energétique Extraordinaire", "a": "Pierre Henri Garnier, Hervé Guillot", "d": "2010-03-27"}, {"id": "D44", "t": "Une écologie consensuelle et scientifique est possible / A consensual and scientific ecology is possible", "a": "Jean-Paul Baquiast", "d": ""}, {"id": "D45", "t": "The Quantum Mechanical One-System Formalism, Joint Probabilities and Locality", "a": "Mioara Mugur-Schächter", "d": "1977"}, {"id": "D46", "t": "Elucidation of the probabilistic structure of quantum mechanics", "a": "Mioara Mugur-Schächter", "d": "1983"}, {"id": "D47", "t": "The Probability Trees of Quantum Mechanics: Probabilistic Meta-Dependence and Meta-Meta-Dependence", "a": "Mioara Mugur-Schächter", "d": "1992"}, {"id": "D48", "t": "Mécanique quantique, réel et sens", "a": "Mioara Mugur-Schächter", "d": "1997"}, {"id": "D49", "t": "En marge de l'article de Giuseppe Longo sur Laplace, Turing et la géométrie impossible du « jeu de l'imitation", "a": "Mioara Mugur-Schächter", "d": "2002"}, {"id": "D50", "t": "On a Crucial Problem in Probabilities and Solution", "a": "Mioara Mugur-Schächter", "d": "2008-01-17"}, {"id": "D51", "t": "Kolmogorov's aporia and solution by construction of a relativized and quantified concept of factual probabilit", "a": "Mioara Mugur-Schächter", "d": "2009-01-15"}, {"id": "D52", "t": "Mioara Mugur-Schachter: Information, Quantum Mechanics and Probabilities", "a": "Mioara Mugur-Schächter", "d": "2015"}, {"id": "D53", "t": "The Method of Relativized Conceptualization and its main consequences (MRC 2023)", "a": "Mioara Mugur-Schächter", "d": "2023-07-01"}, {"id": "D54", "t": "Systémique Relativisée : essences des conceptualisations relativisées du Réel", "a": "Henri Boulouet", "d": "2014-10-03"}, {"id": "D55", "t": "Estructuras y sistemas. Una aproximación al Método de Conceptualización Relativizada de Mioara Mugur-Schächter", "a": "Domingo Fernández Agis", "d": "2019"}, {"id": "D56", "t": "On Complexity", "a": "Vincent Schächter", "d": "2002"}, {"id": "D57", "t": "De l'UXD au LivXD. Design des expériences de vie", "a": "Sylvie Leleu-Merviel (dir.), Daniel Schmitt (dir.), Philippe", "d": "2018"}, {"id": "D58", "t": "Quelques révisions du concept d'information", "a": "Sylvie Leleu-Merviel, Philippe Useille", "d": "2008"}, {"id": "D59", "t": "Mioara Mugur-Schächter, au-delà de la Mécanique Quantique : Comment MCR a donné naissance aux modèles et conce", "a": "", "d": ""}, {"id": "D60", "t": "A synthesis of Relativized Systemic approach", "a": "", "d": ""}, {"id": "D61", "t": "Évaluation et conception d'un langage symbolique pour l'intelligence collective : vers un langage allégorique ", "a": "Samuel Szoniecky", "d": "2012-12-07"}], "concepts": [{"id": "g1", "l": "mécanique quantique"}, {"id": "g2", "l": "probabilité"}, {"id": "g3", "l": "information"}, {"id": "g4", "l": "description"}, {"id": "g5", "l": "relativisation"}, {"id": "g6", "l": "conceptualisation"}, {"id": "n01", "l": "opération de génération (G)"}, {"id": "n02", "l": "entité-objet (œ)"}, {"id": "n03", "l": "vue / qualification (V)"}, {"id": "n04", "l": "description relativisée"}, {"id": "n05", "l": "factuel a-conceptuel / substrat"}, {"id": "n06", "l": "magic leap (saut)"}, {"id": "n07", "l": "description de base transférée"}, {"id": "n08", "l": "métaconceptualisation"}, {"id": "n09", "l": "probabilités factuelles relativisées"}, {"id": "n10", "l": "infra-mécanique quantique (IQM)"}, {"id": "n11", "l": "réalisme naïf / trompe-l’œil conceptuel"}, {"id": "n12", "l": "indéterminisme essentiel"}, {"id": "n13", "l": "algorithme A[D0]"}, {"id": "n14", "l": "arbre de probabilité"}, {"id": "n15", "l": "fonctionnelle d’opacité (W)"}, {"id": "n16", "l": "référentiel épistémique"}, {"id": "n17", "l": "complexité"}, {"id": "n18", "l": "logique génétique relativisée"}, {"id": "n19", "l": "seconde mécanique quantique factuelle (FQM2)"}, {"id": "e1", "l": "Kolmogorov"}, {"id": "e2", "l": "Shannon"}, {"id": "e3", "l": "Bell (théorème)"}, {"id": "e4", "l": "de Broglie"}, {"id": "e5", "l": "Bohm"}, {"id": "e6", "l": "Popper"}, {"id": "e7", "l": "Hilbert-Dirac (formalisme)"}, {"id": "e8", "l": "Kant"}]};
+const KEY='etiqueteuse-mcr-v01';
+const TYPES=['document','résumé','définition','relation','question','traduction','passage','autre'];
+const PARTS=['texte de l’auteur','citation','reformulation humaine','reformulation par une IA','traduction','synthèse','autre'];
+const OPS=['écriture','transcription','extraction','résumé','reformulation','traduction','inférence','sélection','autre'];
+const STATUTS={valide:'validé',propose:'proposé',corriger:'à corriger',rejete:'rejeté',variable:'variable (selon la vue)'};
+const NR='non renseigné';
+const $=s=>document.querySelector(s),esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const today=()=>new Date().toISOString().slice(0,10),uid=()=>'E'+Date.now().toString(36)+Math.random().toString(36).slice(2,5);
+let ST={etiquettes:[],sel:null};try{const o=JSON.parse(localStorage.getItem(KEY));if(o&&Array.isArray(o.etiquettes))ST=o}catch(e){}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(ST))}catch(e){}}
+function toast(t){const b=$('#toast');b.textContent=t;b.classList.add('show');clearTimeout(toast.t);toast.t=setTimeout(()=>b.classList.remove('show'),2200)}
+function vide(){return{id:uid(),version:1,precedente:null,creeLe:today(),element:{type:'définition',identifiant:'',intitule:'',texte:''},
+ composition:[{source:'',localisation:'',part:'texte de l’auteur'}],
+ fabrication:{par:'',nature:'humain',operation:'écriture',date:today()},
+ validations:[],statut:'propose',vue:'',filiation:{derive_de:'',lie_a:''},
+ usage:{citation:'',diffusion:'non renseigné',entrainement:'non renseigné'},notes:''}}
+function cur(){return ST.etiquettes.find(e=>e.id===ST.sel)||null}
+const refLab=x=>{const d=REF.docs.find(d=>d.id===x.trim());return d?d.id+' · '+(d.t.length>48?d.t.slice(0,48).replace(/\s+\S*$/,'')+'…':d.t):x};
+// ---------- conformité ----------
+function controle(e){const err=[],warn=[],ok=[];
+ if(!e.element.intitule.trim())err.push('L’élément n’a pas d’intitulé.');
+ const comp=e.composition.filter(c=>c.source.trim());
+ if(!comp.length)err.push('Aucune composition : l’étiquette ne dit pas de quoi l’élément est fait.');
+ comp.filter(c=>!c.localisation.trim()).forEach(c=>warn.push('Composition « '+c.source.trim()+' » sans page ni passage : on ne pourra pas vérifier.'));
+ if(!e.fabrication.par.trim())err.push('On ne sait pas qui a fabriqué l’élément.');
+ const hum=e.validations.filter(v=>v.par.trim()&&v.nature==='humain');
+ if(e.statut==='valide'&&!e.validations.some(v=>v.statut==='valide'))err.push('Statut « validé » sans aucune validation enregistrée.');
+ if(e.fabrication.nature==='ia'&&['valide','variable'].includes(e.statut)&&!hum.some(v=>['valide','variable'].includes(v.statut)))err.push('Contenu fabriqué par une IA marqué validé sans validation humaine.');
+ e.validations.forEach((v,i)=>{if(!v.par.trim()||!v.date)warn.push('Validation '+(i+1)+' sans auteur ou sans date.');if(v.nature==='ia')warn.push('Validation '+(i+1)+' faite par une IA : elle ne vaut pas validation humaine.')});
+ if(e.fabrication.nature==='ia'&&!e.composition.some(c=>c.part==='reformulation par une IA'||c.part==='synthèse'))warn.push('Fabriqué par une IA : indiquez quelle part de la composition vient d’elle.');
+ if(!e.vue.trim())warn.push('Vue non renseignée : selon quel point de vue l’élément vaut-il ?');
+ if(e.usage.entrainement==='non renseigné')warn.push('Usage pour l’entraînement des IA non renseigné.');
+ if(e.usage.diffusion==='non renseigné')warn.push('Conditions de diffusion non renseignées.');
+ if(!err.length)ok.push('Rubriques obligatoires présentes.');
+ if(!err.length&&!warn.length)ok.push('Étiquette complète.');
+ return{err,warn,ok,niveau:err.length?'non conforme':warn.length?'conforme, à compléter':'conforme'}}
+// ---------- JSON-LD ----------
+function jsonld(e){const ag=(nom,nat)=>nom.trim()?{'@type':nat==='ia'?'prov:SoftwareAgent':nat==='collectif'?'prov:Organization':'prov:Person','rdfs:label':nom.trim()}:NR;
+ const src=x=>{const d=REF.docs.find(d=>d.id===x.trim());return d?{'@id':'https://noyau-ancrage.org/corpus/S%3A'+d.id,'dcterms:title':d.t,'dcterms:creator':d.a||undefined}:{'dcterms:title':x.trim()}};
+ return{'@context':{prov:'http://www.w3.org/ns/prov#',dcterms:'http://purl.org/dc/terms/',rdfs:'http://www.w3.org/2000/01/rdf-schema#',ex:'https://noyau-ancrage.org/voc#'},
+ '@id':'urn:etiquette:'+e.id+':v'+e.version,'@type':'prov:Entity','ex:profil':'etiquette-mcr-v0.1',
+ 'dcterms:identifier':e.element.identifiant||NR,'dcterms:title':e.element.intitule||NR,'ex:typeElement':e.element.type,...(e.element.texte?{'ex:texte':e.element.texte}:{}),
+ 'ex:composition':e.composition.filter(c=>c.source.trim()).map(c=>({'prov:wasDerivedFrom':src(c.source),'ex:localisation':c.localisation||NR,'ex:part':c.part})),
+ 'prov:wasGeneratedBy':{'@type':'prov:Activity','ex:operation':e.fabrication.operation,'prov:wasAssociatedWith':ag(e.fabrication.par,e.fabrication.nature),'prov:endedAtTime':e.fabrication.date||NR},
+ 'ex:validation':e.validations.map(v=>({'@type':['prov:Activity','ex:Validation'],'prov:wasAssociatedWith':ag(v.par,v.nature),'ex:role':v.role||NR,'ex:statut':v.statut,'prov:endedAtTime':v.date||NR,...(v.grille?{'ex:grille':v.grille}:{}),...(v.commentaire?{'rdfs:comment':v.commentaire}:{})})),
+ 'ex:statut':e.statut,'ex:vue':e.vue||NR,
+ 'ex:filiation':{'prov:wasDerivedFrom':e.filiation.derive_de?e.filiation.derive_de.split(/[;,]/).map(s=>s.trim()).filter(Boolean).map(src):[],'ex:lieA':e.filiation.lie_a?e.filiation.lie_a.split(/[;,]/).map(s=>s.trim()).filter(Boolean):[]},
+ 'ex:usage':{'ex:citation':e.usage.citation||NR,'dcterms:accessRights':e.usage.diffusion,'ex:entrainementIA':e.usage.entrainement},
+ 'ex:version':e.version,...(e.precedente?{'prov:wasRevisionOf':{'@id':'urn:etiquette:'+e.precedente}}:{}),'ex:conformite':controle(e).niveau}}
+// ---------- aperçu ----------
+function nr(x){return x&&String(x).trim()?esc(x):'<span class="nr">'+NR+'</span>'}
+function apercu(e){const c=controle(e);const comp=e.composition.filter(x=>x.source.trim());
+ const val=e.validations.filter(v=>v.par.trim());
+ const lines=[['Élément',esc(e.element.type)+(e.element.intitule?' · « '+esc(e.element.intitule)+' »':' · <span class="nr">sans intitulé</span>')+(e.element.identifiant?' <span style="opacity:.7">('+esc(e.element.identifiant)+')</span>':'')],
+  ['Composition',comp.length?comp.map(x=>esc(refLab(x.source))+(x.localisation?', '+esc(x.localisation):'')+' · '+esc(x.part)).join('<br>'):'<span class="nr">'+NR+'</span>'],
+  ['Fabriqué',e.fabrication.par?esc(e.fabrication.operation)+' par '+esc(e.fabrication.par)+(e.fabrication.nature==='ia'&&!/\bIA\b/.test(e.fabrication.par)?' (IA)':'')+(e.fabrication.date?', le '+fr(e.fabrication.date):''):'<span class="nr">'+NR+'</span>'],
+  ['Validé',val.length?val.map(v=>esc(STATUTS[v.statut]||v.statut)+' par '+esc(v.par)+(v.nature==='ia'?' (IA)':'')+(v.date?', '+fr(v.date):'')+(v.grille?' · grille : '+esc(v.grille):'')).join('<br>'):'<span class="nr">aucune validation</span>'],
+  ['Statut',esc(STATUTS[e.statut])+(e.vue?' · selon '+esc(e.vue):'')],
+  ['Filiation',(e.filiation.derive_de||e.filiation.lie_a)?[e.filiation.derive_de?'dérive de '+esc(e.filiation.derive_de):'',e.filiation.lie_a?'liée à '+esc(e.filiation.lie_a):''].filter(Boolean).join(' ; '):'<span class="nr">'+NR+'</span>'],
+  ['Usage',[e.usage.citation?'citer : '+esc(e.usage.citation):'citer : <span class="nr">'+NR+'</span>','diffusion : '+nr(e.usage.diffusion==='non renseigné'?'':e.usage.diffusion),'entraînement IA : '+nr(e.usage.entrainement==='non renseigné'?'':e.usage.entrainement)].join('<br>')]];
+ $('#apercu').innerHTML=`<div class="etiq"><div class="tt"><span>ÉTIQUETTE DE PROVENANCE</span><span>MCR v0.1 · v${e.version}</span></div><table>${lines.map(l=>`<tr><td>${l[0]}</td><td>${l[1]}</td></tr>`).join('')}</table>
+ <div style="margin-top:6px;border-top:1px solid var(--lab-b);padding-top:5px;font-size:12px">${c.niveau}${e.precedente?' · remplace la version '+(e.version-1):''}</div></div>`;
+ $('#chk').innerHTML=[...c.err.map(x=>`<li><span class="badge b-err">à corriger</span> ${esc(x)}</li>`),...c.warn.map(x=>`<li><span class="badge b-warn">à compléter</span> ${esc(x)}</li>`),...c.ok.map(x=>`<li><span class="badge b-ok">ok</span> ${esc(x)}</li>`)].join('');
+ $('#jsonld').textContent=JSON.stringify(jsonld(e),null,1)}
+const fr=d=>{try{return new Date(d+'T12:00').toLocaleDateString('fr-FR')}catch(x){return d}};
+// ---------- formulaire ----------
+const opt=(arr,v)=>arr.map(x=>`<option ${x===v?'selected':''}>${esc(x)}</option>`).join('');
+const optK=(o,v)=>Object.entries(o).map(([k,l])=>`<option value="${k}" ${k===v?'selected':''}>${esc(l)}</option>`).join('');
+function form(){const e=cur(),F=$('#form');
+ if(!e){F.innerHTML='<h2>Aucune étiquette</h2><p class="muted">Créez une étiquette, ou chargez l’exemple pour voir comment elle se remplit.</p>';$('#apercu').innerHTML='';$('#chk').innerHTML='';$('#jsonld').textContent='';return}
+ F.innerHTML=`<h2>Remplir l’étiquette <span class="muted">· version ${e.version}</span></h2>
+ <fieldset><legend>Élément</legend><div class="row"><div><label>Type</label><select data-k="element.type">${opt(TYPES,e.element.type)}</select></div><div><label>Identifiant</label><input data-k="element.identifiant" value="${esc(e.element.identifiant)}" placeholder="ex. DEF:n02"></div></div>
+  <label>Intitulé</label><input data-k="element.intitule" value="${esc(e.element.intitule)}" placeholder="ex. entité-objet">
+  <label>Texte de l’élément (facultatif)</label><textarea data-k="element.texte" rows="2">${esc(e.element.texte)}</textarea></fieldset>
+ <fieldset><legend>Composition · de quoi il est fait</legend><div class="muted">Chaque source utilisée, où dans la source, et ce qu’on en a fait.</div>
+  ${e.composition.map((c,i)=>`<div class="sub"><button class="del" data-delc="${i}" title="Retirer">×</button><div class="row"><div style="flex:2"><label>Source</label><input list="dl-docs" data-c="${i}.source" value="${esc(c.source)}" placeholder="ex. D11, ou référence libre"></div><div><label>Page / passage</label><input data-c="${i}.localisation" value="${esc(c.localisation)}" placeholder="ex. p. 26"></div></div>
+  <label>Part</label><select data-c="${i}.part">${opt(PARTS,c.part)}</select></div>`).join('')}
+  <button data-addc="1">+ Ajouter une source</button></fieldset>
+ <fieldset><legend>Fabrication · qui l’a produit</legend><div class="row"><div style="flex:2"><label>Par</label><input data-k="fabrication.par" value="${esc(e.fabrication.par)}" placeholder="nom de la personne ou de l’IA"></div><div><label>Nature</label><select data-k="fabrication.nature">${optK({humain:'humain',ia:'IA',collectif:'collectif'},e.fabrication.nature)}</select></div></div>
+  <div class="row"><div><label>Opération</label><select data-k="fabrication.operation">${opt(OPS,e.fabrication.operation)}</select></div><div><label>Date</label><input type="date" data-k="fabrication.date" value="${esc(e.fabrication.date)}"></div></div></fieldset>
+ <fieldset><legend>Validations · qui l’a examiné</legend>
+  ${e.validations.map((v,i)=>`<div class="sub"><button class="del" data-delv="${i}" title="Retirer">×</button><div class="row"><div style="flex:2"><label>Par</label><input data-v="${i}.par" value="${esc(v.par)}"></div><div><label>Nature</label><select data-v="${i}.nature">${optK({humain:'humain',ia:'IA'},v.nature)}</select></div></div>
+  <div class="row"><div><label>Rôle</label><input data-v="${i}.role" value="${esc(v.role)}" placeholder="autorité, tiers…"></div><div><label>Statut donné</label><select data-v="${i}.statut">${optK(STATUTS,v.statut)}</select></div><div><label>Date</label><input type="date" data-v="${i}.date" value="${esc(v.date)}"></div></div>
+  <label>Grille ou fiche utilisée</label><input data-v="${i}.grille" value="${esc(v.grille)}" placeholder="ex. fiche d’audit n° 12">
+  <label>Commentaire</label><input data-v="${i}.commentaire" value="${esc(v.commentaire)}"></div>`).join('')||'<div class="muted">Aucune validation pour l’instant.</div>'}
+  <button data-addv="1">+ Ajouter une validation</button></fieldset>
+ <fieldset><legend>Statut et vue</legend><div class="row"><div><label>Statut</label><select data-k="statut">${optK(STATUTS,e.statut)}</select></div><div style="flex:2"><label>Selon quelle vue</label><input data-k="vue" value="${esc(e.vue)}" placeholder="ex. la MCR, la tradition de tel maître…"></div></div></fieldset>
+ <fieldset><legend>Filiation</legend><label>Dérive de (séparer par ;)</label><input list="dl-docs" data-k="filiation.derive_de" value="${esc(e.filiation.derive_de)}" placeholder="ex. D11 ; D26"><label>Liée à</label><input list="dl-cs" data-k="filiation.lie_a" value="${esc(e.filiation.lie_a)}" placeholder="ex. opération de génération"></fieldset>
+ <fieldset><legend>Usage</legend><label>Comment le citer</label><input data-k="usage.citation" value="${esc(e.usage.citation)}">
+  <div class="row"><div><label>Diffusion</label><select data-k="usage.diffusion">${opt(['non renseigné','libre','autorisée avec citation','à demander','interdite'],e.usage.diffusion)}</select></div><div><label>Entraînement des IA</label><select data-k="usage.entrainement">${opt(['non renseigné','autorisé','autorisé avec citation','non autorisé'],e.usage.entrainement)}</select></div></div></fieldset>
+ <div class="row noprint"><button class="pri" id="bVer" title="Garde la version actuelle et en crée une nouvelle">Nouvelle version</button><button id="bDup">Dupliquer</button><button id="bDel" style="color:var(--err)">Supprimer</button></div>
+ <datalist id="dl-docs">${REF.docs.map(d=>`<option value="${d.id}">${esc(d.t)}</option>`).join('')}</datalist><datalist id="dl-cs">${REF.concepts.map(c=>`<option value="${esc(c.l)}">`).join('')}</datalist>`;
+ const set=(o,path,val)=>{const k=path.split('.');let x=o;for(let i=0;i<k.length-1;i++)x=x[k[i]];x[k[k.length-1]]=val};
+ F.querySelectorAll('[data-k]').forEach(i=>i.oninput=()=>{set(e,i.dataset.k,i.value);save();apercu(e);liste()});
+ F.querySelectorAll('[data-c]').forEach(i=>i.oninput=()=>{const [n,f]=i.dataset.c.split('.');e.composition[n][f]=i.value;save();apercu(e)});
+ F.querySelectorAll('[data-v]').forEach(i=>i.oninput=()=>{const [n,f]=i.dataset.v.split('.');e.validations[n][f]=i.value;save();apercu(e)});
+ F.querySelectorAll('[data-delc]').forEach(b=>b.onclick=()=>{e.composition.splice(+b.dataset.delc,1);if(!e.composition.length)e.composition.push({source:'',localisation:'',part:'texte de l’auteur'});save();form()});
+ F.querySelectorAll('[data-delv]').forEach(b=>b.onclick=()=>{e.validations.splice(+b.dataset.delv,1);save();form()});
+ F.querySelector('[data-addc]').onclick=()=>{e.composition.push({source:'',localisation:'',part:'texte de l’auteur'});save();form()};
+ F.querySelector('[data-addv]').onclick=()=>{e.validations.push({par:'',nature:'humain',role:'',statut:'valide',date:today(),grille:'',commentaire:''});save();form()};
+ $('#bVer').onclick=()=>{const n=JSON.parse(JSON.stringify(e));n.precedente=e.id+':v'+e.version;n.version=e.version+1;n.id=e.id;e.archivee=true;
+  e.id=e.id+'_v'+e.version;ST.etiquettes.push(n);ST.sel=n.id;save();render();toast('Version '+n.version+' créée ; la version '+(n.version-1)+' est conservée.')};
+ $('#bDup').onclick=()=>{const n=JSON.parse(JSON.stringify(e));n.id=uid();n.version=1;n.precedente=null;n.archivee=false;n.element.intitule+=' (copie)';ST.etiquettes.push(n);ST.sel=n.id;save();render()};
+ $('#bDel').onclick=()=>{if(!confirmDel){confirmDel=true;$('#bDel').textContent='Confirmer la suppression';return}ST.etiquettes=ST.etiquettes.filter(x=>x!==e);ST.sel=ST.etiquettes.filter(x=>!x.archivee).slice(-1)[0]?.id||null;confirmDel=false;save();render()};
+ apercu(e)}
+let confirmDel=false;
+function liste(){const L=ST.etiquettes.filter(e=>!e.archivee);$('#nb').textContent=L.length+' étiquette(s)'+(ST.etiquettes.length>L.length?' · '+(ST.etiquettes.length-L.length)+' version(s) antérieure(s) conservée(s)':'');
+ $('#liste').innerHTML=L.map(e=>{const c=controle(e);return `<div class="item ${e.id===ST.sel?'on':''}" data-id="${e.id}"><b>${esc(e.element.intitule||'(sans intitulé)')}</b><div class="muted">${esc(e.element.type)} · ${esc(STATUTS[e.statut])} · v${e.version}</div><span class="badge ${c.err.length?'b-err':c.warn.length?'b-warn':'b-ok'}">${c.niveau}</span></div>`}).join('')||'<div class="muted">Aucune.</div>';
+ document.querySelectorAll('.item').forEach(n=>n.onclick=()=>{ST.sel=n.dataset.id;confirmDel=false;save();render()})}
+function render(){liste();form()}
+// ---------- actions ----------
+$('#bNew').onclick=()=>{const e=vide();ST.etiquettes.push(e);ST.sel=e.id;save();render()};
+$('#bEx').onclick=()=>{const e=vide();Object.assign(e,{element:{type:'définition',identifiant:'DEF:n02',intitule:'entité-objet',texte:'Ce que produit une opération de génération et que l’on va ensuite qualifier.'},
+ composition:[{source:'D11',localisation:'chap. 1 (repère du corpus)',part:'texte de l’auteur'},{source:'D11',localisation:'chap. 1',part:'reformulation par une IA'}],
+ fabrication:{par:'IA (Claude)',nature:'ia',operation:'reformulation',date:'2026-10-24'},validations:[],statut:'propose',vue:'la MCR',
+ filiation:{derive_de:'D11',lie_a:'opération de génération ; description relativisée'},usage:{citation:'Définition proposée par l’IA à partir de D11, à valider par l’autrice',diffusion:'à demander',entrainement:'non autorisé'}});
+ ST.etiquettes.push(e);ST.sel=e.id;save();render();toast('Exemple chargé : une définition proposée par une IA, pas encore validée.')};
+let DL=null;(async()=>{try{if(window.claude&&window.claude.use)DL=await window.claude.use('downloads')}catch(e){}})();
+async function telecharger(name,txt){if(DL){try{await DL.save({filename:name,data:txt});toast('Fichier enregistré : '+name);return}catch(e){}}
+ try{const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([txt],{type:'application/json'}));a.download=name;document.body.appendChild(a);a.click();a.remove();toast('Fichier proposé : '+name)}catch(e){toast('Téléchargement impossible ici : utilisez « Copier ».')}}
+async function copier(t,msg){try{await navigator.clipboard.writeText(t);toast(msg)}catch(e){const ta=document.createElement('textarea');ta.value=t;document.body.appendChild(ta);ta.select();document.execCommand('copy');ta.remove();toast(msg)}}
+$('#bCopy').onclick=()=>{const e=cur();if(e)copier(JSON.stringify(jsonld(e),null,1),'JSON-LD copié.')};
+$('#bHtml').onclick=()=>{const e=cur();if(e)copier('<script type="application/ld+json">\n'+JSON.stringify(jsonld(e),null,1)+'\n</'+'script>','Balise copiée : à coller dans la page du document.')};
+$('#bOne').onclick=()=>{const e=cur();if(e)telecharger((e.element.identifiant||e.element.intitule||'etiquette').replace(/[^\w.-]+/g,'_')+'.etiquette.json',JSON.stringify(jsonld(e),null,1))};
+$('#bPrint').onclick=()=>window.print();
+$('#bExp').onclick=()=>telecharger('etiquettes_MCR_'+today()+'.json',JSON.stringify({format:'etiquettes-mcr-v0.1',exporteLe:new Date().toISOString(),etiquettes:ST.etiquettes,jsonld:ST.etiquettes.filter(e=>!e.archivee).map(jsonld)},null,1));
+$('#fImp').onchange=async ev=>{const f=ev.target.files[0];if(!f)return;try{const o=JSON.parse(await f.text());if(o.format!=='etiquettes-mcr-v0.1')throw 0;const ids=new Set(ST.etiquettes.map(e=>e.id));let n=0;o.etiquettes.forEach(e=>{if(!ids.has(e.id)){ST.etiquettes.push(e);n++}});save();render();toast(n+' étiquette(s) importée(s).')}catch(e){toast('Ce fichier n’est pas un export de l’étiqueteuse.')}ev.target.value=''};
+$('#bAide').onclick=()=>{const F=$('#form');F.innerHTML=`<h2>Aide</h2><p>Comme l’étiquette cousue dans un vêtement, l’étiquette de provenance accompagne un élément archivé (document, résumé, définition, relation…) et dit, toujours dans le même ordre :</p>
+ <ul><li><b>Composition</b> : de quelles sources il est fait, à quelle page, et ce qu’on en a fait (texte de l’auteur, reformulation par une IA…).</li><li><b>Fabriqué</b> : qui l’a produit, par quelle opération, quand.</li><li><b>Validé</b> : qui l’a examiné, avec quel statut et quelle fiche.</li><li><b>Statut et vue</b> : ce que vaut l’élément, et selon quel point de vue (MCR : toute connaissance est relative à sa génération et à la vue qui la qualifie).</li><li><b>Filiation</b> : ce dont il dérive, ce à quoi il se rattache.</li><li><b>Usage</b> : comment le citer, s’il peut être diffusé, s’il peut servir à entraîner des IA.</li></ul>
+ <p>Ce qui manque reste marqué « non renseigné » : on ne maquille pas une case vide. Le contrôle de conformité signale ce qui manque et refuse qu’un contenu fabriqué par une IA soit marqué validé sans validation humaine.</p>
+ <p><b>Nouvelle version</b> conserve l’étiquette actuelle et en crée une nouvelle, par exemple après une validation : l’historique reste consultable. <b>Copier la balise HTML</b> donne le bloc à placer dans la page web du document ; <b>Télécharger</b> donne le fichier à joindre au document (même nom, suffixe .etiquette.json).</p>
+ <p class="muted">Les étiquettes sont gardées dans ce navigateur. « Exporter tout » produit un fichier à conserver ou à transmettre ; « Importer » le recharge.</p><button class="pri" id="bRet">Revenir à l’étiquette</button>`;$('#bRet').onclick=form};
+if(!ST.etiquettes.length){}else if(!cur())ST.sel=ST.etiquettes.filter(e=>!e.archivee).slice(-1)[0]?.id;
+render();
+</script></body></html>

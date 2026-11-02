@@ -1,7 +1,7 @@
 name: Boucle du noyau
 on:
   push:
-    paths: ['corpus/**/entrees/**', 'ancrage/**', 'applications/**', '!corpus/**/audits_ia/**']
+    paths: ['corpus/**/entrees/**', 'ancrage/**', 'applications/**', 'exemples/filiation/**', '!corpus/**/audits_ia/**']
   workflow_dispatch:
 permissions:
   contents: read
@@ -29,6 +29,8 @@ jobs:
         run: |
           mkdir -p site
           cp "$(ls -d corpus/mcr/sorties/*/ | sort | tail -1)explorer_mcr.html" site/index.html
+          mkdir -p site/etiqueteuse site/exemples && cp applications/etiqueteuse/index.html site/etiqueteuse/index.html
+          cp exemples/filiation/filiation_tendances_IA.html site/exemples/filiation_tendances_IA.html
           touch site/.nojekyll
       - uses: actions/upload-pages-artifact@v3
         with:

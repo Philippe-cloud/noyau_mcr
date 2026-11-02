@@ -1,0 +1,1767 @@
+{
+ "format": "trace-filiation-v1",
+ "profil": "étiquettes de provenance MCR v0.1",
+ "question": "Quelles sont les grandes tendances de l'IA d'ici 5 ans ?",
+ "acteur": {
+  "role": "ia",
+  "nom": "Claude Opus 5.5 (IA)"
+ },
+ "date": "2026-11-02T16:00:10Z",
+ "note": "Horodatage reconstitué à partir de l'ordre réel des actions (début réel : 16:00:05 UTC, fin des lectures : 16:01:04 UTC). Les « consultations » d'extraits portent sur les résumés renvoyés par le moteur de recherche ; seules trois pages ont été ouvertes en entier.",
+ "requetes": {
+  "q1": "AI trends next five years 2030 forecast report",
+  "q2": "AGI timeline forecasts 2030 Epoch AI compute scaling",
+  "q3": "AI impact on jobs 2030 report labor market",
+  "q4": "International AI Safety Report 2026 key findings",
+  "q5": "(recherche du 1er nov.) AI data center energy consumption 2026 IEA",
+  "q6": "(recherche du 31 oct.) AI Act report 2027 omnibus numérique"
+ },
+ "sources": {
+  "R1-british": {
+   "titre": "AI in 2030: Future Trends, Predictions & Impact",
+   "auteur": "British Council (blog)",
+   "date": "",
+   "lien": "https://online-english.britishcouncil.org/direct-buzz/ai-in-2030-future-trends-predictions-and-impact-1764798298",
+   "nature": "blog"
+  },
+  "R1-startus": {
+   "titre": "Future of AI [2026-2030] Roadmap",
+   "auteur": "StartUs Insights",
+   "date": "",
+   "lien": "https://www.startus-insights.com/innovators-guide/future-of-ai-roadmap/",
+   "nature": "cabinet commercial"
+  },
+  "R1-opper": {
+   "titre": "AI roundtable : prévisions à 5 ans",
+   "auteur": "Opper.ai (réponses de plusieurs IA)",
+   "date": "",
+   "lien": "https://opper.ai/ai-roundtable/questions/based-on-current-ai-development-trends-and-possible-future-24b47b2e",
+   "nature": "contenu généré par IA"
+  },
+  "R1-bau": {
+   "titre": "The Future of Artificial Intelligence: 5 Trends",
+   "auteur": "BAU (blog universitaire)",
+   "date": "",
+   "lien": "https://bau.edu/blog/the-future-of-artificial-intelligence/",
+   "nature": "blog"
+  },
+  "R1-ark": {
+   "titre": "AI Market Forecast to Hit $1.8 Trillion in 2030",
+   "auteur": "Arkansas Business",
+   "date": "2021",
+   "lien": "https://www.arkansasbusiness.com/article/ai-market-forecast-to-hit-1-8-trillion-in-2030/",
+   "nature": "presse économique"
+  },
+  "OCDE": {
+   "titre": "Exploring possible AI trajectories through 2030",
+   "auteur": "OCDE",
+   "date": "2026-02-03",
+   "lien": "https://oecd.ai/en/ai-publications/exploring-possible-ai-trajectories-through-2030",
+   "nature": "organisation internationale"
+  },
+  "IEEE": {
+   "titre": "2030 Technology Megatrends",
+   "auteur": "IEEE Future Directions",
+   "date": "",
+   "lien": "https://engage.ieee.org/FD-Megatrends-2030.html",
+   "nature": "société savante"
+  },
+  "R1-fx": {
+   "titre": "Copie du rapport Epoch AI « AI in 2030 »",
+   "auteur": "fxbaogao.com",
+   "date": "2025-09-22",
+   "lien": "https://fxbaogao.com/detail/5069547",
+   "nature": "copie sur site tiers"
+  },
+  "R1-statista": {
+   "titre": "AI Trends: Roadmap to 2025",
+   "auteur": "Statista",
+   "date": "",
+   "lien": "https://www.statista.com/page/ai-trends-2025-p",
+   "nature": "contenu payant"
+  },
+  "ARXIV-AGI": {
+   "titre": "AGI Forecasting and Scenario Analysis: State of the Field",
+   "auteur": "arXiv 2604.22766",
+   "date": "2026-04",
+   "lien": "https://arxiv.org/pdf/2604.22766",
+   "nature": "prépublication"
+  },
+  "EPOCH": {
+   "titre": "The Future of AI (dossier)",
+   "auteur": "Epoch AI",
+   "date": "2026",
+   "lien": "https://epoch.ai/topics/future-of-ai",
+   "nature": "institut de recherche"
+  },
+  "EPOCH-BRIEF": {
+   "titre": "The Epoch AI Brief – septembre 2025",
+   "auteur": "Epoch AI",
+   "date": "2025-09",
+   "lien": "https://epochai.substack.com/p/the-epoch-ai-brief-september-2025",
+   "nature": "institut de recherche"
+  },
+  "EPOCH-2030": {
+   "titre": "What will AI look like in 2030?",
+   "auteur": "Epoch AI",
+   "date": "2025-09-16",
+   "lien": "https://epoch.ai/topics/future-of-ai",
+   "nature": "institut de recherche"
+  },
+  "R2-akira": {
+   "titre": "Road to AGI: By 2030?",
+   "auteur": "Substack personnel",
+   "date": "",
+   "lien": "https://akiranin.substack.com/p/road-to-agi-by-2030",
+   "nature": "blog"
+  },
+  "R2-arxiv-slow": {
+   "titre": "Compute slowdowns and agent time horizons",
+   "auteur": "arXiv 2511.19492",
+   "date": "2025-11",
+   "lien": "https://web3.arxiv.org/pdf/2511.19492",
+   "nature": "prépublication"
+  },
+  "R2-ltw": {
+   "titre": "Can AI Scaling Continue Through 2030? (fiche)",
+   "auteur": "Longterm Wiki",
+   "date": "",
+   "lien": "https://www.longtermwiki.com/resources/sid_Ah1wV0cDli",
+   "nature": "agrégateur"
+  },
+  "EPOCH-SCALING": {
+   "titre": "Can AI scaling continue through 2030?",
+   "auteur": "Epoch AI",
+   "date": "2024",
+   "lien": "https://epochai.org/blog/can-ai-scaling-continue-through-2030",
+   "nature": "institut de recherche"
+  },
+  "WEF-relais": {
+   "titre": "39 % des compétences dépassées d'ici 2030 (compte rendu du rapport WEF)",
+   "auteur": "Business Today",
+   "date": "2025-01-10",
+   "lien": "https://www.businesstoday.in/wef-2025/story/39-of-skills-outdated-by-2030-wef-warns-of-ais-impact-on-jobs-460306-2025-01-10",
+   "nature": "presse (relais)"
+  },
+  "WEF-relais2": {
+   "titre": "AI could create 78 million more jobs than it eliminates by 2030",
+   "auteur": "Kowatek (reprise d'Ars Technica)",
+   "date": "2025-01",
+   "lien": "https://blog.kowatek.com/?p=91860",
+   "nature": "presse (relais)"
+  },
+  "WEF": {
+   "titre": "Future of Jobs Report 2025",
+   "auteur": "Forum économique mondial",
+   "date": "2025-01",
+   "lien": "",
+   "nature": "organisation internationale (non consulté directement)"
+  },
+  "R3-fox": {
+   "titre": "McKinsey : 30 % des heures de travail automatisables en 2030",
+   "auteur": "Fox Business",
+   "date": "2023",
+   "lien": "https://www.foxbusiness.com/economy/accelerated-adoption-ai-automate-30-americans-work-hours-mckinsey",
+   "nature": "presse (relais)"
+  },
+  "R3-techco": {
+   "titre": "Within 5 Years, 41% of Companies Will Cut Jobs Due to AI",
+   "auteur": "Tech.co",
+   "date": "2025-01",
+   "lien": "https://tech.co/news/report-ai-will-cut-jobs",
+   "nature": "presse"
+  },
+  "R3-uva": {
+   "titre": "AI will perform most work tasks by 2030",
+   "auteur": "Université d'Amsterdam (actualité)",
+   "date": "2025-01",
+   "lien": "https://acbi.uva.nl/content/news/2025/01/ai-will-perform-most-work-tasks-by-2030.html",
+   "nature": "actualité"
+  },
+  "IASR": {
+   "titre": "International AI Safety Report 2026 – Extended Summary for Policymakers",
+   "auteur": "Groupe d'experts présidé par Y. Bengio (DSIT 2026/001)",
+   "date": "2026-02-03",
+   "lien": "https://internationalaisafetyreport.org/publication/2026-report-extended-summary-policymakers",
+   "nature": "rapport scientifique international"
+  },
+  "METR": {
+   "titre": "Kwa et al. 2025 : durée des tâches des agents (cité par le rapport)",
+   "auteur": "METR",
+   "date": "2025",
+   "lien": "",
+   "nature": "étude (citée, non consultée)"
+  },
+  "R4-elephas": {
+   "titre": "AI Safety Report 2026: key findings",
+   "auteur": "Elephas (blog)",
+   "date": "2026-02-06",
+   "lien": "https://elephas.app/resources/international-ai-safety-report-2026-key-findings",
+   "nature": "résumé commercial"
+  },
+  "R4-libertify": {
+   "titre": "International AI Safety Report 2026 – synthèse",
+   "auteur": "Libertify",
+   "date": "",
+   "lien": "https://www.libertify.com/interactive-library/international-ai-safety-report-2026/",
+   "nature": "résumé commercial"
+  },
+  "R4-tse": {
+   "titre": "Séminaire : Key Findings from the 2026 International AI Safety Report",
+   "auteur": "Toulouse School of Economics",
+   "date": "2026-09-30",
+   "lien": "https://www.tse-fr.eu/node/144156",
+   "nature": "annonce de séminaire"
+  },
+  "IEA": {
+   "titre": "AI and data centre electricity use continue to surge, IEA finds",
+   "auteur": "Enlit World (rapport AIE)",
+   "date": "2026-04-17",
+   "lien": "https://www.enlit.world/library/ai-and-data-centre-electricity-use-continue-to-surge-iea-finds",
+   "nature": "presse spécialisée (relais AIE)"
+  },
+  "AIACT": {
+   "titre": "Omnibus numérique IA : règlement (UE) 2026/1744",
+   "auteur": "donneespersonnelles.fr",
+   "date": "2026-07",
+   "lien": "https://donneespersonnelles.fr/omnibus-numerique-ia",
+   "nature": "site juridique"
+  }
+ },
+ "actions": [
+  {
+   "n": 1,
+   "quand": "2026-11-02T16:00:10Z",
+   "qui": "Claude Opus 5.5 (IA)",
+   "action": "poser",
+   "objet": "Q",
+   "detail": "Quelles sont les grandes tendances de l'IA d'ici 5 ans ?"
+  },
+  {
+   "n": 2,
+   "quand": "2026-11-02T16:00:11Z",
+   "qui": "Claude Opus 5.5 (IA)",
+   "action": "rechercher",
+   "objet": "q1",
+   "detail": "lancée en parallèle avec les trois autres"
+  },
+  {
+   "n": 3,
+   "quand": "2026-11-02T16:00:12Z",
+   "qui": "Claude Opus 5.5 (IA)",
+   "action": "rechercher",
+   "objet": "q2",
+   "detail": "lancée en parallèle avec les trois autres"
+  },
+  {
+   "n": 4,
+   "quand": "2026-11-02T16:00:13Z",
+   "qui": "Claude Opus 5.5 (IA)",
+   "action": "rechercher",
+   "objet": "q3",
+   "detail": "lancée en parallèle avec les trois autres"
+  },
+  {
+   "n": 5,
+   "quand": "2026-11-02T16:00:14Z",
+   "qui": "Claude Opus 5.5 (IA)",
+   "action": "rechercher",
+   "objet": "q4",
+   "detail": "lancée en parallèle avec les trois autres"
+  },
+  {
+   "n": 6,
+   "quand": "2026-11-02T16:00:18Z",
+   "qui": "Claude Opus 5.5 (IA)",
+   "action": "consulter",
+   "objet": "R1-british",
+   "detail": "extrait renvoyé par le moteur, page non ouverte"
+  },
+  {
+   "n": 7,
+   "quand": "2026-11-02T16:00:19Z",
+   "qui": "Claude Opus 5.5 (IA)",
+   "action": "rejeter",
+   "objet": "R1-british",
+   "raison": "article grand public, sans sources citées"
+  },
+  {
+   "n": 8,
+   "quand": "2026-11-02T16:00:20Z",
+   "qui": "Claude Opus 5.5 (IA)",
+   "action": "consulter",
+   "objet": "R1-startus",
+   "detail": "extrait renvoyé par le moteur, page non ouverte"
+  },
+  {
+   "n": 9,
+   "quand": "2026-11-02T16:00:21Z",
+   "qui": "Claude Opus 5.5 (IA)",
+   "action": "rejeter",
+   "objet": "R1-startus",
+   "raison": "cabinet de veille commercial, chiffres de marché"
+  },
+  {
+   "n": 10,
+   "quand": "2026-11-02T16:00:22Z",
+   "qui": "Claude Opus 5.5 (IA)",
+   "action": "consulter",
+   "objet": "R1-opper",
+   "detail": "extrait renvoyé par le moteur, page non ouverte"
+  },
+  {
+   "n": 11,
+   "quand": "2026-11-02T16:00:23Z",
+   "qui": "Claude Opus 5.5 (IA)",
+   "action": "rejeter",
+   "objet": "R1-opper",
+   "raison": "prévisions produites par d'autres IA : les reprendre créerait une circularité"
+  },
+  {
+   "n": 12,
+   "quand": "2026-11-02T16:00:24Z",
+   "qui": "Claude Opus 5.5 (IA)",
+   "action": "consulter",
+   "objet": "R1-bau",
+   "detail": "extrait renvoyé par le moteur, page non ouverte"
+  },
+  {
+   "n": 13,
+   "quand": "2026-11-02T16:00:25Z",
+   "qui": "Claude Opus 5.5 (IA)",
+   "action": "rejeter",
+   "objet": "R1-bau",
+   "raison": "blog de promotion ; chiffre McKinsey de seconde main"
+  },
+  {
+   "n": 14,
+   "quand": "2026-11-02T16:00:26Z",
+   "qui": "Claude Opus 5.5 (IA)",
+   "action": "consulter",
+   "objet": "R1-ark",
+   "detail": "extrait renvoyé par le moteur, page non ouverte"
+  },
+  {
+   "n": 15,
+   "quand": "2026-11-02T16:00:27Z",
+   "qui": "Claude Opus 5.5 (IA)",
+   "action": "rejeter",
+   "objet": "R1-ark",
+   "raison": "prévision de marché commerciale datant de 2021"
+  },
+  {
+   "n": 16,
+   "quand": "2026-11-02T16:00:28Z",
+   "qui": "Claude Opus 5.5 (IA)",
+   "action": "consulter",
+   "objet": "R1-statista",
+   "detail": "extrait renvoyé par le moteur, page non ouverte"
+  },
+  {
+   "n": 17,
+   "quand": "2026-11-02T16:00:29Z",
+   "qui": "Claude Opus 5.5 (IA)",
+   "action": "rejeter",
+   "objet": "R1-statista",
+   "raison": "contenu payant, chiffres de marché"
+  },
+  {
+   "n": 18,
+   "quand": "2026-11-02T16:00:30Z",
+   "qui": "Claude Opus 5.5 (IA)",
+   "action": "consulter",
+   "objet": "OCDE",
+   "detail": "extrait"
+  },
+  {
+   "n": 19,
+   "quand": "2026-11-02T16:00:31Z",
+   "qui": "Claude Opus 5.5 (IA)",
+   "action": "relier",
+   "objet": "OCDE",
+   "cible": "IASR",
+   "detail": "l'extrait indique que ce rapport a nourri le Rapport international sur la sécurité de l'IA 2026"
+  },
+  {
+   "n": 20,
+   "quand": "2026-11-02T16:00:32Z",
+   "qui": "Claude Opus 5.5 (IA)",
+   "action": "consulter",
+   "objet": "IEEE",
+   "detail": "extrait"
+  },
+  {
+   "n": 21,
+   "quand": "2026-11-02T16:00:33Z",
+   "qui": "Claude Opus 5.5 (IA)",
+   "action": "rejeter",
+   "objet": "IEEE",
+   "raison": "pertinent mais contenu accessible seulement par téléchargement : non vérifiable ici"
+  },
+  {
+   "n": 22,
+   "quand": "2026-11-02T16:00:34Z",
+   "qui": "Claude Opus 5.5 (IA)",
+   "action": "consulter",
+   "objet": "R1-fx",
+   "detail": "extrait"
+  },
+  {
+   "n": 23,
+   "quand": "2026-11-02T16:00:35Z",
+   "qui": "Claude Opus 5.5 (IA)",
+   "action": "relier",
+   "objet": "R1-fx",
+   "cible": "EPOCH-2030",
+   "detail": "copie d'un rapport d'Epoch AI : je remonte à la source d'origine"
+  },
+  {
+   "n": 24,
+   "quand": "2026-11-02T16:00:36Z",
+   "qui": "Claude Opus 5.5 (IA)",
+   "action": "rejeter",
+   "objet": "R1-fx",
+   "raison": "copie sur un site tiers, je préfère la source d'origine"
+  },
+  {
+   "n": 25,
+   "quand": "2026-11-02T16:00:37Z",
+   "qui": "Claude Opus 5.5 (IA)",
+   "action": "consulter",
+   "objet": "ARXIV-AGI",
+   "detail": "extrait"
+  },
+  {
+   "n": 26,
+   "quand": "2026-11-02T16:00:38Z",
+   "qui": "Claude Opus 5.5 (IA)",
+   "action": "consulter",
+   "objet": "EPOCH",
+   "detail": "extrait"
+  },
+  {
+   "n": 27,
+   "quand": "2026-11-02T16:00:39Z",
+   "qui": "Claude Opus 5.5 (IA)",
+   "action": "consulter",
+   "objet": "EPOCH-BRIEF",
+   "detail": "extrait"
+  },
+  {
+   "n": 28,
+   "quand": "2026-11-02T16:00:40Z",
+   "qui": "Claude Opus 5.5 (IA)",
+   "action": "relier",
+   "objet": "EPOCH-BRIEF",
+   "cible": "EPOCH-2030",
+   "detail": "annonce le rapport « What will AI look like in 2030? »"
+  },
+  {
+   "n": 29,
+   "quand": "2026-11-02T16:00:41Z",
+   "qui": "Claude Opus 5.5 (IA)",
+   "action": "consulter",
+   "objet": "R2-akira",
+   "detail": "extrait"
+  },
+  {
+   "n": 30,
+   "quand": "2026-11-02T16:00:42Z",
+   "qui": "Claude Opus 5.5 (IA)",
+   "action": "rejeter",
+   "objet": "R2-akira",
+   "raison": "blog personnel ; chiffres de prédiction relayés de seconde main"
+  },
+  {
+   "n": 31,
+   "quand": "2026-11-02T16:00:43Z",
+   "qui": "Claude Opus 5.5 (IA)",
+   "action": "consulter",
+   "objet": "R2-arxiv-slow",
+   "detail": "extrait"
+  },
+  {
+   "n": 32,
+   "quand": "2026-11-02T16:00:44Z",
+   "qui": "Claude Opus 5.5 (IA)",
+   "action": "rejeter",
+   "objet": "R2-arxiv-slow",
+   "raison": "article technique sur un point précis, trop spécialisé pour la question"
+  },
+  {
+   "n": 33,
+   "quand": "2026-11-02T16:00:45Z",
+   "qui": "Claude Opus 5.5 (IA)",
+   "action": "consulter",
+   "objet": "R2-ltw",
+   "detail": "extrait"
+  },
+  {
+   "n": 34,
+   "quand": "2026-11-02T16:00:46Z",
+   "qui": "Claude Opus 5.5 (IA)",
+   "action": "rejeter",
+   "objet": "R2-ltw",
+   "raison": "agrégateur secondaire"
+  },
+  {
+   "n": 35,
+   "quand": "2026-11-02T16:00:47Z",
+   "qui": "Claude Opus 5.5 (IA)",
+   "action": "relier",
+   "objet": "R2-ltw",
+   "cible": "EPOCH-SCALING",
+   "detail": "fiche qui renvoie au rapport d'Epoch AI sur la poursuite de la mise à l'échelle"
+  },
+  {
+   "n": 36,
+   "quand": "2026-11-02T16:00:48Z",
+   "qui": "Claude Opus 5.5 (IA)",
+   "action": "consulter",
+   "objet": "WEF-relais",
+   "detail": "extrait"
+  },
+  {
+   "n": 37,
+   "quand": "2026-11-02T16:00:49Z",
+   "qui": "Claude Opus 5.5 (IA)",
+   "action": "relier",
+   "objet": "WEF-relais",
+   "cible": "WEF",
+   "detail": "compte rendu du Future of Jobs Report 2025, que je n'ai pas consulté directement"
+  },
+  {
+   "n": 38,
+   "quand": "2026-11-02T16:00:50Z",
+   "qui": "Claude Opus 5.5 (IA)",
+   "action": "consulter",
+   "objet": "WEF-relais2",
+   "detail": "extrait"
+  },
+  {
+   "n": 39,
+   "quand": "2026-11-02T16:00:51Z",
+   "qui": "Claude Opus 5.5 (IA)",
+   "action": "relier",
+   "objet": "WEF-relais2",
+   "cible": "WEF",
+   "detail": "compte rendu du Future of Jobs Report 2025, que je n'ai pas consulté directement"
+  },
+  {
+   "n": 40,
+   "quand": "2026-11-02T16:00:52Z",
+   "qui": "Claude Opus 5.5 (IA)",
+   "action": "consulter",
+   "objet": "R3-fox",
+   "detail": "extrait"
+  },
+  {
+   "n": 41,
+   "quand": "2026-11-02T16:00:53Z",
+   "qui": "Claude Opus 5.5 (IA)",
+   "action": "rejeter",
+   "objet": "R3-fox",
+   "raison": "estimation de 2023, antérieure aux évolutions récentes"
+  },
+  {
+   "n": 42,
+   "quand": "2026-11-02T16:00:54Z",
+   "qui": "Claude Opus 5.5 (IA)",
+   "action": "consulter",
+   "objet": "R3-techco",
+   "detail": "extrait"
+  },
+  {
+   "n": 43,
+   "quand": "2026-11-02T16:00:55Z",
+   "qui": "Claude Opus 5.5 (IA)",
+   "action": "rejeter",
+   "objet": "R3-techco",
+   "raison": "même rapport que le WEF, présenté sous un titre réducteur"
+  },
+  {
+   "n": 44,
+   "quand": "2026-11-02T16:00:56Z",
+   "qui": "Claude Opus 5.5 (IA)",
+   "action": "consulter",
+   "objet": "R3-uva",
+   "detail": "extrait"
+  },
+  {
+   "n": 45,
+   "quand": "2026-11-02T16:00:57Z",
+   "qui": "Claude Opus 5.5 (IA)",
+   "action": "rejeter",
+   "objet": "R3-uva",
+   "raison": "reformulation contestable du rapport du WEF"
+  },
+  {
+   "n": 46,
+   "quand": "2026-11-02T16:00:58Z",
+   "qui": "Claude Opus 5.5 (IA)",
+   "action": "consulter",
+   "objet": "R4-elephas",
+   "detail": "extrait"
+  },
+  {
+   "n": 47,
+   "quand": "2026-11-02T16:00:59Z",
+   "qui": "Claude Opus 5.5 (IA)",
+   "action": "rejeter",
+   "objet": "R4-elephas",
+   "raison": "résumé commercial ; je préfère le rapport lui-même"
+  },
+  {
+   "n": 48,
+   "quand": "2026-11-02T16:01:00Z",
+   "qui": "Claude Opus 5.5 (IA)",
+   "action": "consulter",
+   "objet": "R4-libertify",
+   "detail": "extrait"
+  },
+  {
+   "n": 49,
+   "quand": "2026-11-02T16:01:01Z",
+   "qui": "Claude Opus 5.5 (IA)",
+   "action": "rejeter",
+   "objet": "R4-libertify",
+   "raison": "résumé commercial ; je préfère le rapport lui-même"
+  },
+  {
+   "n": 50,
+   "quand": "2026-11-02T16:01:02Z",
+   "qui": "Claude Opus 5.5 (IA)",
+   "action": "consulter",
+   "objet": "R4-tse",
+   "detail": "extrait"
+  },
+  {
+   "n": 51,
+   "quand": "2026-11-02T16:01:03Z",
+   "qui": "Claude Opus 5.5 (IA)",
+   "action": "rejeter",
+   "objet": "R4-tse",
+   "raison": "annonce de séminaire, sans contenu"
+  },
+  {
+   "n": 52,
+   "quand": "2026-11-02T16:01:10Z",
+   "qui": "Claude Opus 5.5 (IA)",
+   "action": "consulter",
+   "objet": "OCDE",
+   "detail": "page ouverte et lue (WebFetch)"
+  },
+  {
+   "n": 53,
+   "quand": "2026-11-02T16:01:11Z",
+   "qui": "Claude Opus 5.5 (IA)",
+   "action": "consulter",
+   "objet": "IASR",
+   "detail": "page ouverte et lue (WebFetch)"
+  },
+  {
+   "n": 54,
+   "quand": "2026-11-02T16:01:12Z",
+   "qui": "Claude Opus 5.5 (IA)",
+   "action": "consulter",
+   "objet": "EPOCH",
+   "detail": "page ouverte et lue (WebFetch)"
+  },
+  {
+   "n": 55,
+   "quand": "2026-11-02T16:01:13Z",
+   "qui": "Claude Opus 5.5 (IA)",
+   "action": "relier",
+   "objet": "IASR",
+   "cible": "OCDE",
+   "detail": "le rapport s'appuie sur les scénarios 2030 de l'OCDE"
+  },
+  {
+   "n": 56,
+   "quand": "2026-11-02T16:01:14Z",
+   "qui": "Claude Opus 5.5 (IA)",
+   "action": "relier",
+   "objet": "IASR",
+   "cible": "EPOCH",
+   "detail": "le rapport s'appuie sur l'indice de capacités d'Epoch AI"
+  },
+  {
+   "n": 57,
+   "quand": "2026-11-02T16:01:15Z",
+   "qui": "Claude Opus 5.5 (IA)",
+   "action": "relier",
+   "objet": "IASR",
+   "cible": "METR",
+   "detail": "le rapport cite l'étude METR sur la durée des tâches des agents"
+  },
+  {
+   "n": 58,
+   "quand": "2026-11-02T16:01:16Z",
+   "qui": "Claude Opus 5.5 (IA)",
+   "action": "relier",
+   "objet": "EPOCH",
+   "cible": "EPOCH-2030",
+   "detail": "la page renvoie au rapport 2030 sans en résumer le contenu"
+  },
+  {
+   "n": 59,
+   "quand": "2026-11-02T16:01:17Z",
+   "qui": "Claude Opus 5.5 (IA)",
+   "action": "rechercher",
+   "objet": "q5",
+   "detail": "réutilisation d'une recherche faite la veille"
+  },
+  {
+   "n": 60,
+   "quand": "2026-11-02T16:01:18Z",
+   "qui": "Claude Opus 5.5 (IA)",
+   "action": "rechercher",
+   "objet": "q6",
+   "detail": "réutilisation d'une recherche faite le 31 octobre"
+  },
+  {
+   "n": 61,
+   "quand": "2026-11-02T16:01:30Z",
+   "qui": "Claude Opus 5.5 (IA)",
+   "action": "utiliser",
+   "objet": "IASR",
+   "cible": "A1"
+  },
+  {
+   "n": 62,
+   "quand": "2026-11-02T16:01:31Z",
+   "qui": "Claude Opus 5.5 (IA)",
+   "action": "utiliser",
+   "objet": "IASR",
+   "cible": "A2"
+  },
+  {
+   "n": 63,
+   "quand": "2026-11-02T16:01:32Z",
+   "qui": "Claude Opus 5.5 (IA)",
+   "action": "utiliser",
+   "objet": "METR",
+   "cible": "A2"
+  },
+  {
+   "n": 64,
+   "quand": "2026-11-02T16:01:33Z",
+   "qui": "Claude Opus 5.5 (IA)",
+   "action": "utiliser",
+   "objet": "IASR",
+   "cible": "A3"
+  },
+  {
+   "n": 65,
+   "quand": "2026-11-02T16:01:34Z",
+   "qui": "Claude Opus 5.5 (IA)",
+   "action": "utiliser",
+   "objet": "EPOCH-BRIEF",
+   "cible": "A3"
+  },
+  {
+   "n": 66,
+   "quand": "2026-11-02T16:01:35Z",
+   "qui": "Claude Opus 5.5 (IA)",
+   "action": "utiliser",
+   "objet": "IASR",
+   "cible": "A4"
+  },
+  {
+   "n": 67,
+   "quand": "2026-11-02T16:01:36Z",
+   "qui": "Claude Opus 5.5 (IA)",
+   "action": "utiliser",
+   "objet": "IEA",
+   "cible": "A5"
+  },
+  {
+   "n": 68,
+   "quand": "2026-11-02T16:01:37Z",
+   "qui": "Claude Opus 5.5 (IA)",
+   "action": "utiliser",
+   "objet": "OCDE",
+   "cible": "A6"
+  },
+  {
+   "n": 69,
+   "quand": "2026-11-02T16:01:38Z",
+   "qui": "Claude Opus 5.5 (IA)",
+   "action": "utiliser",
+   "objet": "ARXIV-AGI",
+   "cible": "A7"
+  },
+  {
+   "n": 70,
+   "quand": "2026-11-02T16:01:39Z",
+   "qui": "Claude Opus 5.5 (IA)",
+   "action": "utiliser",
+   "objet": "OCDE",
+   "cible": "A7"
+  },
+  {
+   "n": 71,
+   "quand": "2026-11-02T16:01:40Z",
+   "qui": "Claude Opus 5.5 (IA)",
+   "action": "utiliser",
+   "objet": "IASR",
+   "cible": "A8"
+  },
+  {
+   "n": 72,
+   "quand": "2026-11-02T16:01:41Z",
+   "qui": "Claude Opus 5.5 (IA)",
+   "action": "utiliser",
+   "objet": "EPOCH",
+   "cible": "A8"
+  },
+  {
+   "n": 73,
+   "quand": "2026-11-02T16:01:42Z",
+   "qui": "Claude Opus 5.5 (IA)",
+   "action": "utiliser",
+   "objet": "EPOCH",
+   "cible": "A9"
+  },
+  {
+   "n": 74,
+   "quand": "2026-11-02T16:01:43Z",
+   "qui": "Claude Opus 5.5 (IA)",
+   "action": "utiliser",
+   "objet": "IASR",
+   "cible": "A10"
+  },
+  {
+   "n": 75,
+   "quand": "2026-11-02T16:01:44Z",
+   "qui": "Claude Opus 5.5 (IA)",
+   "action": "utiliser",
+   "objet": "WEF-relais",
+   "cible": "A10"
+  },
+  {
+   "n": 76,
+   "quand": "2026-11-02T16:01:45Z",
+   "qui": "Claude Opus 5.5 (IA)",
+   "action": "utiliser",
+   "objet": "WEF-relais2",
+   "cible": "A10"
+  },
+  {
+   "n": 77,
+   "quand": "2026-11-02T16:01:46Z",
+   "qui": "Claude Opus 5.5 (IA)",
+   "action": "utiliser",
+   "objet": "IASR",
+   "cible": "A11"
+  },
+  {
+   "n": 78,
+   "quand": "2026-11-02T16:01:47Z",
+   "qui": "Claude Opus 5.5 (IA)",
+   "action": "utiliser",
+   "objet": "AIACT",
+   "cible": "A12"
+  },
+  {
+   "n": 79,
+   "quand": "2026-11-02T16:01:48Z",
+   "qui": "Claude Opus 5.5 (IA)",
+   "action": "affirmer",
+   "objet": "reponse",
+   "detail": "13 affirmations"
+  }
+ ],
+ "affirmations": [
+  {
+   "id": "A1",
+   "phrase": "Les capacités continuent de progresser vite, mais de façon irrégulière : niveau médaille d'or aux Olympiades de mathématiques, et pourtant des échecs sur des tâches simples.",
+   "appuis": [
+    "IASR"
+   ],
+   "origine": "source",
+   "confiance": "élevée",
+   "ce_que_dit_la_source": {
+    "IASR": "les systèmes les plus avancés atteignent ce niveau mais restent « irréguliers »"
+   }
+  },
+  {
+   "id": "A2",
+   "phrase": "Les agents sont la tendance la plus nette : la durée des tâches qu'ils accomplissent de façon fiable double environ tous les sept mois ; si cela continue, ils pourraient mener d'ici 2030 des tâches logicielles de plusieurs jours.",
+   "appuis": [
+    "IASR",
+    "METR"
+   ],
+   "origine": "source",
+   "confiance": "moyenne",
+   "ce_que_dit_la_source": {
+    "IASR": "30 minutes aujourd'hui contre moins de 10 il y a un an ; extrapolation sans garantie pour les autres domaines"
+   }
+  },
+  {
+   "id": "A3",
+   "phrase": "La course à la puissance devrait se poursuivre jusqu'en 2030 : le calcul d'entraînement croît d'environ 5 fois par an, l'efficacité des algorithmes de 2 à 6 fois, avec des investissements de plusieurs centaines de milliards de dollars.",
+   "appuis": [
+    "IASR",
+    "EPOCH-BRIEF"
+   ],
+   "origine": "source",
+   "confiance": "moyenne",
+   "ce_que_dit_la_source": {
+    "IASR": "chiffres de tendance du rapport",
+    "EPOCH-BRIEF": "la mise à l'échelle devrait se poursuivre jusqu'en 2030"
+   }
+  },
+  {
+   "id": "A4",
+   "phrase": "Cette course bute sur quatre limites possibles : les données, les puces, le financement et l'énergie.",
+   "appuis": [
+    "IASR"
+   ],
+   "origine": "source",
+   "confiance": "élevée",
+   "ce_que_dit_la_source": {
+    "IASR": "goulets d'étranglement possibles cités par le rapport"
+   }
+  },
+  {
+   "id": "A5",
+   "phrase": "La consommation électrique des centres de données doublerait d'ici 2030, autour de 3 % de l'électricité mondiale.",
+   "appuis": [
+    "IEA"
+   ],
+   "origine": "source",
+   "confiance": "moyenne",
+   "ce_que_dit_la_source": {
+    "IEA": "projection de l'AIE, de 485 à 950 TWh"
+   }
+  },
+  {
+   "id": "A6",
+   "phrase": "L'avenir reste très ouvert : l'OCDE envisage quatre trajectoires, d'un développement qui stagne à un développement accéléré.",
+   "appuis": [
+    "OCDE"
+   ],
+   "origine": "source",
+   "confiance": "élevée",
+   "ce_que_dit_la_source": {
+    "OCDE": "quatre scénarios, fondés sur l'avis d'experts et les indicateurs de l'OCDE"
+   }
+  },
+  {
+   "id": "A7",
+   "phrase": "Les dates avancées pour une IA « générale » varient : certains modèles fondés sur le calcul placent leur estimation centrale vers 2030 plutôt que 2040, mais rien ne fait consensus.",
+   "appuis": [
+    "ARXIV-AGI",
+    "OCDE"
+   ],
+   "origine": "source",
+   "confiance": "faible",
+   "ce_que_dit_la_source": {
+    "ARXIV-AGI": "estimations centrales autour de 2030 dans les analyses récentes"
+   }
+  },
+  {
+   "id": "A8",
+   "phrase": "L'écart entre modèles ouverts et fermés se resserre : les meilleurs modèles à poids ouverts n'ont plus qu'environ un an de retard.",
+   "appuis": [
+    "IASR",
+    "EPOCH"
+   ],
+   "origine": "source",
+   "confiance": "moyenne",
+   "ce_que_dit_la_source": {
+    "IASR": "d'après l'indice de capacités d'Epoch AI"
+   }
+  },
+  {
+   "id": "A9",
+   "phrase": "Les modèles actuels n'apprennent pas encore en temps réel de leur expérience, une limite que les chercheurs suivent de près.",
+   "appuis": [
+    "EPOCH"
+   ],
+   "origine": "source",
+   "confiance": "moyenne",
+   "ce_que_dit_la_source": {
+    "EPOCH": "un test montre qu'ils ne s'améliorent pas avec l'expérience"
+   }
+  },
+  {
+   "id": "A10",
+   "phrase": "Sur l'emploi, aucun effet global n'est établi à ce jour, mais l'emploi des jeunes diplômés baisse dans les métiers les plus exposés ; le WEF prévoit 170 millions d'emplois créés et 92 millions supprimés d'ici 2030.",
+   "appuis": [
+    "IASR",
+    "WEF-relais",
+    "WEF-relais2"
+   ],
+   "origine": "source",
+   "confiance": "moyenne",
+   "ce_que_dit_la_source": {
+    "IASR": "constat du rapport",
+    "WEF-relais2": "chiffres du Future of Jobs Report 2025, lus dans un compte rendu"
+   }
+  },
+  {
+   "id": "A11",
+   "phrase": "Les risques montent avec les capacités : fraudes et trucages, cybersécurité, et des tests de sécurité moins fiables, car les modèles distinguent de plus en plus un test d'un usage réel.",
+   "appuis": [
+    "IASR"
+   ],
+   "origine": "source",
+   "confiance": "élevée",
+   "ce_que_dit_la_source": {
+    "IASR": "« écart d'évaluation » décrit par le rapport"
+   }
+  },
+  {
+   "id": "A12",
+   "phrase": "En Europe, les obligations de l'AI Act pour les systèmes à haut risque s'appliqueront au plus tard le 2 décembre 2027.",
+   "appuis": [
+    "AIACT"
+   ],
+   "origine": "source",
+   "confiance": "élevée",
+   "ce_que_dit_la_source": {
+    "AIACT": "report prévu par le règlement (UE) 2026/1744"
+   }
+  },
+  {
+   "id": "A13",
+   "phrase": "Mon interprétation : la question de la vérifiabilité, savoir d'où vient une réponse d'IA, prendra de l'importance à mesure que les agents agiront davantage seuls.",
+   "appuis": [],
+   "origine": "interprétation",
+   "confiance": "moyenne",
+   "ce_que_dit_la_source": {}
+  }
+ ],
+ "inconnu": [
+  "La date d'une IA « générale », et même le sens précis de ce terme.",
+  "Si la progression des agents se généralisera au-delà de la programmation.",
+  "L'effet réel sur l'emploi, au-delà des prévisions d'enquêtes auprès d'employeurs.",
+  "Le contenu détaillé du rapport d'Epoch AI sur 2030 : la page consultée ne le résume pas."
+ ],
+ "etiquettes": {
+  "R1-british": {
+   "source": "R1-british",
+   "titre": "AI in 2030: Future Trends, Predictions & Impact",
+   "auteur": "British Council (blog)",
+   "date": "",
+   "lien": "https://online-english.britishcouncil.org/direct-buzz/ai-in-2030-future-trends-predictions-and-impact-1764798298",
+   "nature": "blog",
+   "consultations": [
+    {
+     "quand": "2026-11-02T16:00:18Z",
+     "comment": "extrait renvoyé par le moteur, page non ouverte"
+    }
+   ],
+   "utilisee_pour": [],
+   "rejetee": {
+    "quand": "2026-11-02T16:00:19Z",
+    "raison": "article grand public, sans sources citées"
+   },
+   "mene_vers": [],
+   "atteinte_depuis": [],
+   "trouvee_par": "q1",
+   "validation": "aucune validation humaine",
+   "statut_d_usage": "rejetée"
+  },
+  "R1-startus": {
+   "source": "R1-startus",
+   "titre": "Future of AI [2026-2030] Roadmap",
+   "auteur": "StartUs Insights",
+   "date": "",
+   "lien": "https://www.startus-insights.com/innovators-guide/future-of-ai-roadmap/",
+   "nature": "cabinet commercial",
+   "consultations": [
+    {
+     "quand": "2026-11-02T16:00:20Z",
+     "comment": "extrait renvoyé par le moteur, page non ouverte"
+    }
+   ],
+   "utilisee_pour": [],
+   "rejetee": {
+    "quand": "2026-11-02T16:00:21Z",
+    "raison": "cabinet de veille commercial, chiffres de marché"
+   },
+   "mene_vers": [],
+   "atteinte_depuis": [],
+   "trouvee_par": "q1",
+   "validation": "aucune validation humaine",
+   "statut_d_usage": "rejetée"
+  },
+  "R1-opper": {
+   "source": "R1-opper",
+   "titre": "AI roundtable : prévisions à 5 ans",
+   "auteur": "Opper.ai (réponses de plusieurs IA)",
+   "date": "",
+   "lien": "https://opper.ai/ai-roundtable/questions/based-on-current-ai-development-trends-and-possible-future-24b47b2e",
+   "nature": "contenu généré par IA",
+   "consultations": [
+    {
+     "quand": "2026-11-02T16:00:22Z",
+     "comment": "extrait renvoyé par le moteur, page non ouverte"
+    }
+   ],
+   "utilisee_pour": [],
+   "rejetee": {
+    "quand": "2026-11-02T16:00:23Z",
+    "raison": "prévisions produites par d'autres IA : les reprendre créerait une circularité"
+   },
+   "mene_vers": [],
+   "atteinte_depuis": [],
+   "trouvee_par": "q1",
+   "validation": "aucune validation humaine",
+   "statut_d_usage": "rejetée"
+  },
+  "R1-bau": {
+   "source": "R1-bau",
+   "titre": "The Future of Artificial Intelligence: 5 Trends",
+   "auteur": "BAU (blog universitaire)",
+   "date": "",
+   "lien": "https://bau.edu/blog/the-future-of-artificial-intelligence/",
+   "nature": "blog",
+   "consultations": [
+    {
+     "quand": "2026-11-02T16:00:24Z",
+     "comment": "extrait renvoyé par le moteur, page non ouverte"
+    }
+   ],
+   "utilisee_pour": [],
+   "rejetee": {
+    "quand": "2026-11-02T16:00:25Z",
+    "raison": "blog de promotion ; chiffre McKinsey de seconde main"
+   },
+   "mene_vers": [],
+   "atteinte_depuis": [],
+   "trouvee_par": "q1",
+   "validation": "aucune validation humaine",
+   "statut_d_usage": "rejetée"
+  },
+  "R1-ark": {
+   "source": "R1-ark",
+   "titre": "AI Market Forecast to Hit $1.8 Trillion in 2030",
+   "auteur": "Arkansas Business",
+   "date": "2021",
+   "lien": "https://www.arkansasbusiness.com/article/ai-market-forecast-to-hit-1-8-trillion-in-2030/",
+   "nature": "presse économique",
+   "consultations": [
+    {
+     "quand": "2026-11-02T16:00:26Z",
+     "comment": "extrait renvoyé par le moteur, page non ouverte"
+    }
+   ],
+   "utilisee_pour": [],
+   "rejetee": {
+    "quand": "2026-11-02T16:00:27Z",
+    "raison": "prévision de marché commerciale datant de 2021"
+   },
+   "mene_vers": [],
+   "atteinte_depuis": [],
+   "trouvee_par": "q1",
+   "validation": "aucune validation humaine",
+   "statut_d_usage": "rejetée"
+  },
+  "OCDE": {
+   "source": "OCDE",
+   "titre": "Exploring possible AI trajectories through 2030",
+   "auteur": "OCDE",
+   "date": "2026-02-03",
+   "lien": "https://oecd.ai/en/ai-publications/exploring-possible-ai-trajectories-through-2030",
+   "nature": "organisation internationale",
+   "consultations": [
+    {
+     "quand": "2026-11-02T16:00:30Z",
+     "comment": "extrait"
+    },
+    {
+     "quand": "2026-11-02T16:01:10Z",
+     "comment": "page ouverte et lue (WebFetch)"
+    }
+   ],
+   "utilisee_pour": [
+    "A6",
+    "A7"
+   ],
+   "rejetee": null,
+   "mene_vers": [
+    "IASR"
+   ],
+   "atteinte_depuis": [
+    "IASR"
+   ],
+   "trouvee_par": "q1",
+   "validation": "aucune validation humaine",
+   "statut_d_usage": "utilisée"
+  },
+  "IEEE": {
+   "source": "IEEE",
+   "titre": "2030 Technology Megatrends",
+   "auteur": "IEEE Future Directions",
+   "date": "",
+   "lien": "https://engage.ieee.org/FD-Megatrends-2030.html",
+   "nature": "société savante",
+   "consultations": [
+    {
+     "quand": "2026-11-02T16:00:32Z",
+     "comment": "extrait"
+    }
+   ],
+   "utilisee_pour": [],
+   "rejetee": {
+    "quand": "2026-11-02T16:00:33Z",
+    "raison": "pertinent mais contenu accessible seulement par téléchargement : non vérifiable ici"
+   },
+   "mene_vers": [],
+   "atteinte_depuis": [],
+   "trouvee_par": "q1",
+   "validation": "aucune validation humaine",
+   "statut_d_usage": "rejetée"
+  },
+  "R1-fx": {
+   "source": "R1-fx",
+   "titre": "Copie du rapport Epoch AI « AI in 2030 »",
+   "auteur": "fxbaogao.com",
+   "date": "2025-09-22",
+   "lien": "https://fxbaogao.com/detail/5069547",
+   "nature": "copie sur site tiers",
+   "consultations": [
+    {
+     "quand": "2026-11-02T16:00:34Z",
+     "comment": "extrait"
+    }
+   ],
+   "utilisee_pour": [],
+   "rejetee": {
+    "quand": "2026-11-02T16:00:36Z",
+    "raison": "copie sur un site tiers, je préfère la source d'origine"
+   },
+   "mene_vers": [
+    "EPOCH-2030"
+   ],
+   "atteinte_depuis": [],
+   "trouvee_par": "q1",
+   "validation": "aucune validation humaine",
+   "statut_d_usage": "rejetée"
+  },
+  "R1-statista": {
+   "source": "R1-statista",
+   "titre": "AI Trends: Roadmap to 2025",
+   "auteur": "Statista",
+   "date": "",
+   "lien": "https://www.statista.com/page/ai-trends-2025-p",
+   "nature": "contenu payant",
+   "consultations": [
+    {
+     "quand": "2026-11-02T16:00:28Z",
+     "comment": "extrait renvoyé par le moteur, page non ouverte"
+    }
+   ],
+   "utilisee_pour": [],
+   "rejetee": {
+    "quand": "2026-11-02T16:00:29Z",
+    "raison": "contenu payant, chiffres de marché"
+   },
+   "mene_vers": [],
+   "atteinte_depuis": [],
+   "trouvee_par": "q1",
+   "validation": "aucune validation humaine",
+   "statut_d_usage": "rejetée"
+  },
+  "ARXIV-AGI": {
+   "source": "ARXIV-AGI",
+   "titre": "AGI Forecasting and Scenario Analysis: State of the Field",
+   "auteur": "arXiv 2604.22766",
+   "date": "2026-04",
+   "lien": "https://arxiv.org/pdf/2604.22766",
+   "nature": "prépublication",
+   "consultations": [
+    {
+     "quand": "2026-11-02T16:00:37Z",
+     "comment": "extrait"
+    }
+   ],
+   "utilisee_pour": [
+    "A7"
+   ],
+   "rejetee": null,
+   "mene_vers": [],
+   "atteinte_depuis": [],
+   "trouvee_par": "q2",
+   "validation": "aucune validation humaine",
+   "statut_d_usage": "utilisée"
+  },
+  "EPOCH": {
+   "source": "EPOCH",
+   "titre": "The Future of AI (dossier)",
+   "auteur": "Epoch AI",
+   "date": "2026",
+   "lien": "https://epoch.ai/topics/future-of-ai",
+   "nature": "institut de recherche",
+   "consultations": [
+    {
+     "quand": "2026-11-02T16:00:38Z",
+     "comment": "extrait"
+    },
+    {
+     "quand": "2026-11-02T16:01:12Z",
+     "comment": "page ouverte et lue (WebFetch)"
+    }
+   ],
+   "utilisee_pour": [
+    "A8",
+    "A9"
+   ],
+   "rejetee": null,
+   "mene_vers": [
+    "EPOCH-2030"
+   ],
+   "atteinte_depuis": [
+    "IASR"
+   ],
+   "trouvee_par": "q2",
+   "validation": "aucune validation humaine",
+   "statut_d_usage": "utilisée"
+  },
+  "EPOCH-BRIEF": {
+   "source": "EPOCH-BRIEF",
+   "titre": "The Epoch AI Brief – septembre 2025",
+   "auteur": "Epoch AI",
+   "date": "2025-09",
+   "lien": "https://epochai.substack.com/p/the-epoch-ai-brief-september-2025",
+   "nature": "institut de recherche",
+   "consultations": [
+    {
+     "quand": "2026-11-02T16:00:39Z",
+     "comment": "extrait"
+    }
+   ],
+   "utilisee_pour": [
+    "A3"
+   ],
+   "rejetee": null,
+   "mene_vers": [
+    "EPOCH-2030"
+   ],
+   "atteinte_depuis": [],
+   "trouvee_par": "q2",
+   "validation": "aucune validation humaine",
+   "statut_d_usage": "utilisée"
+  },
+  "EPOCH-2030": {
+   "source": "EPOCH-2030",
+   "titre": "What will AI look like in 2030?",
+   "auteur": "Epoch AI",
+   "date": "2025-09-16",
+   "lien": "https://epoch.ai/topics/future-of-ai",
+   "nature": "institut de recherche",
+   "consultations": [],
+   "utilisee_pour": [],
+   "rejetee": null,
+   "mene_vers": [],
+   "atteinte_depuis": [
+    "R1-fx",
+    "EPOCH-BRIEF",
+    "EPOCH"
+   ],
+   "trouvee_par": "q2",
+   "validation": "aucune validation humaine",
+   "statut_d_usage": "atteinte par un lien, non consultée"
+  },
+  "R2-akira": {
+   "source": "R2-akira",
+   "titre": "Road to AGI: By 2030?",
+   "auteur": "Substack personnel",
+   "date": "",
+   "lien": "https://akiranin.substack.com/p/road-to-agi-by-2030",
+   "nature": "blog",
+   "consultations": [
+    {
+     "quand": "2026-11-02T16:00:41Z",
+     "comment": "extrait"
+    }
+   ],
+   "utilisee_pour": [],
+   "rejetee": {
+    "quand": "2026-11-02T16:00:42Z",
+    "raison": "blog personnel ; chiffres de prédiction relayés de seconde main"
+   },
+   "mene_vers": [],
+   "atteinte_depuis": [],
+   "trouvee_par": "q2",
+   "validation": "aucune validation humaine",
+   "statut_d_usage": "rejetée"
+  },
+  "R2-arxiv-slow": {
+   "source": "R2-arxiv-slow",
+   "titre": "Compute slowdowns and agent time horizons",
+   "auteur": "arXiv 2511.19492",
+   "date": "2025-11",
+   "lien": "https://web3.arxiv.org/pdf/2511.19492",
+   "nature": "prépublication",
+   "consultations": [
+    {
+     "quand": "2026-11-02T16:00:43Z",
+     "comment": "extrait"
+    }
+   ],
+   "utilisee_pour": [],
+   "rejetee": {
+    "quand": "2026-11-02T16:00:44Z",
+    "raison": "article technique sur un point précis, trop spécialisé pour la question"
+   },
+   "mene_vers": [],
+   "atteinte_depuis": [],
+   "trouvee_par": "q2",
+   "validation": "aucune validation humaine",
+   "statut_d_usage": "rejetée"
+  },
+  "R2-ltw": {
+   "source": "R2-ltw",
+   "titre": "Can AI Scaling Continue Through 2030? (fiche)",
+   "auteur": "Longterm Wiki",
+   "date": "",
+   "lien": "https://www.longtermwiki.com/resources/sid_Ah1wV0cDli",
+   "nature": "agrégateur",
+   "consultations": [
+    {
+     "quand": "2026-11-02T16:00:45Z",
+     "comment": "extrait"
+    }
+   ],
+   "utilisee_pour": [],
+   "rejetee": {
+    "quand": "2026-11-02T16:00:46Z",
+    "raison": "agrégateur secondaire"
+   },
+   "mene_vers": [
+    "EPOCH-SCALING"
+   ],
+   "atteinte_depuis": [],
+   "trouvee_par": "q2",
+   "validation": "aucune validation humaine",
+   "statut_d_usage": "rejetée"
+  },
+  "EPOCH-SCALING": {
+   "source": "EPOCH-SCALING",
+   "titre": "Can AI scaling continue through 2030?",
+   "auteur": "Epoch AI",
+   "date": "2024",
+   "lien": "https://epochai.org/blog/can-ai-scaling-continue-through-2030",
+   "nature": "institut de recherche",
+   "consultations": [],
+   "utilisee_pour": [],
+   "rejetee": null,
+   "mene_vers": [],
+   "atteinte_depuis": [
+    "R2-ltw"
+   ],
+   "trouvee_par": "q2",
+   "validation": "aucune validation humaine",
+   "statut_d_usage": "atteinte par un lien, non consultée"
+  },
+  "WEF-relais": {
+   "source": "WEF-relais",
+   "titre": "39 % des compétences dépassées d'ici 2030 (compte rendu du rapport WEF)",
+   "auteur": "Business Today",
+   "date": "2025-01-10",
+   "lien": "https://www.businesstoday.in/wef-2025/story/39-of-skills-outdated-by-2030-wef-warns-of-ais-impact-on-jobs-460306-2025-01-10",
+   "nature": "presse (relais)",
+   "consultations": [
+    {
+     "quand": "2026-11-02T16:00:48Z",
+     "comment": "extrait"
+    }
+   ],
+   "utilisee_pour": [
+    "A10"
+   ],
+   "rejetee": null,
+   "mene_vers": [
+    "WEF"
+   ],
+   "atteinte_depuis": [],
+   "trouvee_par": "q3",
+   "validation": "aucune validation humaine",
+   "statut_d_usage": "utilisée"
+  },
+  "WEF-relais2": {
+   "source": "WEF-relais2",
+   "titre": "AI could create 78 million more jobs than it eliminates by 2030",
+   "auteur": "Kowatek (reprise d'Ars Technica)",
+   "date": "2025-01",
+   "lien": "https://blog.kowatek.com/?p=91860",
+   "nature": "presse (relais)",
+   "consultations": [
+    {
+     "quand": "2026-11-02T16:00:50Z",
+     "comment": "extrait"
+    }
+   ],
+   "utilisee_pour": [
+    "A10"
+   ],
+   "rejetee": null,
+   "mene_vers": [
+    "WEF"
+   ],
+   "atteinte_depuis": [],
+   "trouvee_par": "q3",
+   "validation": "aucune validation humaine",
+   "statut_d_usage": "utilisée"
+  },
+  "WEF": {
+   "source": "WEF",
+   "titre": "Future of Jobs Report 2025",
+   "auteur": "Forum économique mondial",
+   "date": "2025-01",
+   "lien": "",
+   "nature": "organisation internationale (non consulté directement)",
+   "consultations": [],
+   "utilisee_pour": [],
+   "rejetee": null,
+   "mene_vers": [],
+   "atteinte_depuis": [
+    "WEF-relais",
+    "WEF-relais2"
+   ],
+   "trouvee_par": null,
+   "validation": "aucune validation humaine",
+   "statut_d_usage": "atteinte par un lien, non consultée"
+  },
+  "R3-fox": {
+   "source": "R3-fox",
+   "titre": "McKinsey : 30 % des heures de travail automatisables en 2030",
+   "auteur": "Fox Business",
+   "date": "2023",
+   "lien": "https://www.foxbusiness.com/economy/accelerated-adoption-ai-automate-30-americans-work-hours-mckinsey",
+   "nature": "presse (relais)",
+   "consultations": [
+    {
+     "quand": "2026-11-02T16:00:52Z",
+     "comment": "extrait"
+    }
+   ],
+   "utilisee_pour": [],
+   "rejetee": {
+    "quand": "2026-11-02T16:00:53Z",
+    "raison": "estimation de 2023, antérieure aux évolutions récentes"
+   },
+   "mene_vers": [],
+   "atteinte_depuis": [],
+   "trouvee_par": "q3",
+   "validation": "aucune validation humaine",
+   "statut_d_usage": "rejetée"
+  },
+  "R3-techco": {
+   "source": "R3-techco",
+   "titre": "Within 5 Years, 41% of Companies Will Cut Jobs Due to AI",
+   "auteur": "Tech.co",
+   "date": "2025-01",
+   "lien": "https://tech.co/news/report-ai-will-cut-jobs",
+   "nature": "presse",
+   "consultations": [
+    {
+     "quand": "2026-11-02T16:00:54Z",
+     "comment": "extrait"
+    }
+   ],
+   "utilisee_pour": [],
+   "rejetee": {
+    "quand": "2026-11-02T16:00:55Z",
+    "raison": "même rapport que le WEF, présenté sous un titre réducteur"
+   },
+   "mene_vers": [],
+   "atteinte_depuis": [],
+   "trouvee_par": "q3",
+   "validation": "aucune validation humaine",
+   "statut_d_usage": "rejetée"
+  },
+  "R3-uva": {
+   "source": "R3-uva",
+   "titre": "AI will perform most work tasks by 2030",
+   "auteur": "Université d'Amsterdam (actualité)",
+   "date": "2025-01",
+   "lien": "https://acbi.uva.nl/content/news/2025/01/ai-will-perform-most-work-tasks-by-2030.html",
+   "nature": "actualité",
+   "consultations": [
+    {
+     "quand": "2026-11-02T16:00:56Z",
+     "comment": "extrait"
+    }
+   ],
+   "utilisee_pour": [],
+   "rejetee": {
+    "quand": "2026-11-02T16:00:57Z",
+    "raison": "reformulation contestable du rapport du WEF"
+   },
+   "mene_vers": [],
+   "atteinte_depuis": [],
+   "trouvee_par": "q3",
+   "validation": "aucune validation humaine",
+   "statut_d_usage": "rejetée"
+  },
+  "IASR": {
+   "source": "IASR",
+   "titre": "International AI Safety Report 2026 – Extended Summary for Policymakers",
+   "auteur": "Groupe d'experts présidé par Y. Bengio (DSIT 2026/001)",
+   "date": "2026-02-03",
+   "lien": "https://internationalaisafetyreport.org/publication/2026-report-extended-summary-policymakers",
+   "nature": "rapport scientifique international",
+   "consultations": [
+    {
+     "quand": "2026-11-02T16:01:11Z",
+     "comment": "page ouverte et lue (WebFetch)"
+    }
+   ],
+   "utilisee_pour": [
+    "A1",
+    "A2",
+    "A3",
+    "A4",
+    "A8",
+    "A10",
+    "A11"
+   ],
+   "rejetee": null,
+   "mene_vers": [
+    "OCDE",
+    "EPOCH",
+    "METR"
+   ],
+   "atteinte_depuis": [
+    "OCDE"
+   ],
+   "trouvee_par": "q4",
+   "validation": "aucune validation humaine",
+   "statut_d_usage": "utilisée"
+  },
+  "METR": {
+   "source": "METR",
+   "titre": "Kwa et al. 2025 : durée des tâches des agents (cité par le rapport)",
+   "auteur": "METR",
+   "date": "2025",
+   "lien": "",
+   "nature": "étude (citée, non consultée)",
+   "consultations": [],
+   "utilisee_pour": [
+    "A2"
+   ],
+   "rejetee": null,
+   "mene_vers": [],
+   "atteinte_depuis": [
+    "IASR"
+   ],
+   "trouvee_par": null,
+   "validation": "aucune validation humaine",
+   "statut_d_usage": "utilisée"
+  },
+  "R4-elephas": {
+   "source": "R4-elephas",
+   "titre": "AI Safety Report 2026: key findings",
+   "auteur": "Elephas (blog)",
+   "date": "2026-02-06",
+   "lien": "https://elephas.app/resources/international-ai-safety-report-2026-key-findings",
+   "nature": "résumé commercial",
+   "consultations": [
+    {
+     "quand": "2026-11-02T16:00:58Z",
+     "comment": "extrait"
+    }
+   ],
+   "utilisee_pour": [],
+   "rejetee": {
+    "quand": "2026-11-02T16:00:59Z",
+    "raison": "résumé commercial ; je préfère le rapport lui-même"
+   },
+   "mene_vers": [],
+   "atteinte_depuis": [],
+   "trouvee_par": "q4",
+   "validation": "aucune validation humaine",
+   "statut_d_usage": "rejetée"
+  },
+  "R4-libertify": {
+   "source": "R4-libertify",
+   "titre": "International AI Safety Report 2026 – synthèse",
+   "auteur": "Libertify",
+   "date": "",
+   "lien": "https://www.libertify.com/interactive-library/international-ai-safety-report-2026/",
+   "nature": "résumé commercial",
+   "consultations": [
+    {
+     "quand": "2026-11-02T16:01:00Z",
+     "comment": "extrait"
+    }
+   ],
+   "utilisee_pour": [],
+   "rejetee": {
+    "quand": "2026-11-02T16:01:01Z",
+    "raison": "résumé commercial ; je préfère le rapport lui-même"
+   },
+   "mene_vers": [],
+   "atteinte_depuis": [],
+   "trouvee_par": "q4",
+   "validation": "aucune validation humaine",
+   "statut_d_usage": "rejetée"
+  },
+  "R4-tse": {
+   "source": "R4-tse",
+   "titre": "Séminaire : Key Findings from the 2026 International AI Safety Report",
+   "auteur": "Toulouse School of Economics",
+   "date": "2026-09-30",
+   "lien": "https://www.tse-fr.eu/node/144156",
+   "nature": "annonce de séminaire",
+   "consultations": [
+    {
+     "quand": "2026-11-02T16:01:02Z",
+     "comment": "extrait"
+    }
+   ],
+   "utilisee_pour": [],
+   "rejetee": {
+    "quand": "2026-11-02T16:01:03Z",
+    "raison": "annonce de séminaire, sans contenu"
+   },
+   "mene_vers": [],
+   "atteinte_depuis": [],
+   "trouvee_par": "q4",
+   "validation": "aucune validation humaine",
+   "statut_d_usage": "rejetée"
+  },
+  "IEA": {
+   "source": "IEA",
+   "titre": "AI and data centre electricity use continue to surge, IEA finds",
+   "auteur": "Enlit World (rapport AIE)",
+   "date": "2026-04-17",
+   "lien": "https://www.enlit.world/library/ai-and-data-centre-electricity-use-continue-to-surge-iea-finds",
+   "nature": "presse spécialisée (relais AIE)",
+   "consultations": [],
+   "utilisee_pour": [
+    "A5"
+   ],
+   "rejetee": null,
+   "mene_vers": [],
+   "atteinte_depuis": [],
+   "trouvee_par": "q5",
+   "validation": "aucune validation humaine",
+   "statut_d_usage": "utilisée"
+  },
+  "AIACT": {
+   "source": "AIACT",
+   "titre": "Omnibus numérique IA : règlement (UE) 2026/1744",
+   "auteur": "donneespersonnelles.fr",
+   "date": "2026-07",
+   "lien": "https://donneespersonnelles.fr/omnibus-numerique-ia",
+   "nature": "site juridique",
+   "consultations": [],
+   "utilisee_pour": [
+    "A12"
+   ],
+   "rejetee": null,
+   "mene_vers": [],
+   "atteinte_depuis": [],
+   "trouvee_par": "q6",
+   "validation": "aucune validation humaine",
+   "statut_d_usage": "utilisée"
+  }
+ }
+}
