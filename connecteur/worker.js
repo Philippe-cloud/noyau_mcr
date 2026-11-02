@@ -178,6 +178,11 @@ export default {
       if (!sorties.length) return new Response(null, { status: 202, headers: h });
       return new Response(JSON.stringify(Array.isArray(corps) ? sorties : sorties[0]), { headers: h });
     }
+    if (url.pathname === "/etat") {
+      const n = (await kv(env).list({ prefix: "session:" })).keys.length;
+      return Response.json({ connecteur: "noyau-mcr-temoin", version: VERSION, stockage_durable_relie: !!(env && env.JOURNAL),
+        mot_de_passe_configure: !!(env && env.JOURNAL_KEY), sessions_enregistrees: n, heure_serveur: new Date().toISOString() });
+    }
     if (url.pathname === "/journal" || url.pathname === "/journal.json") {
       const attendue = env && typeof env.JOURNAL_KEY === "string" ? env.JOURNAL_KEY.trim() : "";
       const donnee = (url.searchParams.get("cle") || "").trim();
