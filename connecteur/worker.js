@@ -179,7 +179,11 @@ export default {
       return new Response(JSON.stringify(Array.isArray(corps) ? sorties : sorties[0]), { headers: h });
     }
     if (url.pathname === "/journal" || url.pathname === "/journal.json") {
-      if (!env || !env.JOURNAL_KEY || url.searchParams.get("cle") !== env.JOURNAL_KEY) return new Response("Clé manquante ou incorrecte.", { status: 403 });
+      const attendue = env && typeof env.JOURNAL_KEY === "string" ? env.JOURNAL_KEY.trim() : "";
+      const donnee = (url.searchParams.get("cle") || "").trim();
+      if (!attendue) return new Response("Le mot de passe du journal n'est pas configuré sur le serveur (secret JOURNAL_KEY absent de ce déploiement).", { status: 503, headers: { "content-type": "text/plain; charset=utf-8" } });
+      if (!donnee) return new Response("Ajoutez votre mot de passe à la fin de l'adresse : /journal?cle=VOTREMOTDEPASSE", { status: 403, headers: { "content-type": "text/plain; charset=utf-8" } });
+      if (donnee !== attendue) return new Response(`Mot de passe incorrect (reçu : ${donnee.length} caractère(s)). Évitez les caractères # & + % ? et les espaces.`, { status: 403, headers: { "content-type": "text/plain; charset=utf-8" } });
       if (url.pathname === "/journal.json") { const s = await kv(env).get("session:" + url.searchParams.get("session")); return new Response(s ? JSON.stringify({ ...JSON.parse(s), comparaison: comparer(JSON.parse(s)) }, null, 1) : "{}", { headers: { "content-type": "application/json" } }); }
       return pageJournal(env, url);
     }
