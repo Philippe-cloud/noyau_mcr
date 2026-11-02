@@ -23,8 +23,11 @@ console.log(await call("declarer_chemin", { question: "Que veut dire décrire se
   affirmations: [{ phrase: "Décrire, c'est produire une description relativisée.", appuis: ["n04"], origine: "corpus" },
                  { phrase: "Elle dépend d'une génération, d'un objet et d'une vue.", appuis: ["D26", "n03"], origine: "corpus" },
                  { phrase: "C'est une idée proche du perspectivisme.", appuis: [], origine: "savoir général" }] }));
+// second essai dans la même session : honnête
+await call("lire_notion", { id: "n03" });
+console.log(await call("declarer_chemin", { question: "Qu'est-ce qu'une vue ?", lus: ["n03"], affirmations: [{ phrase: "Une vue qualifie l'entité-objet.", appuis: ["n03"], origine: "corpus" }] }));
 const j = await W.fetch(new Request(`https://x/journal.json?cle=test&session=${session}`), env); const s = await j.json();
-console.log(JSON.stringify(s.comparaison.ecarts, null, 1), "accord", s.comparaison.accord_declare_reel);
+console.log("essais dans la session :", s.comparaison ? "ok" : "?");
 const p = await W.fetch(new Request(`https://x/journal?cle=test&session=${session}`), env); fs.writeFileSync("/tmp/journal_test.html", await p.text());
 console.log("refus sans clé :", (await W.fetch(new Request("https://x/journal"), env)).status);
 fs.unlinkSync(path.join(ici, ".worker_test.mjs"));
