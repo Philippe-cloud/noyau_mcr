@@ -29,6 +29,8 @@ const OUTILS = [
     inputSchema: { type: "object", properties: { id: { type: "string" } }, required: ["id"] } },
   { name: "lister_questions", description: "Liste les questions d'entrée proposées par le projet, du niveau découverte au niveau avancé.",
     inputSchema: { type: "object", properties: {} } },
+  { name: "voir_journal", description: "Lecture seule : renvoie le journal enregistré par le serveur (sessions, appels réels, comparaison déclaré / réel). Sans identifiant, liste les sessions qui contiennent une déclaration.",
+    inputSchema: { type: "object", properties: { session: { type: "string", description: "identifiant de session (facultatif)" } } } },
   { name: "declarer_chemin", description: "À appeler à la fin : déclare le chemin suivi pour répondre (éléments lus, utilisés, rejetés avec leur raison) et les affirmations de la réponse avec leurs appuis. Le serveur comparera cette déclaration à ce qu'il a lui-même enregistré.",
     inputSchema: { type: "object", properties: {
       question: { type: "string" },
@@ -154,6 +156,15 @@ async function traiter(msg, env, session) {
   if (method === "tools/list") return rep(id, { tools: OUTILS });
   if (method === "tools/call") {
     const nom = params.name, a = params.arguments || {};
+    if (nom === "voir_journal") {
+      const ids = (await kv(env).list({ prefix: "session:" })).keys.map(k => k.name.slice(8));
+      if (a.session) { const s = JSON.parse((await kv(env).get("session:" + a.session)) || "null");
+        return rep(id, { content: [{ type: "text", text: s ? JSON.stringify({ session: s.session, client: s.client, debut: s.debut, fin: s.fin, appels_reels: s.appels.map(x => ({ quand: x.quand, outil: x.outil, arguments: x.outil === "declarer_chemin" ? "(déclaration)" : x.arguments, ouvert: x.lus })), comparaison: comparer(s) }, null, 1) : "Session inconnue." }] }); }
+      const L = [];
+      for (const k of ids) { const s = JSON.parse(await kv(env).get("session:" + k)); const c = comparer(s);
+        if (c.declaration) L.push({ session: k, debut: s.debut, client: s.client?.name, question: c.declaration.question, appels: c.reel.appels, accord: c.accord_declare_reel }); }
+      return rep(id, { content: [{ type: "text", text: JSON.stringify({ sessions_enregistrees: ids.length, sessions_avec_declaration: L }, null, 1) }] });
+    }
     const r = executer(nom, a);
     await journaliser(env, session, { appel: { quand: new Date().toISOString(), outil: nom, arguments: a, lus: r.lus || [], vus: r.vus || [] } });
     let texte = r.texte;
