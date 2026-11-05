@@ -29,7 +29,7 @@ jobs:
         run: |
           mkdir -p site
           cp "$(ls -d corpus/mcr/sorties/*/ | sort | tail -1)explorer_mcr.html" site/index.html
-          mkdir -p site/etiqueteuse site/exemples && cp applications/etiqueteuse/index.html site/etiqueteuse/index.html
+          mkdir -p site/etiqueteuse site/exemples site/trajectoire && cp applications/etiqueteuse/index.html site/etiqueteuse/index.html && cp applications/trajectoire/index.html site/trajectoire/index.html
           cp exemples/filiation/filiation_tendances_IA.html site/exemples/filiation_tendances_IA.html
           touch site/.nojekyll
       - uses: actions/upload-pages-artifact@v3

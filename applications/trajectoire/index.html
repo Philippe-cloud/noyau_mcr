@@ -1,0 +1,473 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Trajectoire · étiqueter, valider, interroger</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Source+Sans+3:wght@400;600;700&display=swap">
+<style>
+:root{--ink:#1B2433;--muted:#4A5568;--soft:#5A6578;--line:#DDE3EC;--line2:#B7C3D6;--bg2:#F6F8FB;--acc:#2E5597;--acc2:#1F3864;--accbg:#E8EEF7;
+--prop:#8A4B08;--propbg:#FDF2E2;--ok:#1F6B3A;--okbg:#E6F3EA;--aut:#5B2A86;--autbg:#F1EAF8;--warn:#9A3412}
+*{box-sizing:border-box}
+body{margin:0;font-family:'Source Sans 3',system-ui,sans-serif;color:var(--ink);background:#fff;font-size:16px;line-height:1.45}
+header{position:sticky;top:0;z-index:5;background:#fff;border-bottom:1px solid var(--line)}
+.top{max-width:880px;margin:0 auto;padding:12px 16px 0;display:flex;align-items:baseline;gap:12px;flex-wrap:wrap}
+.top h1{margin:0;font-size:20px}
+.top .etat{font-size:13px;color:var(--soft)}
+nav{max-width:880px;margin:0 auto;padding:8px 12px;display:flex;gap:4px;overflow-x:auto}
+nav button{border:0;background:none;font:inherit;font-size:15px;padding:10px 12px;border-radius:8px;color:var(--muted);cursor:pointer;white-space:nowrap;min-height:44px}
+nav button[aria-current="page"]{background:var(--accbg);color:var(--acc2);font-weight:600}
+main{max-width:880px;margin:0 auto;padding:16px}
+section{display:none}section.on{display:block}
+h2{font-size:22px;margin:4px 0 8px}h3{font-size:17px;margin:18px 0 8px}
+p.aide{color:var(--muted);margin:4px 0 14px}
+.carte{border:1px solid var(--line);border-radius:12px;padding:14px;margin:0 0 12px}
+.fond{background:var(--bg2);border:0}
+label{display:block;font-weight:600;font-size:15px;margin:0 0 6px}
+input[type=text],input[type=url],textarea,select{width:100%;font:inherit;font-size:16px;color:var(--ink);border:1px solid var(--line2);border-radius:10px;padding:10px 12px;background:#fff}
+textarea{min-height:90px;resize:vertical}
+.ligne{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.btn{font:inherit;font-size:15px;min-height:44px;padding:0 16px;border-radius:10px;border:1px solid var(--line2);background:#fff;color:var(--ink);cursor:pointer}
+.btn.p{background:var(--acc);border-color:var(--acc);color:#fff;font-weight:600}
+.btn.p:hover{background:var(--acc2)}
+.btn:disabled{opacity:.5;cursor:default}
+.btn.petit{min-height:36px;padding:0 10px;font-size:14px}
+.badge{display:inline-block;font-size:12px;font-weight:600;padding:2px 8px;border-radius:999px;white-space:nowrap}
+.b-prop{color:var(--prop);background:var(--propbg)}.b-auteur{color:var(--acc2);background:var(--accbg)}
+.b-aut{color:var(--aut);background:var(--autbg)}.b-ok{color:var(--ok);background:var(--okbg)}
+.b-gris{color:var(--soft);background:#EEF1F5}.b-warn{color:var(--warn);background:#FDECE7}
+.depot{border:1.5px dashed #9AA8BF;border-radius:12px;padding:18px;text-align:center;background:var(--bg2)}
+.depot.sur{background:var(--accbg)}
+.doc{display:flex;justify-content:space-between;gap:10px;align-items:flex-start}
+.doc .t{font-weight:700}
+.petit{font-size:14px;color:var(--soft)}
+.champ{border-top:1px solid var(--line);padding:12px 0}
+.champ:first-of-type{border-top:0}
+.champ .tete{display:flex;justify-content:space-between;gap:8px;align-items:center;margin-bottom:6px}
+.appui{font-size:13px;color:var(--soft);margin-top:4px}
+.raison{margin-top:6px;display:none}.raison.on{display:block}
+.arbre .g{border:1.5px solid var(--acc);border-radius:12px;padding:12px 14px;margin-bottom:10px}
+.branche{margin:0 0 10px 14px;padding-left:14px;border-left:2px solid var(--line2)}
+.branche .nom{display:flex;justify-content:space-between;gap:8px;align-items:center;font-weight:700;padding:8px 0}
+.barre{height:8px;border-radius:4px;background:#EEF1F5;overflow:hidden;display:flex;margin:2px 0 8px}
+.barre i{display:block;height:100%}
+.feuille{display:flex;justify-content:space-between;gap:8px;padding:6px 0;font-size:15px;border-top:1px dashed var(--line)}
+.enonce{border:1px solid var(--line);border-radius:10px;padding:10px 12px;margin:0 0 8px}
+.journal li{margin:0 0 6px;font-size:14px}
+.msg{padding:10px 12px;border-radius:10px;background:var(--propbg);color:var(--prop);font-size:14px;margin:8px 0;display:none}
+.msg.on{display:block}.msg.info{background:var(--accbg);color:var(--acc2)}
+.cache{display:none}
+pre{white-space:pre-wrap;word-break:break-word;font-size:13px;background:var(--bg2);padding:10px;border-radius:10px;max-height:260px;overflow:auto}
+a{color:var(--acc)}
+@media (max-width:520px){.doc{flex-direction:column}}
+</style>
+</head>
+<body>
+<header>
+<div class="top"><h1>Trajectoire</h1><span class="etat" id="etatStock">chargement…</span></div>
+<nav aria-label="Sections">
+<button data-v="traj" aria-current="page">1 · Trajectoire</button>
+<button data-v="etiq">2 · Étiqueter</button>
+<button data-v="arbre">3 · Arbre des vues</button>
+<button data-v="quest">4 · Interroger</button>
+<button data-v="journal">5 · Journal</button>
+</nav>
+</header>
+<main>
+
+<section id="v-traj" class="on">
+<h2>Votre trajectoire</h2>
+<p class="aide">Une trajectoire rassemble des documents autour d'une question. L'IA lit chaque document et propose une étiquette ; vous la complétez et la validez. Chacun de vos choix est gardé.</p>
+<div class="carte">
+<label for="question">Votre question ou votre projet</label>
+<textarea id="question" placeholder="Ex. : Comment la MCR traite-t-elle la notion de vue ?"></textarea>
+<div class="ligne" style="margin-top:8px"><label for="auteurTraj" style="margin:0">Auteur de la trajectoire</label></div>
+<input type="text" id="auteurTraj" placeholder="Votre nom">
+</div>
+<h3>Ajouter un document</h3>
+<div class="carte">
+<div class="depot" id="depot">
+<p style="margin:0 0 10px"><strong>Déposer un fichier</strong><br><span class="petit">texte, Markdown, HTML, PDF ou Word</span></p>
+<label for="fichier" class="cache">Choisir un fichier</label>
+<input type="file" id="fichier" accept=".txt,.md,.html,.htm,.pdf,.docx,text/plain,text/markdown,text/html,application/pdf">
+</div>
+<h3 style="margin-top:14px">ou un lien, avec son texte</h3>
+<label for="lien">Lien</label>
+<input type="url" id="lien" placeholder="https://…">
+<p class="petit" style="margin:6px 0 8px">La page ne peut pas aller lire un autre site. Collez le texte ci-dessous, ou déposez le fichier : le lien est gardé comme référence.</p>
+<label for="texteColle">Texte du document</label>
+<textarea id="texteColle" placeholder="Collez ici le texte du lien"></textarea>
+<div class="ligne" style="margin-top:8px"><button class="btn p" id="ajouterTexte">Ajouter ce document</button></div>
+<div class="msg" id="msgDepot" role="status"></div>
+</div>
+<h3>Documents de la trajectoire</h3>
+<div id="listeDocs"><p class="petit">Aucun document pour l'instant.</p></div>
+</section>
+
+<section id="v-etiq">
+<h2>Étiqueter</h2>
+<p class="aide">Choisissez un document. L'IA propose ; vous acceptez, corrigez ou refusez chaque champ. Les droits sont à vous de les dire.</p>
+<div class="carte">
+<label for="choixDoc">Document</label>
+<select id="choixDoc"></select>
+<div class="ligne" style="margin-top:10px">
+<button class="btn p" id="proposer">Faire proposer l'étiquette par l'IA</button>
+<span class="petit" id="iaEtat"></span>
+</div>
+<div class="msg" id="msgIA" role="status"></div>
+</div>
+<div id="formEtiq"></div>
+</section>
+
+<section id="v-arbre">
+<h2>Arbre des vues</h2>
+<p class="aide">Votre question est le tronc. Chaque vue déclarée dans les étiquettes est une branche ; les documents en sont les feuilles. Il s'agit d'une répartition des documents selon les vues, pas encore d'une probabilité factuelle au sens de la MCR.</p>
+<div id="arbre" class="arbre"></div>
+</section>
+
+<section id="v-quest">
+<h2>Interroger le noyau</h2>
+<p class="aide">L'IA répond uniquement à partir des documents de la trajectoire. Chaque énoncé porte ses appuis, et hérite du statut le plus faible de ces appuis.</p>
+<div class="carte">
+<label for="q">Votre question</label>
+<textarea id="q" placeholder="Posez une question sur votre trajectoire"></textarea>
+<div class="ligne" style="margin-top:8px">
+<label style="font-weight:400;display:flex;gap:8px;align-items:center;margin:0"><input type="checkbox" id="seulsValides"> N'utiliser que les documents validés</label>
+</div>
+<div class="ligne" style="margin-top:8px"><button class="btn p" id="interroger">Interroger</button><span class="petit" id="qEtat"></span></div>
+<div class="msg" id="msgQ" role="status"></div>
+</div>
+<div id="reponses"></div>
+</section>
+
+<section id="v-journal">
+<h2>Journal de la trajectoire</h2>
+<p class="aide">Tout ce qui s'est passé, dans l'ordre : ce que l'IA a proposé, ce que vous en avez fait.</p>
+<div class="ligne" style="margin-bottom:12px">
+<button class="btn" id="exporter">Exporter (JSON)</button>
+<button class="btn" id="copier">Copier le JSON</button>
+<label class="btn" style="display:inline-flex;align-items:center;margin:0;font-weight:400" for="importer">Importer</label>
+<input type="file" id="importer" accept="application/json,.json" class="cache">
+<button class="btn" id="vider">Nouvelle trajectoire</button>
+</div>
+<div class="msg" id="msgJ" role="status"></div>
+<div class="carte fond" id="taux"></div>
+<ol class="journal" id="journal"></ol>
+</section>
+</main>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js"></script>
+<script>
+"use strict";
+/* ---------- état ---------- */
+const PROFIL="trajectoire-etiquettes-mcr-v0.1";
+const MAXTXT=30000;
+let S=nouvelEtat();
+const textes={}; // id -> texte (stocké à part)
+function nouvelEtat(){return{profil:PROFIL,trajectoire:{id:"TR-"+Date.now().toString(36),question:"",auteur:"",creee:new Date().toISOString()},documents:[],evenements:[],questions:[]}}
+const CHAMPS=[
+ ["titre","Titre","", "ia"],["auteurs","Auteur(s)","","ia"],["date","Date","","ia"],
+ ["nature","Nature","original ou repris d'un autre document","ia"],
+ ["part_ia","Part d'IA","aucune, un peu, beaucoup, inconnue","ia"],
+ ["a_partir_de","À partir de (filiation)","une source par ligne : source — apport (reprend, étend, applique, conteste, s'inspire de)","ia"],
+ ["visee","Visée","pour quoi ce document a été produit","ia"],
+ ["point_de_vue","Point de vue","sous quel angle, pour qui","ia"],
+ ["non_traite","Ce qui n'est pas traité","frontières du document","ia"],
+ ["vue","Vue (branche de l'arbre)","libellé court : 2 à 5 mots","ia"],
+ ["lecture","Lecture","interne, restreinte ou publique","humain"],
+ ["ia_usage","Usage par une IA","autorisé ou non autorisé","humain"]];
+const NOMS=Object.fromEntries(CHAMPS.map(c=>[c[0],c[1]]));
+function maintenant(){return new Date().toISOString()}
+function ev(o){S.evenements.push(Object.assign({t:maintenant()},o));sauver()}
+function doc(id){return S.documents.find(d=>d.id===id)}
+function esc(s){return String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))}
+function $(id){return document.getElementById(id)}
+function msg(id,t,info){const m=$(id);m.textContent=t||"";m.className="msg"+(t?" on":"")+(info?" info":"")}
+
+/* ---------- stockage : db du compte, sinon navigateur ---------- */
+let db=null,uid=null,timer=null;
+async function initStock(){
+ try{const u=await claude.use("user");const d=await claude.use("db");
+  if(u&&d){uid=await u.id();db=d}}catch(e){db=null}
+ if(db){try{
+   const snap=await db.collection("data/users/"+uid).doc("trajectoire").get();
+   const v=snap&&(snap.data?snap.data():snap);
+   if(v&&v.json){S=JSON.parse(v.json);
+     for(const d of S.documents){try{const s=await db.collection("data/users/"+uid).doc("texte_"+d.id).get();const tv=s&&(s.data?s.data():s);if(tv&&tv.texte)textes[d.id]=tv.texte}catch(e){}}}
+   $("etatStock").textContent="enregistré dans votre compte";
+  }catch(e){db=null}}
+ if(!db){try{const j=localStorage.getItem(PROFIL);if(j){const o=JSON.parse(j);S=o.etat;Object.assign(textes,o.textes||{})}
+   $("etatStock").textContent="enregistré dans ce navigateur seulement : exportez pour garder"}catch(e){$("etatStock").textContent="non enregistré : exportez pour garder"}}
+ rendreTout();
+}
+function sauver(){clearTimeout(timer);timer=setTimeout(async()=>{
+ if(db){try{await db.collection("data/users/"+uid).doc("trajectoire").set({json:JSON.stringify(S),maj:maintenant()});$("etatStock").textContent="enregistré dans votre compte";return}catch(e){}}
+ try{localStorage.setItem(PROFIL,JSON.stringify({etat:S,textes}))}catch(e){}
+},400)}
+async function sauverTexte(id){
+ if(db){try{await db.collection("data/users/"+uid).doc("texte_"+id).set({texte:textes[id]});return}catch(e){}}
+ sauver();
+}
+
+/* ---------- lecture des fichiers ---------- */
+async function empreinte(t){try{const b=await crypto.subtle.digest("SHA-256",new TextEncoder().encode(t));return[...new Uint8Array(b)].map(x=>x.toString(16).padStart(2,"0")).join("")}catch(e){return null}}
+async function lireFichier(f){
+ const n=f.name.toLowerCase();
+ if(n.endsWith(".pdf")){
+  if(!window.pdfjsLib)throw new Error("lecteur PDF indisponible");
+  pdfjsLib.GlobalWorkerOptions.workerSrc="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
+  const pdf=await pdfjsLib.getDocument({data:await f.arrayBuffer()}).promise;let out="";
+  for(let i=1;i<=pdf.numPages&&out.length<MAXTXT;i++){const p=await pdf.getPage(i);const c=await p.getTextContent();out+="\n[p. "+i+"] "+c.items.map(x=>x.str).join(" ")}
+  return out}
+ if(n.endsWith(".docx")){if(!window.mammoth)throw new Error("lecteur Word indisponible");const r=await mammoth.extractRawText({arrayBuffer:await f.arrayBuffer()});return r.value}
+ const t=await f.text();
+ if(n.endsWith(".html")||n.endsWith(".htm")){const d=new DOMParser().parseFromString(t,"text/html");return d.body?d.body.innerText||d.body.textContent:t}
+ return t}
+async function ajouterDoc(source,texte){
+ texte=(texte||"").trim();if(!texte){msg("msgDepot","Le document est vide : rien à étiqueter.");return}
+ const id="T"+(S.documents.length+1)+"-"+Date.now().toString(36).slice(-4);
+ const tronque=texte.length>MAXTXT;textes[id]=texte.slice(0,MAXTXT);
+ const d={id,source,empreinte:await empreinte(texte),longueur:texte.length,tronque,ajoute:maintenant(),champs:{},statut:"a_etiqueter",autorite:null};
+ for(const c of CHAMPS)d.champs[c[0]]={valeur:"",propose:null,etat:"vide",appui:""};
+ S.documents.push(d);ev({type:"deposer",doc:id,source});await sauverTexte(id);
+ msg("msgDepot",(source.nom||source.url||"Document")+" ajouté"+(tronque?" (texte coupé à "+MAXTXT+" caractères)":"")+".",true);
+ rendreTout();choisir(id);aller("etiq");
+}
+$("fichier").addEventListener("change",async e=>{const f=e.target.files[0];if(!f)return;msg("msgDepot","Lecture du fichier…",true);
+ try{await ajouterDoc({type:"fichier",nom:f.name},await lireFichier(f))}catch(err){msg("msgDepot","Lecture impossible ("+err.message+"). Collez le texte à la place.")}e.target.value=""});
+const depot=$("depot");
+depot.addEventListener("dragover",e=>{e.preventDefault();depot.classList.add("sur")});
+depot.addEventListener("dragleave",()=>depot.classList.remove("sur"));
+depot.addEventListener("drop",async e=>{e.preventDefault();depot.classList.remove("sur");const f=e.dataTransfer.files[0];if(!f)return;
+ try{await ajouterDoc({type:"fichier",nom:f.name},await lireFichier(f))}catch(err){msg("msgDepot","Lecture impossible ("+err.message+").")}});
+$("ajouterTexte").addEventListener("click",async()=>{const url=$("lien").value.trim();const t=$("texteColle").value;
+ if(!t.trim()){msg("msgDepot",url?"Collez le texte de ce lien, ou déposez le fichier : la page ne peut pas le lire elle-même.":"Collez un texte ou déposez un fichier.");return}
+ await ajouterDoc(url?{type:"lien",url}:{type:"texte"},t);$("lien").value="";$("texteColle").value=""});
+$("question").addEventListener("change",e=>{const a=S.trajectoire.question;S.trajectoire.question=e.target.value.trim();ev({type:"question_trajectoire",avant:a,apres:S.trajectoire.question});rendreArbre()});
+$("auteurTraj").addEventListener("change",e=>{S.trajectoire.auteur=e.target.value.trim();sauver()});
+
+/* ---------- statuts ---------- */
+function statutDoc(d){return d.statut}
+const LIB={a_etiqueter:["à étiqueter","b-gris"],propose:["proposé par l'IA","b-prop"],en_cours:["en cours","b-gris"],valide_auteur:["validé par l'auteur","b-auteur"],valide_autorite:["validé par une autorité","b-aut"]};
+function badge(s){const l=LIB[s]||[s,"b-gris"];return'<span class="badge '+l[1]+'">'+esc(l[0])+"</span>"}
+function majStatut(d){if(d.statut==="valide_autorite"||d.statut==="valide_auteur")return;
+ const etats=Object.values(d.champs).map(c=>c.etat);
+ if(etats.some(e=>e==="propose"))d.statut="propose";else if(etats.some(e=>e!=="vide"))d.statut="en_cours";else d.statut="a_etiqueter"}
+
+/* ---------- liste ---------- */
+function rendreListe(){
+ $("question").value=S.trajectoire.question;$("auteurTraj").value=S.trajectoire.auteur;
+ const L=$("listeDocs");if(!S.documents.length){L.innerHTML='<p class="petit">Aucun document pour l\'instant.</p>';return}
+ L.innerHTML=S.documents.map(d=>{const t=d.champs.titre.valeur||d.source.nom||d.source.url||"Texte collé";
+  return'<div class="carte doc"><div><div class="t">'+esc(t)+'</div><div class="petit">'+esc(d.id)+" · "+(d.source.type==="lien"?'<a href="'+esc(d.source.url)+'">lien</a>':esc(d.source.type))+" · "+d.longueur.toLocaleString("fr")+" caractères"+(d.champs.vue.valeur?" · vue : "+esc(d.champs.vue.valeur):"")+'</div></div><div class="ligne">'+badge(d.statut)+'<button class="btn petit" data-ouvrir="'+d.id+'">Étiqueter</button></div></div>'}).join("");
+ L.querySelectorAll("[data-ouvrir]").forEach(b=>b.onclick=()=>{choisir(b.dataset.ouvrir);aller("etiq")});
+}
+
+/* ---------- étiquetage ---------- */
+let courant=null;
+function choisir(id){courant=id;rendreEtiq()}
+function rendreChoix(){const s=$("choixDoc");s.innerHTML=S.documents.length?S.documents.map(d=>'<option value="'+d.id+'"'+(d.id===courant?" selected":"")+">"+esc(d.id+" · "+(d.champs.titre.valeur||d.source.nom||d.source.url||"texte"))+"</option>").join(""):'<option value="">Aucun document</option>';
+ if(!courant&&S.documents.length)courant=S.documents[0].id}
+$("choixDoc").addEventListener("change",e=>choisir(e.target.value));
+function vuesExistantes(sauf){return[...new Set(S.documents.filter(d=>d.id!==sauf).map(d=>d.champs.vue.valeur).filter(Boolean))]}
+function rendreEtiq(){
+ rendreChoix();const d=doc(courant);const F=$("formEtiq");msg("msgIA","");
+ if(!d){F.innerHTML="";$("proposer").disabled=true;return}$("proposer").disabled=false;
+ const vues=vuesExistantes(d.id);
+ let h='<div class="carte"><div class="doc"><div><div class="t">'+esc(d.champs.titre.valeur||d.source.nom||"Document "+d.id)+'</div><div class="petit">Empreinte '+esc((d.empreinte||"indisponible").slice(0,16))+"… · ajouté le "+new Date(d.ajoute).toLocaleDateString("fr")+'</div></div>'+badge(d.statut)+"</div></div>";
+ h+='<div class="carte">';
+ for(const [k,nom,aide,qui] of CHAMPS){const c=d.champs[k];
+  const etat=c.etat==="propose"?'<span class="badge b-prop">proposé par l\'IA</span>':c.etat==="accepte"?'<span class="badge b-ok">accepté</span>':c.etat==="modifie"?'<span class="badge b-auteur">modifié</span>':c.etat==="refuse"?'<span class="badge b-warn">refusé</span>':c.etat==="rempli"?'<span class="badge b-auteur">rempli par vous</span>':'<span class="badge b-gris">'+(qui==="humain"?"à remplir par vous":"vide")+"</span>";
+  const multi=k==="a_partir_de"||k==="visee"||k==="point_de_vue"||k==="non_traite";
+  const val=esc(c.valeur);
+  h+='<div class="champ"><div class="tete"><label for="f_'+k+'" style="margin:0">'+esc(nom)+"</label>"+etat+"</div>";
+  if(k==="lecture")h+='<select id="f_'+k+'" data-k="'+k+'"><option value=""></option>'+["interne","restreinte","publique"].map(o=>'<option'+(c.valeur===o?" selected":"")+">"+o+"</option>").join("")+"</select>";
+  else if(k==="ia_usage")h+='<select id="f_'+k+'" data-k="'+k+'"><option value=""></option>'+["autorisé","non autorisé"].map(o=>'<option'+(c.valeur===o?" selected":"")+">"+o+"</option>").join("")+"</select>";
+  else if(multi)h+='<textarea id="f_'+k+'" data-k="'+k+'" placeholder="'+esc(aide)+'">'+val+"</textarea>";
+  else h+='<input type="text" id="f_'+k+'" data-k="'+k+'" value="'+val+'" placeholder="'+esc(aide)+'"'+(k==="vue"?' list="vuesL"':"")+">";
+  if(k==="vue"&&vues.length)h+='<datalist id="vuesL">'+vues.map(v=>'<option value="'+esc(v)+'">').join("")+'</datalist><div class="appui">Vues déjà présentes : '+vues.map(esc).join(" · ")+"</div>";
+  if(c.appui)h+='<div class="appui">Trouvé dans le texte : '+esc(c.appui)+"</div>";
+  if(c.etat==="propose")h+='<div class="ligne" style="margin-top:6px"><button class="btn petit p" data-acc="'+k+'">Accepter</button><button class="btn petit" data-ref="'+k+'">Refuser</button></div><div class="raison" id="r_'+k+'"><label for="ri_'+k+'" style="font-weight:400">Raison (facultatif)</label><input type="text" id="ri_'+k+'"><div class="ligne" style="margin-top:6px"><button class="btn petit" data-refok="'+k+'">Confirmer le refus</button></div></div>';
+  h+="</div>"}
+ h+="</div>";
+ h+='<div class="carte fond"><h3 style="margin-top:0">Valider</h3>';
+ if(d.statut==="valide_auteur"||d.statut==="valide_autorite"){h+='<p style="margin:0 0 8px">'+badge(d.statut)+(d.autorite?" par "+esc(d.autorite.nom)+" le "+new Date(d.autorite.date).toLocaleDateString("fr"):"")+'</p><button class="btn" id="rouvrir">Rouvrir l\'étiquette</button>'}
+ else h+='<p class="petit" style="margin:0 0 8px">Valider, c\'est déclarer que cette étiquette exprime votre lecture du document, dans votre trajectoire. Les droits (lecture, usage par une IA) doivent être remplis, et plus aucun champ ne doit rester « proposé ».</p><button class="btn p" id="validerAuteur">Valider comme auteur de la trajectoire</button>';
+ if(d.statut==="valide_auteur")h+='<h3>Validation par une autorité</h3><p class="petit" style="margin:0 0 8px">Une autre personne, reconnue pour ce domaine, a relu l\'étiquette.</p><label for="nomAut">Nom de l\'autorité</label><input type="text" id="nomAut"><div class="ligne" style="margin-top:8px"><button class="btn" id="validerAut">Enregistrer la validation</button></div>';
+ h+='<div class="msg" id="msgVal" role="status"></div></div>';
+ h+='<details class="carte"><summary>Texte lu ('+d.longueur.toLocaleString("fr")+" caractères"+(d.tronque?", coupé":"")+')</summary><pre>'+esc((textes[d.id]||"texte non disponible sur cet appareil").slice(0,4000))+((textes[d.id]||"").length>4000?"\n…":"")+"</pre></details>";
+ F.innerHTML=h;
+ F.querySelectorAll("[data-k]").forEach(el=>el.addEventListener("change",()=>{const k=el.dataset.k;const c=d.champs[k];const avant=c.valeur;const apres=el.value.trim();if(avant===apres)return;
+  c.valeur=apres;const prop=c.propose;
+  if(CHAMPS.find(x=>x[0]===k)[3]==="humain"||prop===null){c.etat=apres?"rempli":"vide";ev({type:"remplir",doc:d.id,champ:k,apres})}
+  else{c.etat=apres===prop?"accepte":"modifie";ev({type:c.etat==="accepte"?"accepter":"modifier",doc:d.id,champ:k,avant,apres,propose:prop})}
+  majStatut(d);if(k==="vue"||k==="titre"){rendreListe();rendreArbre()}rendreEtiq()}));
+ F.querySelectorAll("[data-acc]").forEach(b=>b.onclick=()=>{const k=b.dataset.acc;const c=d.champs[k];c.etat="accepte";ev({type:"accepter",doc:d.id,champ:k,apres:c.valeur});majStatut(d);rendreTout()});
+ F.querySelectorAll("[data-ref]").forEach(b=>b.onclick=()=>$("r_"+b.dataset.ref).classList.add("on"));
+ F.querySelectorAll("[data-refok]").forEach(b=>b.onclick=()=>{const k=b.dataset.refok;const c=d.champs[k];const raison=$("ri_"+k).value.trim();ev({type:"refuser",doc:d.id,champ:k,avant:c.valeur,raison});c.valeur="";c.etat="refuse";majStatut(d);rendreTout()});
+ const va=$("validerAuteur");if(va)va.onclick=()=>{
+  const manque=[];if(!d.champs.lecture.valeur)manque.push("lecture");if(!d.champs.ia_usage.valeur)manque.push("usage par une IA");
+  const restants=Object.entries(d.champs).filter(([k,c])=>c.etat==="propose").map(([k])=>NOMS[k]);
+  if(manque.length||restants.length){msg("msgVal",(manque.length?"À remplir : "+manque.join(", ")+". ":"")+(restants.length?"Encore proposés par l'IA : "+restants.join(", ")+".":""));return}
+  d.statut="valide_auteur";ev({type:"valider_auteur",doc:d.id,par:S.trajectoire.auteur||"auteur de la trajectoire"});rendreTout()};
+ const vt=$("validerAut");if(vt)vt.onclick=()=>{const n=$("nomAut").value.trim();if(!n){msg("msgVal","Indiquez le nom de l'autorité.");return}
+  d.statut="valide_autorite";d.autorite={nom:n,date:maintenant()};ev({type:"valider_autorite",doc:d.id,par:n});rendreTout()};
+ const ro=$("rouvrir");if(ro)ro.onclick=()=>{ev({type:"rouvrir",doc:d.id,avant:d.statut});d.statut="en_cours";d.autorite=null;majStatut(d);rendreTout()};
+}
+
+/* ---------- IA : proposition d'étiquette ---------- */
+let sample=null;
+async function ia(){if(sample)return sample;try{sample=await claude.use("sample")}catch(e){sample=null}return sample}
+function extraireJSON(t){const a=t.indexOf("{"),b=t.lastIndexOf("}");if(a<0||b<0)throw new Error("réponse illisible");return JSON.parse(t.slice(a,b+1))}
+$("proposer").addEventListener("click",async()=>{
+ const d=doc(courant);if(!d)return;const s=await ia();
+ if(!s){msg("msgIA","L'IA n'est pas disponible ici. Vous pouvez remplir l'étiquette vous-même.");return}
+ const texte=textes[d.id];if(!texte){msg("msgIA","Le texte de ce document n'est pas disponible sur cet appareil.");return}
+ $("proposer").disabled=true;$("iaEtat").textContent="L'IA lit le document…";msg("msgIA","");
+ const vues=vuesExistantes(d.id);
+ const consigne=`Tu prépares une étiquette de provenance pour un document, dans le cadre d'une trajectoire de recherche.
+Question de la trajectoire : ${S.trajectoire.question||"(non précisée)"}
+Vues déjà utilisées dans la trajectoire (réutilise-en une si elle convient, sinon propose un nouveau libellé court) : ${vues.length?vues.join(" | "):"aucune"}
+
+Règles :
+- N'affirme que ce que le texte permet d'établir. Si une information n'est pas dans le texte, laisse la valeur vide.
+- Pour chaque champ, "appui" est un court extrait du texte (moins de 20 mots) ou "métadonnées du document" ou vide.
+- "a_partir_de" : sources que le document cite ou reprend explicitement, avec leur apport (reprend, étend, applique, conteste, s'inspire de).
+- "vue" : libellé de 2 à 5 mots désignant l'angle sous lequel le document traite son objet.
+- Ne propose rien sur les droits de diffusion.
+Réponds uniquement par un objet JSON de cette forme :
+{"titre":{"valeur":"","appui":""},"auteurs":{"valeur":"","appui":""},"date":{"valeur":"","appui":""},"nature":{"valeur":"original ou repris","appui":""},"part_ia":{"valeur":"aucune, un peu, beaucoup ou inconnue","appui":""},"a_partir_de":{"valeur":[{"source":"","apport":""}],"appui":""},"visee":{"valeur":"","appui":""},"point_de_vue":{"valeur":"","appui":""},"non_traite":{"valeur":"","appui":""},"vue":{"valeur":"","appui":""}}
+
+Document (${d.source.nom||d.source.url||"texte collé"}) :
+<<<
+${texte.slice(0,16000)}
+>>>`;
+ try{
+  const r=await s(consigne,{modelTier:"default",cache:false});
+  const o=extraireJSON(r.text);
+  const proposes=[];
+  for(const [k] of CHAMPS){if(!(k in o))continue;let v=o[k]&&o[k].valeur;
+   if(k==="a_partir_de"&&Array.isArray(v))v=v.filter(x=>x&&x.source).map(x=>x.source+(x.apport?" — "+x.apport:"")).join("\n");
+   v=(v==null?"":String(v)).trim();const c=d.champs[k];
+   if(c.etat==="accepte"||c.etat==="modifie"||c.etat==="rempli")continue;
+   c.propose=v;c.appui=(o[k].appui||"").toString().slice(0,200);
+   if(v){c.valeur=v;c.etat="propose";proposes.push(k)}else{c.valeur="";c.etat="vide"}}
+  majStatut(d);ev({type:"proposer",doc:d.id,champs:proposes,par:"IA"+(r.modelApplied?" ("+r.modelApplied+")":"")});
+  $("iaEtat").textContent="";rendreTout();
+ }catch(e){$("iaEtat").textContent="";msg("msgIA",e&&e.code==="rate_limited"?"Trop de demandes : réessayez dans un moment.":e&&e.code==="not_granted"?"L'accès à l'IA a été refusé pour cette page.":"La proposition a échoué ("+(e.message||e.code||"erreur")+").")}
+ $("proposer").disabled=false;
+});
+
+/* ---------- arbre ---------- */
+const COUL={valide_autorite:"#5B2A86",valide_auteur:"#2E5597",en_cours:"#9AA8BF",propose:"#D9A35B",a_etiqueter:"#D3D9E2"};
+function rendreArbre(){
+ const A=$("arbre");const n=S.documents.length;
+ const g='<div class="g"><div class="petit">Opération de génération (G) : votre question</div><div style="font-weight:700;font-size:17px">'+esc(S.trajectoire.question||"Question non encore posée")+'</div><div class="petit">'+n+" document"+(n>1?"s":"")+"</div></div>";
+ if(!n){A.innerHTML=g+'<p class="petit">Ajoutez des documents pour voir l\'arbre se former.</p>';return}
+ const br={};for(const d of S.documents){const v=d.champs.vue.valeur||"(vue non déclarée)";(br[v]=br[v]||[]).push(d)}
+ const ordre=Object.keys(br).sort((a,b)=>br[b].length-br[a].length);
+ let h=g;
+ for(const v of ordre){const ds=br[v];const part=Math.round(100*ds.length/n);
+  const cpt=s=>ds.filter(d=>d.statut===s).length;
+  const segs=["valide_autorite","valide_auteur","en_cours","propose","a_etiqueter"].map(s=>cpt(s)?'<i style="width:'+(100*cpt(s)/ds.length)+'%;background:'+COUL[s]+'" title="'+esc(LIB[s][0])+'"></i>':"").join("");
+  h+='<div class="branche"><div class="nom"><span>Vue : '+esc(v)+'</span><span class="petit">'+ds.length+" / "+n+" ("+part+" %)</span></div>";
+  h+='<div class="barre" aria-hidden="true">'+segs+'</div><div class="petit">'+["valide_autorite","valide_auteur","propose"].map(s=>cpt(s)?cpt(s)+" "+LIB[s][0]:"").filter(Boolean).join(" · ")+"</div>";
+  for(const d of ds)h+='<div class="feuille"><span>'+esc(d.champs.titre.valeur||d.source.nom||d.id)+'</span>'+badge(d.statut)+"</div>";
+  h+="</div>"}
+ h+='<p class="petit">Couleurs de la barre : violet = validé par une autorité, bleu = validé par l\'auteur, ocre = proposé par l\'IA, gris = en cours ou à étiqueter.</p>';
+ A.innerHTML=h;
+}
+
+/* ---------- interroger ---------- */
+const RANG={valide_autorite:3,valide_auteur:2,en_cours:1,propose:1,a_etiqueter:0,memoire:0};
+const LIBQ={valide_autorite:"appuis validés par une autorité",valide_auteur:"appuis validés par l'auteur",en_cours:"appuis non validés",propose:"appuis proposés par l'IA",a_etiqueter:"appuis non étiquetés",memoire:"mémoire du modèle, sans appui"};
+const CLQ={valide_autorite:"b-aut",valide_auteur:"b-auteur",en_cours:"b-gris",propose:"b-prop",a_etiqueter:"b-gris",memoire:"b-warn"};
+$("interroger").addEventListener("click",async()=>{
+ const q=$("q").value.trim();if(!q){msg("msgQ","Écrivez une question.");return}
+ const seuls=$("seulsValides").checked;
+ const corpus=S.documents.filter(d=>!seuls||d.statut==="valide_auteur"||d.statut==="valide_autorite");
+ if(!corpus.length){msg("msgQ",seuls?"Aucun document validé pour l'instant.":"Aucun document dans la trajectoire.");return}
+ const s=await ia();if(!s){msg("msgQ","L'IA n'est pas disponible ici.");return}
+ msg("msgQ","");$("interroger").disabled=true;$("qEtat").textContent="L'IA raisonne sur vos documents…";
+ const budget=Math.max(1500,Math.floor(24000/corpus.length));
+ const docs=corpus.map(d=>{const c=d.champs;return`[${d.id}] statut : ${LIB[d.statut][0]}
+titre : ${c.titre.valeur} · auteurs : ${c.auteurs.valeur} · date : ${c.date.valeur}
+vue : ${c.vue.valeur} · visée : ${c.visee.valeur} · point de vue : ${c.point_de_vue.valeur} · ne traite pas : ${c.non_traite.valeur}
+extrait : ${(textes[d.id]||"").slice(0,budget)}`}).join("\n\n");
+ const consigne=`Tu réponds à une question en t'appuyant uniquement sur les documents étiquetés ci-dessous, qui forment le noyau d'une trajectoire de recherche.
+Question de la trajectoire : ${S.trajectoire.question||"(non précisée)"}
+Question posée : ${q}
+
+Règles :
+- Découpe ta réponse en énoncés courts. Pour chacun, donne les identifiants des documents qui l'appuient (ex. "T1-ab12").
+- N'ajoute rien de ta mémoire. Si un énoncé est indispensable mais ne repose sur aucun document, mets "memoire" dans ses appuis.
+- Ce que les documents ne permettent pas de traiter va dans "hors_champ".
+- Indique la vue (champ "vue" des documents) depuis laquelle chaque énoncé est dit, si c'est pertinent.
+Réponds uniquement par un objet JSON : {"enonces":[{"texte":"","appuis":[""],"vue":""}],"hors_champ":[""],"limites":""}
+
+Documents :
+${docs}`;
+ try{
+  const r=await s(consigne,{modelTier:"default",cache:false});const o=extraireJSON(r.text);
+  const ids=new Set(corpus.map(d=>d.id));
+  const enonces=(o.enonces||[]).map(e=>{const ap=(e.appuis||[]).map(String);const valides=ap.filter(a=>ids.has(a));
+   let st;if(!valides.length)st="memoire";else st=valides.map(a=>doc(a).statut).sort((a,b)=>RANG[a]-RANG[b])[0];
+   const inconnus=ap.filter(a=>a!=="memoire"&&!ids.has(a));
+   return{texte:e.texte,appuis:valides,vue:e.vue||"",statut:st,inconnus}});
+  const rep={t:maintenant(),q,seuls,enonces,hors_champ:(o.hors_champ||[]).filter(Boolean),limites:o.limites||"",docs:corpus.map(d=>d.id)};
+  S.questions.unshift(rep);ev({type:"interroger",question:q,documents:rep.docs,enonces:enonces.length,sans_appui:enonces.filter(e=>e.statut==="memoire").length});
+  rendreReponses();
+ }catch(e){msg("msgQ",e&&e.code==="rate_limited"?"Trop de demandes : réessayez dans un moment.":"La réponse a échoué ("+(e.message||e.code||"erreur")+").")}
+ $("interroger").disabled=false;$("qEtat").textContent="";
+});
+function rendreReponses(){
+ $("reponses").innerHTML=S.questions.map(r=>{
+  const min=r.enonces.length?r.enonces.map(e=>e.statut).sort((a,b)=>RANG[a]-RANG[b])[0]:null;
+  let h='<div class="carte"><div class="petit">'+new Date(r.t).toLocaleString("fr")+(r.seuls?" · documents validés seulement":"")+'</div><h3 style="margin:4px 0 10px">'+esc(r.q)+"</h3>";
+  for(const e of r.enonces)h+='<div class="enonce"><div>'+esc(e.texte)+'</div><div class="ligne" style="margin-top:6px"><span class="badge '+CLQ[e.statut]+'">'+esc(LIBQ[e.statut])+"</span>"+(e.appuis.length?'<span class="petit">'+e.appuis.map(a=>esc(a+" · "+((doc(a)&&doc(a).champs.titre.valeur)||""))).join(" ; ")+"</span>":"")+(e.vue?'<span class="petit">vue : '+esc(e.vue)+"</span>":"")+(e.inconnus.length?'<span class="badge b-warn">appui inconnu : '+esc(e.inconnus.join(", "))+"</span>":"")+"</div></div>";
+  if(r.hors_champ.length)h+='<div class="enonce" style="background:var(--bg2);border:0"><strong>Hors du champ de vos documents :</strong><ul style="margin:6px 0 0">'+r.hors_champ.map(x=>"<li>"+esc(x)+"</li>").join("")+"</ul></div>";
+  if(min)h+='<p class="petit" style="margin:8px 0 0">Cette réponse ne vaut pas plus que son appui le plus faible : '+esc(LIBQ[min])+"."+(r.limites?" Limites signalées : "+esc(r.limites):"")+"</p>";
+  return h+"</div>"}).join("");
+}
+
+/* ---------- journal ---------- */
+const LIBE={deposer:"Document déposé",proposer:"Étiquette proposée",accepter:"Champ accepté",modifier:"Champ modifié",refuser:"Champ refusé",remplir:"Champ rempli",valider_auteur:"Validé par l'auteur",valider_autorite:"Validé par une autorité",rouvrir:"Étiquette rouverte",interroger:"Question posée au noyau",question_trajectoire:"Question de la trajectoire"};
+function rendreJournal(){
+ const E=S.evenements;const prop=E.filter(e=>e.type==="proposer").reduce((a,e)=>a+(e.champs||[]).length,0);
+ const corr=E.filter(e=>e.type==="modifier"||e.type==="refuser").length;const acc=E.filter(e=>e.type==="accepter").length;
+ $("taux").innerHTML='<strong>Ce que vous avez fait des propositions de l\'IA</strong><div class="petit" style="margin-top:4px">'+prop+" champs proposés · "+acc+" acceptés · "+corr+" corrigés ou refusés"+(acc+corr?" · taux de correction : "+Math.round(100*corr/(acc+corr))+" %":"")+"</div>";
+ $("journal").innerHTML=E.slice().reverse().map(e=>"<li><strong>"+esc(LIBE[e.type]||e.type)+"</strong> · "+new Date(e.t).toLocaleString("fr")+(e.doc?" · "+esc(e.doc):"")+(e.champ?" · "+esc(NOMS[e.champ]||e.champ):"")+(e.type==="modifier"?'<div class="petit">avant : « '+esc(e.avant)+" » → après : « "+esc(e.apres)+" »</div>":"")+(e.type==="refuser"&&e.raison?'<div class="petit">raison : '+esc(e.raison)+"</div>":"")+(e.question?'<div class="petit">'+esc(e.question)+"</div>":"")+(e.par?'<div class="petit">par '+esc(e.par)+"</div>":"")+"</li>").join("")||'<li class="petit">Rien pour l\'instant.</li>';
+}
+function exportJSON(){
+ const etiquettes=S.documents.map(d=>{const c=d.champs;const st=v=>v;return{profil:"etiquette-minimale-mcr-v0.1",auto:{identifiant:d.id,titre:c.titre.valeur,auteur:c.auteurs.valeur,date:c.date.valeur,empreinte_sha256:d.empreinte,source:d.source},
+  origine:{nature:c.nature.valeur||null,part_ia:c.part_ia.valeur||null,a_partir_de:c.a_partir_de.valeur||null},
+  angle:[c.visee.valeur,c.point_de_vue.valeur,c.non_traite.valeur?"ne traite pas : "+c.non_traite.valeur:""].filter(Boolean).join(" · ")||null,
+  vue:c.vue.valeur||null,usage:{lecture:c.lecture.valeur||null,ia:c.ia_usage.valeur||null},
+  validation:{statut:d.statut,valide:d.statut==="valide_auteur"||d.statut==="valide_autorite",auteur_trajectoire:S.trajectoire.auteur||null,autorite:d.autorite},
+  champs:Object.fromEntries(Object.entries(c).map(([k,v])=>[k,{valeur:v.valeur,propose_par_ia:v.propose,etat:v.etat,appui:v.appui}]))}});
+ return JSON.stringify({profil:PROFIL,exporte:maintenant(),trajectoire:S.trajectoire,etiquettes,evenements:S.evenements,questions:S.questions,etat:S},null,1)}
+$("exporter").addEventListener("click",async()=>{let dl=null;try{dl=await claude.use("downloads")}catch(e){}
+ if(!dl){msg("msgJ","Le téléchargement n'est pas disponible ici : utilisez « Copier le JSON ».");return}
+ try{await dl.save({filename:"trajectoire_"+new Date().toISOString().slice(0,10)+".json",data:exportJSON()});msg("msgJ","Export proposé au téléchargement.",true)}catch(e){msg("msgJ","Téléchargement annulé ou refusé.")}});
+$("copier").addEventListener("click",async()=>{try{await navigator.clipboard.writeText(exportJSON());msg("msgJ","JSON copié.",true)}catch(e){msg("msgJ","Copie refusée par le navigateur.")}});
+$("importer").addEventListener("change",async e=>{const f=e.target.files[0];if(!f)return;try{const o=JSON.parse(await f.text());if(!o.etat||o.profil!==PROFIL)throw new Error("format inconnu");S=o.etat;sauver();rendreTout();msg("msgJ","Trajectoire importée. Les textes des documents ne sont pas dans l'export : redéposez-les pour interroger le noyau.",true)}catch(err){msg("msgJ","Import impossible ("+err.message+").")}e.target.value=""});
+let confirmerVider=false;
+$("vider").addEventListener("click",()=>{if(!confirmerVider){confirmerVider=true;msg("msgJ","Cliquez à nouveau pour commencer une nouvelle trajectoire. Pensez à exporter l'actuelle.");setTimeout(()=>confirmerVider=false,6000);return}
+ confirmerVider=false;S=nouvelEtat();for(const k in textes)delete textes[k];sauver();rendreTout();msg("msgJ","Nouvelle trajectoire commencée.",true)});
+
+/* ---------- navigation ---------- */
+const VUES=["traj","etiq","arbre","quest","journal"];
+function aller(v){if(!VUES.includes(v))v="traj";document.querySelectorAll("section").forEach(s=>s.classList.toggle("on",s.id==="v-"+v));
+ document.querySelectorAll("nav button").forEach(b=>b.setAttribute("aria-current",b.dataset.v===v?"page":"false"));
+ if(location.hash!=="#"+v)try{history.replaceState(null,"","#"+v)}catch(e){location.hash=v}
+ if(v==="etiq")rendreEtiq();if(v==="arbre")rendreArbre();if(v==="journal")rendreJournal();if(v==="quest")rendreReponses()}
+document.querySelectorAll("nav button").forEach(b=>b.onclick=()=>aller(b.dataset.v));
+window.addEventListener("hashchange",()=>aller(location.hash.slice(1)));
+function rendreTout(){rendreListe();rendreEtiq();rendreArbre();rendreReponses();rendreJournal()}
+aller(location.hash.slice(1)||"traj");
+rendreTout();
+if(window.claude&&claude.use)initStock();else{$("etatStock").textContent="mode autonome : exportez pour garder";try{const j=localStorage.getItem(PROFIL);if(j){const o=JSON.parse(j);S=o.etat;Object.assign(textes,o.textes||{});rendreTout()}}catch(e){}}
+</script>
+</body>
+</html>

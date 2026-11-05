@@ -37,6 +37,7 @@ Le corpus fourni est celui de la **Méthode de Conceptualisation Relativisée (M
 |---|---|---|
 | **Explorer la MCR** | https://philippe-cloud.github.io/noyau_mcr/ | parcourir le corpus en plantes, tracer sa trajectoire, valider (mode autorité) |
 | **Étiqueteuse** | https://philippe-cloud.github.io/noyau_mcr/etiqueteuse/ | créer des étiquettes de provenance pour des éléments archivés |
+| **Trajectoire** | https://philippe-cloud.github.io/noyau_mcr/trajectoire/ | déposer des documents, faire proposer leur étiquette par l'IA, la valider, voir l'arbre des vues et interroger ce noyau (l'IA ne fonctionne que dans la version Claude ; ici, l'étiquette se remplit à la main) |
 | **Exemple de filiation** | https://philippe-cloud.github.io/noyau_mcr/exemples/filiation_tendances_IA.html | graphe dynamique du chemin réel d'une recherche d'IA, action par action |
 
 Ces pages sont publiques et republiées à chaque passage de la boucle. Elles fonctionnent sans compte. Les fonctions qui font appel à l'IA (« Demander un retour », « Demander le chemin de l'IA ») ne fonctionnent que dans la version publiée sur claude.ai.
@@ -124,6 +125,7 @@ ancrage/               noyau : graphe, adaptateurs, calcul, RDF/SHACL, interroga
   regles/              formes.ttl (garde-fous SHACL), seuils.json (seuils de gouvernance)
 applications/mcr/      application « Explorer la MCR » (les données y sont injectées)
 applications/etiqueteuse/  application « Étiqueteuse »
+applications/trajectoire/  application « Trajectoire » (étiquette minimale, trajectoire, arbre des vues, questions au noyau)
 corpus/mcr/entrees/    corpus_mcr.json, validations/, trajectoires/, propositions_ia/
 corpus/mcr/audits_ia/  réponses d'IA à auditer (séparées de la boucle)
 connecteur/            connecteur « témoin » MCP (Cloudflare Workers)
